@@ -1,0 +1,13 @@
+{
+  "name": "atleti-al-dia",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Web de noticias del Atlético de Madrid que se actualiza sola, agregando varios medios y reescribiendo el texto con IA.",
+  "scripts": {
+    "dev": "vercel dev"
+  },
+  "dependencies": {
+    "@vercel/kv": "^2.0.0",
+    "rss-parser": "^3.13.0"
+  }
+}
