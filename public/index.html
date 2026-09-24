@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Atleti al Día — Diario Colchonero</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,400;0,500;0,600;0,700;1,500&family=Barlow+Condensed:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --red: #D2122E; --red-dark: #9A0B21; --ink: #14151A; --cream: #F5F3EE;
+    --paper: #FFFFFF; --navy: #10203D; --gold: #C79A3C; --grey: #55565C;
+    --line: rgba(20,21,26,0.13);
+  }
+  *{ box-sizing:border-box; }
+  body{ margin:0; background:var(--cream); color:var(--ink); font-family:'Barlow',Arial,sans-serif; }
+  a{ color:inherit; text-decoration:none; }
+  .headline-font{ font-family:'Barlow Condensed','Arial Narrow',sans-serif; font-weight:800; }
+  .topbar{ background:var(--ink); color:#EDEDED; font-family:'Barlow Condensed',sans-serif; font-size:12.5px; font-weight:500; display:flex; justify-content:space-between; align-items:center; padding:6px 20px; letter-spacing:.02em; }
+  .topbar span.dot{ color:var(--red); margin:0 6px; }
+  .masthead{ background:var(--paper); border-bottom:5px solid var(--red); padding:18px 20px 14px; }
+  .masthead-inner{ max-width:1080px; margin:0 auto; display:flex; align-items:center; gap:16px; }
+  .badge{ width:58px; height:58px; flex:none; border-radius:50%; background:repeating-linear-gradient(90deg, var(--red) 0 8px, var(--paper) 8px 16px); border:3px solid var(--ink); display:flex; align-items:center; justify-content:center; }
+  .badge span{ font-family:'Barlow Condensed',sans-serif; font-weight:800; font-size:20px; color:var(--ink); background:var(--paper); width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; }
+  .wordmark{ font-family:'Barlow Condensed',sans-serif; font-weight:800; font-size:clamp(30px,6vw,46px); line-height:.95; margin:0; letter-spacing:.01em; }
+  .wordmark .al{ color:var(--red); }
+  .strapline{ font-family:'Barlow Condensed',sans-serif; font-size:13.5px; font-weight:600; color:var(--grey); letter-spacing:.03em; margin-top:2px; }
+  .ticker{ background:var(--navy); color:#fff; font-family:'Barlow Condensed',sans-serif; font-weight:600; font-size:13px; padding:8px 20px; overflow:hidden; white-space:nowrap; }
+  .ticker-inner{ max-width:1080px; margin:0 auto; display:flex; gap:26px; }
+  .ticker b{ color:var(--gold); }
+  main{ max-width:1080px; margin:0 auto; padding:22px 20px 60px; }
+
+  /* Cara a cara configurable */
+  .matchup{ background:var(--paper); border:1px solid var(--line); padding:20px 24px 24px; margin-bottom:30px; }
+  .matchup-head{ display:flex; flex-wrap:wrap; align-items:center; gap:12px; margin-bottom:18px; }
+  .matchup-when{ font-family:'Barlow Condensed',sans-serif; font-weight:600; font-size:13.5px; color:var(--grey); }
+  .matchup-teams{ display:flex; align-items:center; justify-content:center; gap:34px; padding:6px 0 22px; }
+  .team{ display:flex; flex-direction:column; align-items:center; gap:8px; width:150px; }
+  .crest{ width:104px; height:auto; }
+  .team-name{ font-family:'Barlow Condensed',sans-serif; font-weight:700; font-size:15px; text-align:center; }
+  .vs-mark{ font-family:'Barlow Condensed',sans-serif; font-weight:800; font-size:22px; color:var(--grey); }
+  .lineups{ display:grid; grid-template-columns:1fr 1fr; gap:30px; border-top:1px solid var(--line); padding-top:18px; }
+  .lineup-title{ font-family:'Barlow Condensed',sans-serif; font-weight:700; font-size:14.5px; text-transform:uppercase; letter-spacing:.02em; margin:0 0 10px; }
+  .lineup-list{ list-style:none; margin:0; padding:0; font-size:14.5px; }
+  .lineup-list li{ display:flex; justify-content:space-between; padding:5px 0; border-bottom:1px dashed var(--line); }
+  .lineup-list li span{ font-family:'Barlow Condensed',sans-serif; font-weight:600; color:var(--grey); font-size:12px; }
+  .lineup-note{ font-family:'Barlow Condensed',sans-serif; font-size:12.5px; color:var(--grey); margin:14px 0 0; }
+  @media (max-width:640px){ .lineups{ grid-template-columns:1fr; } .matchup-teams{ gap:20px; } .team{ width:120px; } }
+
+  /* Portada / hero dinámico */
+  .hero{ position:relative; border-radius:2px; overflow:hidden; margin-bottom:26px; color:#fff; min-height:260px; display:flex; align-items:flex-end; }
+  .hero-illustration{ position:absolute; inset:0; }
+  .hero-scrim{ position:absolute; inset:0; background:linear-gradient(0deg, rgba(10,10,14,.92) 0%, rgba(10,10,14,.35) 55%, rgba(10,10,14,.05) 100%); }
+  .hero-content{ position:relative; padding:26px 28px 24px; max-width:640px; }
+  .ribbon{ display:inline-block; font-family:'Barlow Condensed',sans-serif; font-weight:700; font-size:13px; letter-spacing:.03em; background:var(--red); color:#fff; padding:4px 10px 5px; border-radius:2px; margin-bottom:10px; text-transform:uppercase; }
+  .ribbon.champions{ background:var(--navy); } .ribbon.previa{ background:var(--grey); } .ribbon.fichajes{ background:var(--gold); color:#1c1608; }
+  .hero h1.headline-font{ font-size:clamp(26px,4.2vw,40px); line-height:1.04; margin:0 0 10px; text-transform:uppercase; }
+  .hero p.dek{ font-family:'Barlow',sans-serif; font-size:16px; max-width:56ch; opacity:.94; margin:0; }
+
+  /* Grid de tarjetas */
+  .grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:22px; }
+  .card{ background:var(--paper); border:1px solid var(--line); display:flex; flex-direction:column; }
+  .card-img{ height:140px; position:relative; }
+  .card-body{ padding:14px 16px 18px; display:flex; flex-direction:column; gap:8px; flex:1; }
+  .tag{ align-self:flex-start; font-family:'Barlow Condensed',sans-serif; font-weight:700; font-size:12px; letter-spacing:.02em; padding:3px 8px 4px; border-radius:2px; color:#fff; text-transform:uppercase; }
+  .tag.liga{ background:var(--red); } .tag.champions{ background:var(--navy); }
+  .tag.previa{ background:var(--grey); } .tag.fichajes{ background:var(--gold); color:#1c1608; }
+  .card h3.headline-font{ font-size:19px; line-height:1.08; margin:0; text-transform:uppercase; }
+  .card p.teaser{ font-size:14.5px; color:#33343a; margin:0; line-height:1.4; }
+  .card .leer-mas{ margin-top:auto; font-family:'Barlow Condensed',sans-serif; font-weight:700; font-size:12px; color:var(--red-dark); padding-top:6px; border-top:1px dashed var(--line); background:none; border:none; border-top:1px dashed var(--line); text-align:left; cursor:pointer; }
+  .estado{ font-family:'Barlow Condensed',sans-serif; color:var(--grey); padding:40px 0; text-align:center; }
+
+  /* Modal de noticia completa */
+  .modal-overlay{ position:fixed; inset:0; background:rgba(10,10,14,.6); display:none; align-items:flex-start; justify-content:center; padding: 5vh 16px; z-index:50; overflow-y:auto; }
+  .modal-overlay.abierto{ display:flex; }
+  .modal-box{ background:var(--paper); max-width:640px; width:100%; margin-bottom:40px; }
+  .modal-img{ height:200px; }
+  .modal-content{ padding:22px 26px 28px; }
+  .modal-content h2{ font-family:'Barlow Condensed',sans-serif; font-weight:800; font-size:26px; text-transform:uppercase; line-height:1.08; margin:10px 0 14px; }
+  .modal-content .cuerpo p{ font-size:16px; line-height:1.6; color:#22232b; margin:0 0 12px; }
+  .modal-close{ float:right; background:none; border:none; font-family:'Barlow Condensed',sans-serif; font-weight:700; font-size:14px; color:var(--grey); cursor:pointer; padding:4px 0; }
+
+  footer{ max-width:1080px; margin:0 auto; padding:10px 20px 50px; color:var(--grey); font-size:13px; }
+  footer .note{ border-top:1px solid var(--line); padding-top:18px; }
+  footer b{ color:var(--ink); }
+
+  @media (max-width:860px){ .grid{ grid-template-columns:repeat(2,1fr); } }
+  @media (max-width:560px){ .grid{ grid-template-columns:1fr; } .masthead-inner{ gap:12px; } .hero h1.headline-font{ font-size:24px; } }
+</style>
+</head>
+<body>
+
+  <div class="topbar">
+    <span id="fecha-hoy">—</span>
+    <span><span class="dot">•</span>EDICIÓN DIGITAL<span class="dot">•</span><span id="hora-actualizado">—</span></span>
+  </div>
+
+  <div class="masthead">
+    <div class="masthead-inner">
+      <div class="badge"><span>AD</span></div>
+      <div>
+        <h1 class="wordmark">ATLETI <span class="al">AL</span> DÍA</h1>
+        <p class="strapline">EL DIARIO COLCHONERO — NOTICIAS REESCRITAS, NUNCA COPIADAS</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="ticker">
+    <div class="ticker-inner" id="ticker-inner">
+      <span>Cargando última hora…</span>
+    </div>
+  </div>
+
+  <main>
+
+    <!--
+      CARA A CARA — esto es manual a propósito: no hay una fuente de datos
+      automática fiable para alineaciones/convocatorias, así que se edita
+      aquí a mano antes de cada partido importante. Cambia estos valores
+      y los colores/nombre de cada equipo se actualizan solos abajo.
+    -->
+    <section class="matchup" id="matchup" data-equipo-local="Real Sociedad"
+      data-equipo-local-colores="#10203D,#FFFFFF" data-equipo-visitante="Atlético de Madrid"
+      data-equipo-visitante-colores="#D2122E,#FFFFFF" data-cuando="Domingo 21:00h · Reale Arena">
+      <!-- El contenido real se rellena por JS a partir de los data-* de arriba -->
+    </section>
+
+    <div id="hero-slot"></div>
+    <div class="grid" id="grid">
+      <p class="estado">Cargando noticias…</p>
+    </div>
+
+  </main>
+
+  <footer>
+    <div class="note">
+      <p><b>Cómo funciona esta página:</b> cada resumen está redactado con nuestras propias palabras a partir de varios medios, nunca copiado. Las imágenes son ilustraciones propias por categoría, no fotos de partidos ni escudos oficiales.</p>
+    </div>
+  </footer>
+
+  <div class="modal-overlay" id="modal-overlay">
+    <div class="modal-box">
+      <div class="modal-img" id="modal-img"></div>
+      <div class="modal-content">
+        <button class="modal-close" id="modal-close">Cerrar ✕</button>
+        <span class="ribbon" id="modal-tag"></span>
+        <h2 id="modal-titulo"></h2>
+        <div class="cuerpo" id="modal-cuerpo"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const ETIQUETAS = { liga:"Liga", champions:"Champions", previa:"Previa", fichajes:"Mercado" };
+
+    // ---- Cara a cara: pinta el bloque a partir de los data-* del HTML ----
+    function pintarMatchup(){
+      const el = document.getElementById("matchup");
+      const local = el.dataset.equipoLocal, visitante = el.dataset.equipoVisitante;
+      const [c1a, c1b] = el.dataset.equipoLocalColores.split(",");
+      const [c2a, c2b] = el.dataset.equipoVisitanteColores.split(",");
+      const cuando = el.dataset.cuando;
+
+      const bandera = (colorA, colorB) => `
+        <svg class="crest" viewBox="0 0 100 90" xmlns="http://www.w3.org/2000/svg">
+          <rect x="9" y="2" width="5" height="84" fill="#2b2f36"/>
+          <circle cx="11.5" cy="4" r="4" fill="#2b2f36"/>
+          <polygon points="14,6 88,6 88,30 100,42 88,54 88,78 14,78" fill="${colorA}"/>
+          <rect x="14" y="6" width="37" height="72" fill="${colorB}"/>
+        </svg>`;
+
+      el.innerHTML = `
+        <div class="matchup-head">
+          <span class="ribbon previa" style="margin:0;">Partido de hoy</span>
+          <span class="matchup-when">${cuando}</span>
+        </div>
+        <div class="matchup-teams">
+          <div class="team">${bandera(c1a, c1b)}<span class="team-name">${local}</span></div>
+          <div class="vs-mark">VS</div>
+          <div class="team">${bandera(c2a, c2b)}<span class="team-name">${visitante}</span></div>
+        </div>
+        <p class="lineup-note">Actualiza los equipos y colores editando los atributos data-* de esta sección en public/index.html antes de cada partido.</p>
+      `;
+    }
+
+    // ---- Ilustración genérica por categoría (no depende de datos reales del partido) ----
+    function ilustracionCategoria(cat){
+      const fondos = {
+        liga: `<rect width="400" height="200" fill="#9A0B21"/><circle cx="330" cy="40" r="50" fill="#D2122E" opacity="0.5"/>`,
+        champions: `<rect width="400" height="200" fill="#10203D"/><polygon points="70,40 76,58 95,58 80,69 86,87 70,77 54,87 60,69 45,58 64,58" fill="#C79A3C" opacity="0.6"/>`,
+        previa: `<rect width="400" height="200" fill="#3a3b42"/><circle cx="200" cy="100" r="60" fill="none" stroke="#F5F3EE" stroke-width="4" opacity="0.5"/><circle cx="200" cy="100" r="14" fill="#F5F3EE"/>`,
+        fichajes: `<rect width="400" height="200" fill="#C79A3C"/><rect x="-30" y="88" width="460" height="22" fill="#1c1608" opacity="0.85" transform="rotate(-6 200 100)"/>`
+      };
+      return `<svg width="100%" height="100%" viewBox="0 0 400 200" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">${fondos[cat] || fondos.liga}</svg>`;
+    }
+
+    function formatearFecha(iso){
+      if(!iso) return "";
+      return new Date(iso).toLocaleString("es-ES", { day:"numeric", month:"long", hour:"2-digit", minute:"2-digit" });
+    }
+
+    let NOTICIAS_ACTUALES = [];
+
+    function abrirModal(indice){
+      const n = NOTICIAS_ACTUALES[indice];
+      if(!n) return;
+      document.getElementById("modal-img").innerHTML = ilustracionCategoria(n.categoria);
+      const tag = document.getElementById("modal-tag");
+      tag.textContent = ETIQUETAS[n.categoria] || n.categoria;
+      tag.className = "ribbon " + n.categoria;
+      document.getElementById("modal-titulo").textContent = n.titular;
+      const cuerpo = n.cuerpo || n.resumen;
+      document.getElementById("modal-cuerpo").innerHTML = cuerpo.split(/\n+/).map(p => `<p>${p}</p>`).join("");
+      document.getElementById("modal-overlay").classList.add("abierto");
+    }
+    function cerrarModal(){ document.getElementById("modal-overlay").classList.remove("abierto"); }
+    document.getElementById("modal-close").addEventListener("click", cerrarModal);
+    document.getElementById("modal-overlay").addEventListener("click", (e) => {
+      if(e.target.id === "modal-overlay") cerrarModal();
+    });
+
+    async function cargar(){
+      pintarMatchup();
+      document.getElementById("fecha-hoy").textContent =
+        new Date().toLocaleDateString("es-ES", { weekday:"long", day:"numeric", month:"long", year:"numeric" }).toUpperCase();
+
+      try{
+        const r = await fetch("/api/noticias");
+        const datos = await r.json();
+        NOTICIAS_ACTUALES = datos.noticias;
+        document.getElementById("hora-actualizado").textContent =
+          "ACTUALIZADO " + (formatearFecha(datos.actualizado) || "—");
+
+        const grid = document.getElementById("grid");
+        const heroSlot = document.getElementById("hero-slot");
+        const ticker = document.getElementById("ticker-inner");
+
+        if(!datos.noticias.length){
+          grid.innerHTML = '<p class="estado">Todavía no hay noticias guardadas. Ejecuta /api/actualizar una vez (o espera al próximo cron).</p>';
+          heroSlot.innerHTML = "";
+          ticker.innerHTML = "<span>Sin noticias todavía</span>";
+          return;
+        }
+
+        ticker.innerHTML = datos.noticias.slice(0,4).map(n => `<span>${n.titular}</span>`).join("");
+
+        const [primera, ...resto] = datos.noticias;
+        heroSlot.innerHTML = `
+          <a class="hero" href="javascript:void(0)" onclick="abrirModal(0)">
+            <div class="hero-illustration">${ilustracionCategoria(primera.categoria)}</div>
+            <div class="hero-scrim"></div>
+            <div class="hero-content">
+              <span class="ribbon ${primera.categoria}">${ETIQUETAS[primera.categoria] || primera.categoria}</span>
+              <h1 class="headline-font">${primera.titular}</h1>
+              <p class="dek">${primera.resumen}</p>
+            </div>
+          </a>`;
+
+        grid.innerHTML = resto.map((n, i) => `
+          <div class="card">
+            <div class="card-img">${ilustracionCategoria(n.categoria)}</div>
+            <div class="card-body">
+              <span class="tag ${n.categoria}">${ETIQUETAS[n.categoria] || n.categoria}</span>
+              <h3 class="headline-font">${n.titular}</h3>
+              <p class="teaser">${n.resumen}</p>
+              <button class="leer-mas" onclick="abrirModal(${i + 1})">Leer más →</button>
+            </div>
+          </div>
+        `).join("");
+
+      }catch(e){
+        document.getElementById("grid").innerHTML = '<p class="estado">No se pudieron cargar las noticias. Revisa que /api/noticias esté desplegado.</p>';
+      }
+    }
+
+    cargar();
+  </script>
+</body>
+</html>
