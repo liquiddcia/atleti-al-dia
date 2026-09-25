@@ -95,7 +95,7 @@
   </div>
 
   <div class="masthead-banner">
-    <img src="/banner.jpg" alt="Atlético al Día" class="banner-img">
+    <img src="/banner.png" alt="Atlético al Día" class="banner-img">
   </div>
   <div class="strapline-bar">EL DIARIO COLCHONERO — NOTICIAS REESCRITAS, NUNCA COPIADAS</div>
 
@@ -220,52 +220,4 @@
         const r = await fetch("/api/noticias");
         const datos = await r.json();
         NOTICIAS_ACTUALES = datos.noticias;
-        document.getElementById("hora-actualizado").textContent =
-          "ACTUALIZADO " + (formatearFecha(datos.actualizado) || "—");
-
-        const grid = document.getElementById("grid");
-        const heroSlot = document.getElementById("hero-slot");
-        const ticker = document.getElementById("ticker-inner");
-
-        if(!datos.noticias.length){
-          grid.innerHTML = '<p class="estado">Todavía no hay noticias guardadas. Ejecuta /api/actualizar una vez (o espera al próximo cron).</p>';
-          heroSlot.innerHTML = "";
-          ticker.innerHTML = "<span>Sin noticias todavía</span>";
-          return;
-        }
-
-        ticker.innerHTML = datos.noticias.slice(0,4).map(n => `<span>${n.titular}</span>`).join("");
-
-        const [primera, ...resto] = datos.noticias;
-        heroSlot.innerHTML = `
-          <a class="hero" href="javascript:void(0)" onclick="abrirModal(0)">
-            <div class="hero-illustration">${ilustracionCategoria(primera.categoria)}</div>
-            <div class="hero-scrim"></div>
-            <div class="hero-content">
-              <span class="ribbon ${primera.categoria}">${ETIQUETAS[primera.categoria] || primera.categoria}</span>
-              <h1 class="headline-font">${primera.titular}</h1>
-              <p class="dek">${primera.resumen}</p>
-            </div>
-          </a>`;
-
-        grid.innerHTML = resto.map((n, i) => `
-          <div class="card">
-            <div class="card-img">${ilustracionCategoria(n.categoria)}</div>
-            <div class="card-body">
-              <span class="tag ${n.categoria}">${ETIQUETAS[n.categoria] || n.categoria}</span>
-              <h3 class="headline-font">${n.titular}</h3>
-              <p class="teaser">${n.resumen}</p>
-              <button class="leer-mas" onclick="abrirModal(${i + 1})">Leer más →</button>
-            </div>
-          </div>
-        `).join("");
-
-      }catch(e){
-        document.getElementById("grid").innerHTML = '<p class="estado">No se pudieron cargar las noticias. Revisa que /api/noticias esté desplegado.</p>';
-      }
-    }
-
-    cargar();
-  </script>
-</body>
-</html>
+        document.getElementById("hora-actualizado").
