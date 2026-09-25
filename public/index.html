@@ -28,6 +28,7 @@
   .ticker b{ color:var(--gold); }
   main{ max-width:1080px; margin:0 auto; padding:22px 20px 60px; }
 
+  /* Cara a cara configurable */
   .matchup{ background:var(--paper); border:1px solid var(--line); padding:20px 24px 24px; margin-bottom:30px; }
   .matchup-head{ display:flex; flex-wrap:wrap; align-items:center; gap:12px; margin-bottom:18px; }
   .matchup-when{ font-family:'Barlow Condensed',sans-serif; font-weight:600; font-size:13.5px; color:var(--grey); }
@@ -44,6 +45,7 @@
   .lineup-note{ font-family:'Barlow Condensed',sans-serif; font-size:12.5px; color:var(--grey); margin:14px 0 0; }
   @media (max-width:640px){ .lineups{ grid-template-columns:1fr; } .matchup-teams{ gap:20px; } .team{ width:120px; } }
 
+  /* Portada / hero dinámico */
   .hero{ position:relative; border-radius:2px; overflow:hidden; margin-bottom:26px; color:#fff; min-height:260px; display:flex; align-items:flex-end; }
   .hero-illustration{ position:absolute; inset:0; }
   .hero-scrim{ position:absolute; inset:0; background:linear-gradient(0deg, rgba(10,10,14,.92) 0%, rgba(10,10,14,.35) 55%, rgba(10,10,14,.05) 100%); }
@@ -53,6 +55,7 @@
   .hero h1.headline-font{ font-size:clamp(26px,4.2vw,40px); line-height:1.04; margin:0 0 10px; text-transform:uppercase; }
   .hero p.dek{ font-family:'Barlow',sans-serif; font-size:16px; max-width:56ch; opacity:.94; margin:0; }
 
+  /* Grid de tarjetas */
   .grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:22px; }
   .card{ background:var(--paper); border:1px solid var(--line); display:flex; flex-direction:column; }
   .card-img{ height:140px; position:relative; }
@@ -65,6 +68,7 @@
   .card .leer-mas{ margin-top:auto; font-family:'Barlow Condensed',sans-serif; font-weight:700; font-size:12px; color:var(--red-dark); padding-top:6px; border-top:1px dashed var(--line); background:none; border:none; border-top:1px dashed var(--line); text-align:left; cursor:pointer; }
   .estado{ font-family:'Barlow Condensed',sans-serif; color:var(--grey); padding:40px 0; text-align:center; }
 
+  /* Modal de noticia completa */
   .modal-overlay{ position:fixed; inset:0; background:rgba(10,10,14,.6); display:none; align-items:flex-start; justify-content:center; padding: 5vh 16px; z-index:50; overflow-y:auto; }
   .modal-overlay.abierto{ display:flex; }
   .modal-box{ background:var(--paper); max-width:640px; width:100%; margin-bottom:40px; }
@@ -102,9 +106,16 @@
 
   <main>
 
-    <section class="matchup" id="matchup" data-equipo-local="Real Sociedad"
-      data-equipo-local-colores="#10203D,#FFFFFF" data-equipo-visitante="Atlético de Madrid"
-      data-equipo-visitante-colores="#D2122E,#FFFFFF" data-cuando="Domingo 21:00h · Reale Arena">
+    <!--
+      CARA A CARA — esto es manual a propósito: no hay una fuente de datos
+      automática fiable para alineaciones/convocatorias, así que se edita
+      aquí a mano antes de cada partido importante. Cambia estos valores
+      y el rival/hora/escudos se actualizan solos abajo.
+    -->
+    <section class="matchup" id="matchup" data-equipo-local="Alavés"
+      data-escudo-local="/escudos/escudoA.png" data-equipo-visitante="Atlético de Madrid"
+      data-escudo-visitante="/escudos/escudoB.png" data-cuando="Sábado 10 de octubre, 14:15h · Mendizorroza">
+      <!-- El contenido real se rellena por JS a partir de los data-* de arriba -->
     </section>
 
     <div id="hero-slot"></div>
@@ -138,17 +149,8 @@
     function pintarMatchup(){
       const el = document.getElementById("matchup");
       const local = el.dataset.equipoLocal, visitante = el.dataset.equipoVisitante;
-      const [c1a, c1b] = el.dataset.equipoLocalColores.split(",");
-      const [c2a, c2b] = el.dataset.equipoVisitanteColores.split(",");
+      const escudoLocal = el.dataset.escudoLocal, escudoVisitante = el.dataset.escudoVisitante;
       const cuando = el.dataset.cuando;
-
-      const bandera = (colorA, colorB) => `
-        <svg class="crest" viewBox="0 0 100 90" xmlns="http://www.w3.org/2000/svg">
-          <rect x="9" y="2" width="5" height="84" fill="#2b2f36"/>
-          <circle cx="11.5" cy="4" r="4" fill="#2b2f36"/>
-          <polygon points="14,6 88,6 88,30 100,42 88,54 88,78 14,78" fill="${colorA}"/>
-          <rect x="14" y="6" width="37" height="72" fill="${colorB}"/>
-        </svg>`;
 
       el.innerHTML = `
         <div class="matchup-head">
@@ -156,11 +158,11 @@
           <span class="matchup-when">${cuando}</span>
         </div>
         <div class="matchup-teams">
-          <div class="team">${bandera(c1a, c1b)}<span class="team-name">${local}</span></div>
+          <div class="team"><img src="${escudoLocal}" class="crest" alt="${local}"><span class="team-name">${local}</span></div>
           <div class="vs-mark">VS</div>
-          <div class="team">${bandera(c2a, c2b)}<span class="team-name">${visitante}</span></div>
+          <div class="team"><img src="${escudoVisitante}" class="crest" alt="${visitante}"><span class="team-name">${visitante}</span></div>
         </div>
-        <p class="lineup-note">Actualiza los equipos y colores editando los atributos data-* de esta sección en public/index.html antes de cada partido.</p>
+        <p class="lineup-note">Actualiza el rival, la hora y los escudos (carpeta public/escudos/) editando los atributos data-* de esta sección en public/index.html antes de cada partido.</p>
       `;
     }
 
