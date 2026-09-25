@@ -19,17 +19,15 @@
   .topbar{ background:var(--ink); color:#EDEDED; font-family:'Barlow Condensed',sans-serif; font-size:12.5px; font-weight:500; display:flex; justify-content:space-between; align-items:center; padding:6px 20px; letter-spacing:.02em; }
   .topbar span.dot{ color:var(--red); margin:0 6px; }
 
-  .masthead-banner{ width:100%; height:110px; background:var(--navy); overflow:hidden; border-bottom:5px solid var(--red); }
-  .banner-img{ width:100%; height:100%; display:block; object-fit:contain; }
+  .masthead-banner{ width:100%; background:var(--navy); border-bottom:5px solid var(--red); }
+  .banner-img{ width:100%; height:auto; display:block; }
   .strapline-bar{ background:var(--paper); text-align:center; padding:8px 12px; font-family:'Barlow Condensed',sans-serif; font-size:13px; font-weight:600; color:var(--grey); letter-spacing:.04em; border-bottom:1px solid var(--line); }
-  @media (max-width:640px){ .masthead-banner{ height:75px; } }
 
   .ticker{ background:var(--navy); color:#fff; font-family:'Barlow Condensed',sans-serif; font-weight:600; font-size:13px; padding:8px 20px; overflow:hidden; white-space:nowrap; }
   .ticker-inner{ max-width:1080px; margin:0 auto; display:flex; gap:26px; }
   .ticker b{ color:var(--gold); }
   main{ max-width:1080px; margin:0 auto; padding:22px 20px 60px; }
 
-  /* Cara a cara configurable */
   .matchup{ background:var(--paper); border:1px solid var(--line); padding:20px 24px 24px; margin-bottom:30px; }
   .matchup-head{ display:flex; flex-wrap:wrap; align-items:center; gap:12px; margin-bottom:18px; }
   .matchup-when{ font-family:'Barlow Condensed',sans-serif; font-weight:600; font-size:13.5px; color:var(--grey); }
@@ -46,7 +44,6 @@
   .lineup-note{ font-family:'Barlow Condensed',sans-serif; font-size:12.5px; color:var(--grey); margin:14px 0 0; }
   @media (max-width:640px){ .lineups{ grid-template-columns:1fr; } .matchup-teams{ gap:20px; } .team{ width:120px; } }
 
-  /* Portada / hero dinámico */
   .hero{ position:relative; border-radius:2px; overflow:hidden; margin-bottom:26px; color:#fff; min-height:260px; display:flex; align-items:flex-end; }
   .hero-illustration{ position:absolute; inset:0; }
   .hero-scrim{ position:absolute; inset:0; background:linear-gradient(0deg, rgba(10,10,14,.92) 0%, rgba(10,10,14,.35) 55%, rgba(10,10,14,.05) 100%); }
@@ -56,7 +53,6 @@
   .hero h1.headline-font{ font-size:clamp(26px,4.2vw,40px); line-height:1.04; margin:0 0 10px; text-transform:uppercase; }
   .hero p.dek{ font-family:'Barlow',sans-serif; font-size:16px; max-width:56ch; opacity:.94; margin:0; }
 
-  /* Grid de tarjetas */
   .grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:22px; }
   .card{ background:var(--paper); border:1px solid var(--line); display:flex; flex-direction:column; }
   .card-img{ height:140px; position:relative; }
@@ -69,7 +65,6 @@
   .card .leer-mas{ margin-top:auto; font-family:'Barlow Condensed',sans-serif; font-weight:700; font-size:12px; color:var(--red-dark); padding-top:6px; border-top:1px dashed var(--line); background:none; border:none; border-top:1px dashed var(--line); text-align:left; cursor:pointer; }
   .estado{ font-family:'Barlow Condensed',sans-serif; color:var(--grey); padding:40px 0; text-align:center; }
 
-  /* Modal de noticia completa */
   .modal-overlay{ position:fixed; inset:0; background:rgba(10,10,14,.6); display:none; align-items:flex-start; justify-content:center; padding: 5vh 16px; z-index:50; overflow-y:auto; }
   .modal-overlay.abierto{ display:flex; }
   .modal-box{ background:var(--paper); max-width:640px; width:100%; margin-bottom:40px; }
@@ -107,16 +102,9 @@
 
   <main>
 
-    <!--
-      CARA A CARA — esto es manual a propósito: no hay una fuente de datos
-      automática fiable para alineaciones/convocatorias, así que se edita
-      aquí a mano antes de cada partido importante. Cambia estos valores
-      y los colores/nombre de cada equipo se actualizan solos abajo.
-    -->
     <section class="matchup" id="matchup" data-equipo-local="Real Sociedad"
       data-equipo-local-colores="#10203D,#FFFFFF" data-equipo-visitante="Atlético de Madrid"
       data-equipo-visitante-colores="#D2122E,#FFFFFF" data-cuando="Domingo 21:00h · Reale Arena">
-      <!-- El contenido real se rellena por JS a partir de los data-* de arriba -->
     </section>
 
     <div id="hero-slot"></div>
@@ -220,4 +208,52 @@
         const r = await fetch("/api/noticias");
         const datos = await r.json();
         NOTICIAS_ACTUALES = datos.noticias;
-        document.getElementById("hora-actualizado").
+        document.getElementById("hora-actualizado").textContent =
+          "ACTUALIZADO " + (formatearFecha(datos.actualizado) || "—");
+
+        const grid = document.getElementById("grid");
+        const heroSlot = document.getElementById("hero-slot");
+        const ticker = document.getElementById("ticker-inner");
+
+        if(!datos.noticias.length){
+          grid.innerHTML = '<p class="estado">Todavía no hay noticias guardadas. Ejecuta /api/actualizar una vez (o espera al próximo cron).</p>';
+          heroSlot.innerHTML = "";
+          ticker.innerHTML = "<span>Sin noticias todavía</span>";
+          return;
+        }
+
+        ticker.innerHTML = datos.noticias.slice(0,4).map(n => `<span>${n.titular}</span>`).join("");
+
+        const [primera, ...resto] = datos.noticias;
+        heroSlot.innerHTML = `
+          <a class="hero" href="javascript:void(0)" onclick="abrirModal(0)">
+            <div class="hero-illustration">${ilustracionCategoria(primera.categoria)}</div>
+            <div class="hero-scrim"></div>
+            <div class="hero-content">
+              <span class="ribbon ${primera.categoria}">${ETIQUETAS[primera.categoria] || primera.categoria}</span>
+              <h1 class="headline-font">${primera.titular}</h1>
+              <p class="dek">${primera.resumen}</p>
+            </div>
+          </a>`;
+
+        grid.innerHTML = resto.map((n, i) => `
+          <div class="card">
+            <div class="card-img">${ilustracionCategoria(n.categoria)}</div>
+            <div class="card-body">
+              <span class="tag ${n.categoria}">${ETIQUETAS[n.categoria] || n.categoria}</span>
+              <h3 class="headline-font">${n.titular}</h3>
+              <p class="teaser">${n.resumen}</p>
+              <button class="leer-mas" onclick="abrirModal(${i + 1})">Leer más →</button>
+            </div>
+          </div>
+        `).join("");
+
+      }catch(e){
+        document.getElementById("grid").innerHTML = '<p class="estado">No se pudieron cargar las noticias. Revisa que /api/noticias esté desplegado.</p>';
+      }
+    }
+
+    cargar();
+  </script>
+</body>
+</html>
