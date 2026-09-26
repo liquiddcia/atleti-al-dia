@@ -16,6 +16,7 @@ module.exports = async function handler(req, res) {
     titular: n.titular,
     resumen: n.resumen,
     cuerpo: n.cuerpo,
+    publicado_en: n.publicado_en,
   }));
 
   res.setHeader("Cache-Control", "s-maxage=300");
