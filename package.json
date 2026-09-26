@@ -7,7 +7,7 @@
     "dev": "vercel dev"
   },
   "dependencies": {
-    "@vercel/kv": "^2.0.0",
+    "@supabase/supabase-js": "^2.45.4",
     "rss-parser": "^3.13.0"
   }
 }
