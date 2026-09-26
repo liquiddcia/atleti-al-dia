@@ -40,13 +40,18 @@ module.exports = async function handler(req, res) {
       return true;
     });
 
-    // Comprueba duplicados por titular original (más fiable que el enlace,
-    // que Google News cambia cada vez que se pide el mismo feed)
-    const claves = unicos.map((it) => it.titulo.toLowerCase().slice(0, 40));
-    const { data: existentes } = await supabase
+    // Trae los títulos guardados en los últimos 7 días y compara en memoria
+    // (más fiable que mandar una lista larga de títulos en la consulta)
+    const hace7dias = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+    const { data: existentes, error: errorExistentes } = await supabase
       .from("noticias")
       .select("titulo_original")
-      .in("titulo_original", claves);
+      .gte("publicado_en", hace7dias);
+
+    if (errorExistentes) {
+      console.error("Error consultando duplicados:", errorExistentes);
+    }
+
     const yaGuardados = new Set((existentes || []).map((n) => n.titulo_original));
 
     const nuevos = unicos
@@ -79,7 +84,7 @@ module.exports = async function handler(req, res) {
       if (error) throw error;
     }
 
-    return res.status(200).json({ ok: true, total: filas.length });
+    return res.status(200).json({ ok: true, total: filas.length, encontrados: unicos.length });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ error: error.message });
