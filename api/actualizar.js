@@ -40,12 +40,10 @@ module.exports = async function handler(req, res) {
       return true;
     });
 
-    // Trae los títulos guardados en los últimos 7 días y compara en memoria
-    const hace7dias = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+    // Trae todos los títulos ya guardados y compara en memoria
     const { data: existentes, error: errorExistentes } = await supabase
       .from("noticias")
-      .select("titulo_original")
-      .gte("publicado_en", hace7dias);
+      .select("titulo_original");
 
     if (errorExistentes) {
       console.error("Error consultando duplicados:", errorExistentes);
