@@ -1,10 +1,26 @@
-const { kv } = require("@vercel/kv");
+const supabase = require("../lib/supabase");
 
 module.exports = async function handler(req, res) {
-  const datos = (await kv.get("noticias-atleti")) || {
-    actualizado: null,
-    noticias: [],
-  };
-  res.setHeader("Cache-Control", "s-maxage=300"); // caché de 5 min en el borde
-  return res.status(200).json(datos);
+  const { data, error } = await supabase
+    .from("noticias")
+    .select("categoria, titular, resumen, cuerpo, publicado_en")
+    .order("publicado_en", { ascending: false })
+    .limit(60);
+
+  if (error) {
+    return res.status(500).json({ error: error.message });
+  }
+
+  const noticias = (data || []).map((n) => ({
+    categoria: n.categoria,
+    titular: n.titular,
+    resumen: n.resumen,
+    cuerpo: n.cuerpo,
+  }));
+
+  res.setHeader("Cache-Control", "s-maxage=300");
+  return res.status(200).json({
+    actualizado: data && data[0] ? data[0].publicado_en : null,
+    noticias,
+  });
 };
