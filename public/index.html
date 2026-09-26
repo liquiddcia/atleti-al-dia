@@ -80,7 +80,7 @@
   .modal-box{ background:var(--paper); max-width:640px; width:100%; margin-bottom:40px; }
   .modal-img{ height:200px; }
   .modal-content{ padding:22px 26px 28px; }
-  .modal-content h2{ font-family:'Barlow Condensed',sans-serif; font-weight:800; font-size:26px; text-transform:uppercase; line-height:1.08; margin:10px 0 14px; }
+  .modal-content h2{ font-family:'Barlow Condensed',sans-serif; font-weight:800; font-size:26px; text-transform:uppercase; line-height:1.08; margin:10px 0 6px; }
   .modal-content .cuerpo p{ font-size:16px; line-height:1.6; color:#22232b; margin:0 0 12px; }
   .modal-close{ float:right; background:none; border:none; font-family:'Barlow Condensed',sans-serif; font-weight:700; font-size:14px; color:var(--grey); cursor:pointer; padding:4px 0; }
 
@@ -151,6 +151,7 @@
         <button class="modal-close" id="modal-close">Cerrar ✕</button>
         <span class="ribbon" id="modal-tag"></span>
         <h2 id="modal-titulo"></h2>
+        <p id="modal-fecha" style="font-family:'Barlow Condensed',sans-serif; font-size:13px; color:var(--grey); margin:0 0 16px;"></p>
         <div class="cuerpo" id="modal-cuerpo"></div>
       </div>
     </div>
@@ -161,6 +162,8 @@
     // La portada solo muestra las categorías del primer equipo. Filial y Femenino
     // tienen su propia página (categoria.html) enlazada desde el menú.
     const CATEGORIAS_PORTADA = ["liga", "champions", "previa", "fichajes", "clasificacion"];
+    // Máximo de noticias en portada (garantizando al menos 1 de cada sección que tenga noticias)
+    const TOTAL_PORTADA = 8;
 
     function pintarMatchup(){
       const el = document.getElementById("matchup");
@@ -210,6 +213,7 @@
       tag.textContent = ETIQUETAS[n.categoria] || n.categoria;
       tag.className = "ribbon " + n.categoria;
       document.getElementById("modal-titulo").textContent = n.titular;
+      document.getElementById("modal-fecha").textContent = formatearFecha(n.publicado_en);
       const cuerpo = n.cuerpo || n.resumen;
       document.getElementById("modal-cuerpo").innerHTML = cuerpo.split(/\n+/).map(p => `<p>${p}</p>`).join("");
       document.getElementById("modal-overlay").classList.add("abierto");
@@ -228,7 +232,25 @@
       try{
         const r = await fetch("/api/noticias");
         const datos = await r.json();
-        NOTICIAS_ACTUALES = datos.noticias.filter(n => CATEGORIAS_PORTADA.includes(n.categoria));
+
+        // Al menos 1 de cada sección (la más reciente de esa sección),
+        // y rellena el resto de huecos con las más recientes en general
+        // hasta un máximo de TOTAL_PORTADA. Nada se duplica: es la misma
+        // lista de noticias, solo elegida con este criterio.
+        const porCategoria = {};
+        datos.noticias.forEach(n => {
+          if (!CATEGORIAS_PORTADA.includes(n.categoria)) return;
+          if (!porCategoria[n.categoria]) porCategoria[n.categoria] = n;
+        });
+        const destacadas = Object.values(porCategoria);
+        const yaIncluidas = new Set(destacadas.map(n => n.titular));
+        const resto = datos.noticias.filter(n =>
+          CATEGORIAS_PORTADA.includes(n.categoria) && !yaIncluidas.has(n.titular)
+        );
+        const extra = resto.slice(0, Math.max(0, TOTAL_PORTADA - destacadas.length));
+        NOTICIAS_ACTUALES = [...destacadas, ...extra]
+          .sort((a, b) => new Date(b.publicado_en) - new Date(a.publicado_en));
+
         document.getElementById("hora-actualizado").textContent =
           "ACTUALIZADO " + (formatearFecha(datos.actualizado) || "—");
 
@@ -245,7 +267,7 @@
 
         ticker.innerHTML = NOTICIAS_ACTUALES.slice(0,4).map(n => `<span>${n.titular}</span>`).join("");
 
-        const [primera, ...resto] = NOTICIAS_ACTUALES;
+        const [primera, ...resto2] = NOTICIAS_ACTUALES;
         heroSlot.innerHTML = `
           <a class="hero" href="javascript:void(0)" onclick="abrirModal(0)">
             <div class="hero-illustration">${ilustracionCategoria(primera.categoria)}</div>
@@ -254,16 +276,18 @@
               <span class="ribbon ${primera.categoria}">${ETIQUETAS[primera.categoria] || primera.categoria}</span>
               <h1 class="headline-font">${primera.titular}</h1>
               <p class="dek">${primera.resumen}</p>
+              <p class="dek" style="font-size:13px; opacity:.75; margin-top:8px;">${formatearFecha(primera.publicado_en)}</p>
             </div>
           </a>`;
 
-        grid.innerHTML = resto.map((n, i) => `
+        grid.innerHTML = resto2.map((n, i) => `
           <div class="card">
             <div class="card-img">${ilustracionCategoria(n.categoria)}</div>
             <div class="card-body">
               <span class="tag ${n.categoria}">${ETIQUETAS[n.categoria] || n.categoria}</span>
               <h3 class="headline-font">${n.titular}</h3>
               <p class="teaser">${n.resumen}</p>
+              <p class="teaser" style="font-size:12px; opacity:.65;">${formatearFecha(n.publicado_en)}</p>
               <button class="leer-mas" onclick="abrirModal(${i + 1})">Leer más →</button>
             </div>
           </div>
