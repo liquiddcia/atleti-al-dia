@@ -29,14 +29,39 @@
   .navmenu a:hover{ color:var(--red-dark); }
   .navmenu a.activo{ color:var(--red-dark); border-bottom-color:var(--red); }
 
+  .ticker{ background:var(--navy); color:#fff; font-family:'Barlow Condensed',sans-serif; font-weight:600; font-size:13px; padding:8px 20px; overflow:hidden; white-space:nowrap; }
+  .ticker-inner{ max-width:1080px; margin:0 auto; display:flex; gap:26px; }
+  .ticker b{ color:var(--gold); }
   main{ max-width:1080px; margin:0 auto; padding:22px 20px 60px; }
-  .cat-head{ display:flex; align-items:center; gap:12px; margin-bottom:22px; }
-  .cat-head .ribbon{ margin:0; }
-  .cat-head h1.headline-font{ font-size:clamp(22px,3.6vw,32px); margin:0; text-transform:uppercase; }
 
-  .ribbon{ display:inline-block; font-family:'Barlow Condensed',sans-serif; font-weight:700; font-size:13px; letter-spacing:.03em; background:var(--red); color:#fff; padding:4px 10px 5px; border-radius:2px; text-transform:uppercase; }
+  /* Cara a cara configurable */
+  .matchup{ background:var(--paper); border:1px solid var(--line); padding:20px 24px 24px; margin-bottom:30px; }
+  .matchup-head{ display:flex; flex-wrap:wrap; align-items:center; gap:12px; margin-bottom:18px; }
+  .matchup-when{ font-family:'Barlow Condensed',sans-serif; font-weight:600; font-size:13.5px; color:var(--grey); }
+  .matchup-teams{ display:flex; align-items:center; justify-content:center; gap:34px; padding:6px 0 22px; }
+  .team{ display:flex; flex-direction:column; align-items:center; gap:8px; width:150px; }
+  .crest{ width:104px; height:auto; }
+  .team-name{ font-family:'Barlow Condensed',sans-serif; font-weight:700; font-size:15px; text-align:center; }
+  .vs-mark{ font-family:'Barlow Condensed',sans-serif; font-weight:800; font-size:22px; color:var(--grey); }
+  .lineups{ display:grid; grid-template-columns:1fr 1fr; gap:30px; border-top:1px solid var(--line); padding-top:18px; }
+  .lineup-title{ font-family:'Barlow Condensed',sans-serif; font-weight:700; font-size:14.5px; text-transform:uppercase; letter-spacing:.02em; margin:0 0 10px; }
+  .lineup-list{ list-style:none; margin:0; padding:0; font-size:14.5px; }
+  .lineup-list li{ display:flex; justify-content:space-between; padding:5px 0; border-bottom:1px dashed var(--line); }
+  .lineup-list li span{ font-family:'Barlow Condensed',sans-serif; font-weight:600; color:var(--grey); font-size:12px; }
+  .lineup-note{ font-family:'Barlow Condensed',sans-serif; font-size:12.5px; color:var(--grey); margin:14px 0 0; }
+  @media (max-width:640px){ .lineups{ grid-template-columns:1fr; } .matchup-teams{ gap:20px; } .team{ width:120px; } }
+
+  /* Portada / hero dinámico */
+  .hero{ position:relative; border-radius:2px; overflow:hidden; margin-bottom:26px; color:#fff; min-height:260px; display:flex; align-items:flex-end; }
+  .hero-illustration{ position:absolute; inset:0; }
+  .hero-scrim{ position:absolute; inset:0; background:linear-gradient(0deg, rgba(10,10,14,.92) 0%, rgba(10,10,14,.35) 55%, rgba(10,10,14,.05) 100%); }
+  .hero-content{ position:relative; padding:26px 28px 24px; max-width:640px; }
+  .ribbon{ display:inline-block; font-family:'Barlow Condensed',sans-serif; font-weight:700; font-size:13px; letter-spacing:.03em; background:var(--red); color:#fff; padding:4px 10px 5px; border-radius:2px; margin-bottom:10px; text-transform:uppercase; }
   .ribbon.champions{ background:var(--navy); } .ribbon.previa{ background:var(--grey); } .ribbon.fichajes{ background:var(--gold); color:#1c1608; } .ribbon.clasificacion{ background:var(--ink); } .ribbon.filial{ background:var(--teal); } .ribbon.femenino{ background:var(--plum); }
+  .hero h1.headline-font{ font-size:clamp(26px,4.2vw,40px); line-height:1.04; margin:0 0 10px; text-transform:uppercase; }
+  .hero p.dek{ font-family:'Barlow',sans-serif; font-size:16px; max-width:56ch; opacity:.94; margin:0; }
 
+  /* Grid de tarjetas */
   .grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:22px; }
   .card{ background:var(--paper); border:1px solid var(--line); display:flex; flex-direction:column; }
   .card-img{ height:140px; position:relative; }
@@ -46,9 +71,10 @@
   .tag.previa{ background:var(--grey); } .tag.fichajes{ background:var(--gold); color:#1c1608; } .tag.clasificacion{ background:var(--ink); } .tag.filial{ background:var(--teal); } .tag.femenino{ background:var(--plum); }
   .card h3.headline-font{ font-size:19px; line-height:1.08; margin:0; text-transform:uppercase; }
   .card p.teaser{ font-size:14.5px; color:#33343a; margin:0; line-height:1.4; }
-  .card .leer-mas{ margin-top:auto; font-family:'Barlow Condensed',sans-serif; font-weight:700; font-size:12px; color:var(--red-dark); padding-top:6px; border-top:1px dashed var(--line); background:none; border:none; text-align:left; cursor:pointer; }
+  .card .leer-mas{ margin-top:auto; font-family:'Barlow Condensed',sans-serif; font-weight:700; font-size:12px; color:var(--red-dark); padding-top:6px; border-top:1px dashed var(--line); background:none; border:none; border-top:1px dashed var(--line); text-align:left; cursor:pointer; }
   .estado{ font-family:'Barlow Condensed',sans-serif; color:var(--grey); padding:40px 0; text-align:center; }
 
+  /* Modal de noticia completa */
   .modal-overlay{ position:fixed; inset:0; background:rgba(10,10,14,.6); display:none; align-items:flex-start; justify-content:center; padding: 5vh 16px; z-index:50; overflow-y:auto; }
   .modal-overlay.abierto{ display:flex; }
   .modal-box{ background:var(--paper); max-width:640px; width:100%; margin-bottom:40px; }
@@ -63,7 +89,7 @@
   footer b{ color:var(--ink); }
 
   @media (max-width:860px){ .grid{ grid-template-columns:repeat(2,1fr); } }
-  @media (max-width:560px){ .grid{ grid-template-columns:1fr; } }
+  @media (max-width:560px){ .grid{ grid-template-columns:1fr; } .hero h1.headline-font{ font-size:24px; } }
 </style>
 </head>
 <body>
@@ -79,26 +105,43 @@
   <div class="strapline-bar">EL DIARIO COLCHONERO — NOTICIAS DEL ATLÉTICO DE MADRID</div>
 
   <nav class="navmenu">
-    <div class="navmenu-inner" id="navmenu-inner">
-      <a href="index.html">Portada</a>
-      <a href="categoria.html?cat=liga" data-cat="liga">Liga</a>
-      <a href="categoria.html?cat=champions" data-cat="champions">Champions</a>
-      <a href="categoria.html?cat=previa" data-cat="previa">Previa</a>
-      <a href="categoria.html?cat=fichajes" data-cat="fichajes">Mercado</a>
-      <a href="categoria.html?cat=clasificacion" data-cat="clasificacion">Clasificación</a>
-      <a href="categoria.html?cat=filial" data-cat="filial">Filial</a>
-      <a href="categoria.html?cat=femenino" data-cat="femenino">Femenino</a>
+    <div class="navmenu-inner">
+      <a href="index.html" class="activo">Portada</a>
+      <a href="categoria.html?cat=liga">Liga</a>
+      <a href="categoria.html?cat=champions">Champions</a>
+      <a href="categoria.html?cat=previa">Previa</a>
+      <a href="categoria.html?cat=fichajes">Mercado</a>
+      <a href="categoria.html?cat=clasificacion">Clasificación</a>
+      <a href="categoria.html?cat=filial">Filial</a>
+      <a href="categoria.html?cat=femenino">Femenino</a>
     </div>
   </nav>
 
-  <main>
-    <div class="cat-head">
-      <span class="ribbon" id="cat-ribbon">Categoría</span>
-      <h1 class="headline-font" id="cat-titulo">Cargando…</h1>
+  <div class="ticker">
+    <div class="ticker-inner" id="ticker-inner">
+      <span>Cargando última hora…</span>
     </div>
+  </div>
+
+  <main>
+
+    <!--
+      CARA A CARA — esto es manual a propósito: no hay una fuente de datos
+      automática fiable para alineaciones/convocatorias, así que se edita
+      aquí a mano antes de cada partido importante. Cambia estos valores
+      y el rival/hora/escudos se actualizan solos abajo.
+    -->
+    <section class="matchup" id="matchup" data-equipo-local="Alavés"
+      data-escudo-local="/escudos/escudoA.png" data-equipo-visitante="Atlético de Madrid"
+      data-escudo-visitante="/escudos/escudoB.png" data-cuando="Sábado 10 de octubre, 16:15h · Mendizorroza">
+      <!-- El contenido real se rellena por JS a partir de los data-* de arriba -->
+    </section>
+
+    <div id="hero-slot"></div>
     <div class="grid" id="grid">
       <p class="estado">Cargando noticias…</p>
     </div>
+
   </main>
 
   <div class="modal-overlay" id="modal-overlay">
@@ -115,9 +158,28 @@
 
   <script>
     const ETIQUETAS = { liga:"Liga", champions:"Champions", previa:"Previa", fichajes:"Mercado", clasificacion:"Clasificación", filial:"Filial", femenino:"Femenino" };
+    // La portada solo muestra las categorías del primer equipo. Filial y Femenino
+    // tienen su propia página (categoria.html) enlazada desde el menú.
+    const CATEGORIAS_PORTADA = ["liga", "champions", "previa", "fichajes", "clasificacion"];
 
-    const params = new URLSearchParams(window.location.search);
-    const CATEGORIA = params.get("cat") || "liga";
+    function pintarMatchup(){
+      const el = document.getElementById("matchup");
+      const local = el.dataset.equipoLocal, visitante = el.dataset.equipoVisitante;
+      const escudoLocal = el.dataset.escudoLocal, escudoVisitante = el.dataset.escudoVisitante;
+      const cuando = el.dataset.cuando;
+
+      el.innerHTML = `
+        <div class="matchup-head">
+          <span class="ribbon previa" style="margin:0;">Próxima Jornada</span>
+          <span class="matchup-when">${cuando}</span>
+        </div>
+        <div class="matchup-teams">
+          <div class="team"><img src="${escudoLocal}" class="crest" alt="${local}"><span class="team-name">${local}</span></div>
+          <div class="vs-mark">VS</div>
+          <div class="team"><img src="${escudoVisitante}" class="crest" alt="${visitante}"><span class="team-name">${visitante}</span></div>
+        </div>
+      `;
+    }
 
     function ilustracionCategoria(cat){
       const imagenes = {
@@ -159,40 +221,50 @@
     });
 
     async function cargar(){
+      pintarMatchup();
       document.getElementById("fecha-hoy").textContent =
         new Date().toLocaleDateString("es-ES", { weekday:"long", day:"numeric", month:"long", year:"numeric" }).toUpperCase();
-
-      // Resalta en el menú la categoría activa
-      const link = document.querySelector(`.navmenu a[data-cat="${CATEGORIA}"]`);
-      if(link) link.classList.add("activo");
-
-      document.getElementById("cat-titulo").textContent = ETIQUETAS[CATEGORIA] || CATEGORIA;
-      const ribbon = document.getElementById("cat-ribbon");
-      ribbon.textContent = ETIQUETAS[CATEGORIA] || CATEGORIA;
-      ribbon.className = "ribbon " + CATEGORIA;
 
       try{
         const r = await fetch("/api/noticias");
         const datos = await r.json();
-        NOTICIAS_ACTUALES = datos.noticias.filter(n => n.categoria === CATEGORIA);
+        NOTICIAS_ACTUALES = datos.noticias.filter(n => CATEGORIAS_PORTADA.includes(n.categoria));
         document.getElementById("hora-actualizado").textContent =
           "ACTUALIZADO " + (formatearFecha(datos.actualizado) || "—");
 
         const grid = document.getElementById("grid");
+        const heroSlot = document.getElementById("hero-slot");
+        const ticker = document.getElementById("ticker-inner");
 
         if(!NOTICIAS_ACTUALES.length){
-          grid.innerHTML = '<p class="estado">Todavía no hay noticias guardadas en esta categoría.</p>';
+          grid.innerHTML = '<p class="estado">Todavía no hay noticias guardadas. Ejecuta /api/actualizar una vez (o espera al próximo cron).</p>';
+          heroSlot.innerHTML = "";
+          ticker.innerHTML = "<span>Sin noticias todavía</span>";
           return;
         }
 
-        grid.innerHTML = NOTICIAS_ACTUALES.map((n, i) => `
+        ticker.innerHTML = NOTICIAS_ACTUALES.slice(0,4).map(n => `<span>${n.titular}</span>`).join("");
+
+        const [primera, ...resto] = NOTICIAS_ACTUALES;
+        heroSlot.innerHTML = `
+          <a class="hero" href="javascript:void(0)" onclick="abrirModal(0)">
+            <div class="hero-illustration">${ilustracionCategoria(primera.categoria)}</div>
+            <div class="hero-scrim"></div>
+            <div class="hero-content">
+              <span class="ribbon ${primera.categoria}">${ETIQUETAS[primera.categoria] || primera.categoria}</span>
+              <h1 class="headline-font">${primera.titular}</h1>
+              <p class="dek">${primera.resumen}</p>
+            </div>
+          </a>`;
+
+        grid.innerHTML = resto.map((n, i) => `
           <div class="card">
             <div class="card-img">${ilustracionCategoria(n.categoria)}</div>
             <div class="card-body">
               <span class="tag ${n.categoria}">${ETIQUETAS[n.categoria] || n.categoria}</span>
               <h3 class="headline-font">${n.titular}</h3>
               <p class="teaser">${n.resumen}</p>
-              <button class="leer-mas" onclick="abrirModal(${i})">Leer más →</button>
+              <button class="leer-mas" onclick="abrirModal(${i + 1})">Leer más →</button>
             </div>
           </div>
         `).join("");
