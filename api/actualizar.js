@@ -40,14 +40,18 @@ module.exports = async function handler(req, res) {
       return true;
     });
 
-    const enlaces = unicos.map((it) => it.enlace).filter(Boolean);
+    // Comprueba duplicados por titular original (más fiable que el enlace,
+    // que Google News cambia cada vez que se pide el mismo feed)
+    const claves = unicos.map((it) => it.titulo.toLowerCase().slice(0, 40));
     const { data: existentes } = await supabase
       .from("noticias")
-      .select("enlace_original")
-      .in("enlace_original", enlaces);
-    const yaGuardados = new Set((existentes || []).map((n) => n.enlace_original));
+      .select("titulo_original")
+      .in("titulo_original", claves);
+    const yaGuardados = new Set((existentes || []).map((n) => n.titulo_original));
 
-    const nuevos = unicos.filter((it) => !yaGuardados.has(it.enlace)).slice(0, MAX_NOTICIAS);
+    const nuevos = unicos
+      .filter((it) => !yaGuardados.has(it.titulo.toLowerCase().slice(0, 40)))
+      .slice(0, MAX_NOTICIAS);
 
     const reescritas = await Promise.all(
       nuevos.map(async (item) => {
@@ -60,6 +64,7 @@ module.exports = async function handler(req, res) {
           cuerpo: resultado.cuerpo,
           fuentes: item.fuente,
           enlace_original: item.enlace,
+          titulo_original: item.titulo.toLowerCase().slice(0, 40),
           publicado_en: item.publicado
             ? new Date(item.publicado).toISOString()
             : new Date().toISOString(),
