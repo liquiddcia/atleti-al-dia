@@ -13,10 +13,15 @@ module.exports = async function handler(req, res) {
   }
 
   try {
+    const resultados = await Promise.allSettled(
+      fuentes.map((fuente) => parser.parseURL(fuente.url))
+    );
+
     const items = [];
-    for (const fuente of fuentes) {
-      const feed = await parser.parseURL(fuente.url);
-      for (const item of feed.items.slice(0, 8)) {
+    resultados.forEach((resultado, i) => {
+      if (resultado.status !== "fulfilled") return;
+      const fuente = fuentes[i];
+      for (const item of resultado.value.items.slice(0, 8)) {
         items.push({
           titulo: item.title,
           resumenOriginal: (item.contentSnippet || "").slice(0, 500),
@@ -25,7 +30,7 @@ module.exports = async function handler(req, res) {
           publicado: item.isoDate || item.pubDate,
         });
       }
-    }
+    });
 
     const vistos = new Set();
     const unicos = items.filter((it) => {
@@ -44,11 +49,11 @@ module.exports = async function handler(req, res) {
 
     const nuevos = unicos.filter((it) => !yaGuardados.has(it.enlace)).slice(0, MAX_NOTICIAS);
 
-    const filas = [];
-    for (const item of nuevos) {
-      const resultado = await reescribirNoticia(item);
-      if (resultado) {
-        filas.push({
+    const reescritas = await Promise.all(
+      nuevos.map(async (item) => {
+        const resultado = await reescribirNoticia(item);
+        if (!resultado) return null;
+        return {
           categoria: resultado.categoria,
           titular: resultado.titular,
           resumen: resultado.resumen,
@@ -58,9 +63,11 @@ module.exports = async function handler(req, res) {
           publicado_en: item.publicado
             ? new Date(item.publicado).toISOString()
             : new Date().toISOString(),
-        });
-      }
-    }
+        };
+      })
+    );
+
+    const filas = reescritas.filter(Boolean);
 
     if (filas.length > 0) {
       const { error } = await supabase.from("noticias").insert(filas);
