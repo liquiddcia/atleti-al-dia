@@ -41,3 +41,58 @@ module.exports = async function handler(req, res) {
     });
 
     // Trae los títulos guardados en los últimos 7 días y compara en memoria
+    const hace7dias = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+    const { data: existentes, error: errorExistentes } = await supabase
+      .from("noticias")
+      .select("titulo_original")
+      .gte("publicado_en", hace7dias);
+
+    if (errorExistentes) {
+      console.error("Error consultando duplicados:", errorExistentes);
+    }
+
+    const yaGuardados = new Set((existentes || []).map((n) => n.titulo_original));
+
+    const nuevos = unicos
+      .filter((it) => !yaGuardados.has(it.titulo.toLowerCase().slice(0, 40)))
+      .slice(0, MAX_NOTICIAS);
+
+    const reescritas = await Promise.all(
+      nuevos.map(async (item) => {
+        const resultado = await reescribirNoticia(item);
+        if (!resultado) return null;
+        return {
+          categoria: resultado.categoria,
+          titular: resultado.titular,
+          resumen: resultado.resumen,
+          cuerpo: resultado.cuerpo,
+          fuentes: item.fuente,
+          enlace_original: item.enlace,
+          titulo_original: item.titulo.toLowerCase().slice(0, 40),
+          publicado_en: item.publicado
+            ? new Date(item.publicado).toISOString()
+            : new Date().toISOString(),
+        };
+      })
+    );
+
+    const filas = reescritas.filter(Boolean);
+
+    if (filas.length > 0) {
+      const { error } = await supabase.from("noticias").insert(filas);
+      if (error) throw error;
+    }
+
+    return res.status(200).json({
+      ok: true,
+      total: filas.length,
+      encontrados: unicos.length,
+      yaGuardadosEnBD: yaGuardados.size,
+      nuevosTrasFiltro: nuevos.length,
+      errorConsulta: errorExistentes ? errorExistentes.message : null,
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: error.message });
+  }
+};
