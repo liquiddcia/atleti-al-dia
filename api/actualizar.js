@@ -1,5 +1,5 @@
 const Parser = require("rss-parser");
-const { kv } = require("@vercel/kv");
+const supabase = require("../lib/supabase");
 const fuentes = require("../lib/fuentes");
 const { reescribirNoticia } = require("../lib/reescribir");
 
@@ -7,7 +7,6 @@ const parser = new Parser();
 const MAX_NOTICIAS = 12;
 
 module.exports = async function handler(req, res) {
-  // Protege el endpoint: solo Vercel Cron (o tú, a mano) puede dispararlo.
   const secreto = req.headers.authorization;
   if (secreto !== `Bearer ${process.env.CRON_SECRET}`) {
     return res.status(401).json({ error: "No autorizado" });
@@ -28,7 +27,6 @@ module.exports = async function handler(req, res) {
       }
     }
 
-    // Quita duplicados por titular muy parecido (varios medios cubren lo mismo)
     const vistos = new Set();
     const unicos = items.filter((it) => {
       const clave = it.titulo.toLowerCase().slice(0, 40);
@@ -37,25 +35,39 @@ module.exports = async function handler(req, res) {
       return true;
     });
 
-    const reescritas = [];
-    for (const item of unicos.slice(0, MAX_NOTICIAS)) {
+    const enlaces = unicos.map((it) => it.enlace).filter(Boolean);
+    const { data: existentes } = await supabase
+      .from("noticias")
+      .select("enlace_original")
+      .in("enlace_original", enlaces);
+    const yaGuardados = new Set((existentes || []).map((n) => n.enlace_original));
+
+    const nuevos = unicos.filter((it) => !yaGuardados.has(it.enlace)).slice(0, MAX_NOTICIAS);
+
+    const filas = [];
+    for (const item of nuevos) {
       const resultado = await reescribirNoticia(item);
       if (resultado) {
-        reescritas.push({
-          ...resultado,
-          enlaceOriginal: item.enlace,
-          fuenteOriginal: item.fuente,
-          publicado: item.publicado,
+        filas.push({
+          categoria: resultado.categoria,
+          titular: resultado.titular,
+          resumen: resultado.resumen,
+          cuerpo: resultado.cuerpo,
+          fuentes: item.fuente,
+          enlace_original: item.enlace,
+          publicado_en: item.publicado
+            ? new Date(item.publicado).toISOString()
+            : new Date().toISOString(),
         });
       }
     }
 
-    await kv.set("noticias-atleti", {
-      actualizado: new Date().toISOString(),
-      noticias: reescritas,
-    });
+    if (filas.length > 0) {
+      const { error } = await supabase.from("noticias").insert(filas);
+      if (error) throw error;
+    }
 
-    return res.status(200).json({ ok: true, total: reescritas.length });
+    return res.status(200).json({ ok: true, total: filas.length });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ error: error.message });
