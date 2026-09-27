@@ -58,7 +58,7 @@ module.exports = async function handler(req, res) {
     const reescritas = await Promise.all(
       nuevos.map(async (item) => {
         const resultado = await reescribirNoticia(item);
-        if (!resultado) return null;
+        if (!resultado || resultado.descartar) return null;
         return {
           categoria: resultado.categoria,
           titular: resultado.titular,
