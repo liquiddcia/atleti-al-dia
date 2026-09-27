@@ -6,6 +6,17 @@ const { reescribirNoticia } = require("../lib/reescribir");
 const parser = new Parser();
 const MAX_NOTICIAS = 12;
 
+function corregirCategoria(texto, categoriaIA) {
+  const t = texto.toLowerCase();
+  const esFemenino = ["femenino", "liga f", "jenni hermoso", "maite zubieta", "lola gallardo"].some((k) =>
+    t.includes(k)
+  );
+  if (esFemenino) return "femenino";
+  const esFilial = ["atlético madrileño", "atletico madrileño", "filial"].some((k) => t.includes(k));
+  if (esFilial) return "filial";
+  return categoriaIA;
+}
+
 module.exports = async function handler(req, res) {
   const secreto = req.headers.authorization;
   if (secreto !== `Bearer ${process.env.CRON_SECRET}`) {
@@ -60,7 +71,10 @@ module.exports = async function handler(req, res) {
         const resultado = await reescribirNoticia(item);
         if (!resultado || resultado.descartar) return null;
         return {
-          categoria: resultado.categoria,
+          categoria: corregirCategoria(
+            `${item.titulo} ${item.resumenOriginal} ${resultado.titular} ${resultado.resumen}`,
+            resultado.categoria
+          ),
           titular: resultado.titular,
           resumen: resultado.resumen,
           cuerpo: resultado.cuerpo,
