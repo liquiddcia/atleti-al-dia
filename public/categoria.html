@@ -49,6 +49,29 @@
   .card .leer-mas{ margin-top:auto; font-family:'Barlow Condensed',sans-serif; font-weight:700; font-size:12px; color:var(--red-dark); padding-top:6px; border-top:1px dashed var(--line); background:none; border:none; text-align:left; cursor:pointer; }
   .estado{ font-family:'Barlow Condensed',sans-serif; color:var(--grey); padding:40px 0; text-align:center; }
 
+  /* Tabla de clasificación */
+  .clasif-wrap{ background:var(--paper); border:1px solid var(--line); margin-bottom:30px; overflow-x:auto; }
+  .clasif-actualizado{ font-family:'Barlow Condensed',sans-serif; font-size:12px; color:var(--grey); padding:10px 16px 0; }
+  table.tabla-clasif{ width:100%; border-collapse:collapse; font-family:'Barlow Condensed',sans-serif; min-width:560px; }
+  table.tabla-clasif th{ font-size:11.5px; font-weight:700; text-transform:uppercase; letter-spacing:.02em; color:var(--grey); text-align:center; padding:10px 6px; border-bottom:2px solid var(--ink); }
+  table.tabla-clasif th:nth-child(2){ text-align:left; }
+  table.tabla-clasif td{ font-size:14px; font-weight:600; text-align:center; padding:8px 6px; border-bottom:1px solid var(--line); }
+  table.tabla-clasif td:nth-child(2){ text-align:left; font-weight:700; }
+  table.tabla-clasif td.pts{ font-weight:800; }
+  table.tabla-clasif td.pos{ position:relative; width:26px; }
+  table.tabla-clasif tr.fila-ucl td.pos{ box-shadow: inset 4px 0 0 var(--navy); }
+  table.tabla-clasif tr.fila-uel td.pos{ box-shadow: inset 4px 0 0 var(--teal); }
+  table.tabla-clasif tr.fila-uecl td.pos{ box-shadow: inset 4px 0 0 var(--gold); }
+  table.tabla-clasif tr.fila-descenso td.pos{ box-shadow: inset 4px 0 0 var(--red); }
+  table.tabla-clasif tr.fila-eliminado{ opacity:.55; }
+  table.tabla-clasif tr.fila-lider td:nth-child(2)::after{ content:" 👑"; }
+  table.tabla-clasif tr.fila-atleti{ background:rgba(210,18,46,.07); }
+  table.tabla-clasif tr.fila-atleti td:nth-child(2){ color:var(--red-dark); }
+  .clasif-leyenda{ display:flex; flex-wrap:wrap; gap:14px; padding:12px 16px 16px; font-family:'Barlow Condensed',sans-serif; font-size:12px; color:var(--grey); }
+  .clasif-leyenda span{ display:flex; align-items:center; gap:6px; }
+  .clasif-leyenda i{ width:10px; height:10px; border-radius:50%; display:inline-block; }
+  .clasif-leyenda i.ucl{ background:var(--navy); } .clasif-leyenda i.uel{ background:var(--teal); } .clasif-leyenda i.uecl{ background:var(--gold); } .clasif-leyenda i.descenso{ background:var(--red); }
+
   /* Acciones: me gusta y compartir */
   .acciones{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
   .btn-like, .btn-compartir{ font-family:'Barlow Condensed',sans-serif; font-weight:700; font-size:12.5px; background:none; border:1px solid var(--line); border-radius:20px; padding:4px 10px; cursor:pointer; color:var(--grey); }
@@ -116,6 +139,8 @@
       <span class="ribbon" id="cat-ribbon">Categoría</span>
       <h1 class="headline-font" id="cat-titulo">Cargando…</h1>
     </div>
+    <div id="clasificacion-slot"></div>
+
     <div class="grid" id="grid">
       <p class="estado">Cargando noticias…</p>
     </div>
@@ -294,6 +319,92 @@
       }
     }
 
+    // ---------- Clasificación ----------
+    function esAtletico(nombreEquipo){
+      const n = nombreEquipo.toLowerCase();
+      return n.includes("atlético") || n.includes("atletico");
+    }
+
+    function claseZonaLiga(pos, total){
+      if(pos === 1) return "fila-lider fila-ucl";
+      if(pos <= 4) return "fila-ucl";
+      if(pos === 5) return "fila-uel";
+      if(pos === 6) return "fila-uecl";
+      if(pos > total - 3) return "fila-descenso";
+      return "";
+    }
+    function claseZonaChampions(pos){
+      if(pos <= 8) return "fila-ucl";
+      if(pos <= 24) return "fila-uecl";
+      return "fila-eliminado";
+    }
+
+    function renderizarClasificacion(tabla, tipo){
+      const total = tabla.length;
+      const filas = tabla.map(f => {
+        const zona = tipo === "liga" ? claseZonaLiga(f.posicion, total) : claseZonaChampions(f.posicion);
+        const atleti = esAtletico(f.equipo) ? " fila-atleti" : "";
+        return `
+          <tr class="${zona}${atleti}">
+            <td class="pos">${f.posicion}</td>
+            <td>${f.equipo}</td>
+            <td>${f.pj}</td>
+            <td>${f.pg}</td>
+            <td>${f.pe}</td>
+            <td>${f.pp}</td>
+            <td>${f.gf}</td>
+            <td>${f.gc}</td>
+            <td>${f.dg}</td>
+            <td class="pts">${f.pts}</td>
+          </tr>`;
+      }).join("");
+
+      const leyenda = tipo === "liga"
+        ? `<div class="clasif-leyenda">
+             <span><i class="ucl"></i>Champions League</span>
+             <span><i class="uel"></i>Europa League</span>
+             <span><i class="uecl"></i>Conference League</span>
+             <span><i class="descenso"></i>Descenso</span>
+           </div>`
+        : `<div class="clasif-leyenda">
+             <span><i class="ucl"></i>Octavos directos</span>
+             <span><i class="uecl"></i>Repesca (playoff)</span>
+             <span>Sin color: eliminado</span>
+           </div>`;
+
+      return `
+        <div class="clasif-wrap">
+          <table class="tabla-clasif">
+            <thead>
+              <tr>
+                <th></th><th>Equipo</th><th>PJ</th><th>PG</th><th>PE</th><th>PP</th><th>GF</th><th>GC</th><th>DG</th><th>Pts</th>
+              </tr>
+            </thead>
+            <tbody>${filas}</tbody>
+          </table>
+          ${leyenda}
+        </div>`;
+    }
+
+    async function cargarClasificacion(tipo){
+      const slot = document.getElementById("clasificacion-slot");
+      slot.innerHTML = '<p class="estado">Cargando clasificación…</p>';
+      try{
+        const r = await fetch("/api/clasificacion");
+        const datos = await r.json();
+        const entrada = datos[tipo];
+        if(!entrada || !entrada.tabla || !entrada.tabla.length){
+          slot.innerHTML = '<p class="estado">Clasificación no disponible todavía.</p>';
+          return;
+        }
+        slot.innerHTML =
+          `<p class="clasif-actualizado">Actualizado ${formatearFecha(entrada.actualizado_en)}</p>` +
+          renderizarClasificacion(entrada.tabla, tipo);
+      }catch(e){
+        slot.innerHTML = '<p class="estado">No se pudo cargar la clasificación.</p>';
+      }
+    }
+
     let NOTICIAS_ACTUALES = [];
 
     function abrirModal(indice){
@@ -348,6 +459,9 @@
       const ribbon = document.getElementById("cat-ribbon");
       ribbon.textContent = ETIQUETAS[CATEGORIA] || CATEGORIA;
       ribbon.className = "ribbon " + CATEGORIA;
+
+      if(CATEGORIA === "clasificacion") cargarClasificacion("liga");
+      if(CATEGORIA === "champions") cargarClasificacion("champions");
 
       try{
         const r = await fetch("/api/noticias");
