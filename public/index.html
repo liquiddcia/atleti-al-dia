@@ -29,6 +29,15 @@
   .navmenu a:hover{ color:var(--red-dark); }
   .navmenu a.activo{ color:var(--red-dark); border-bottom-color:var(--red); }
 
+  .nav-dropdown{ position:relative; }
+  .nav-dropdown-btn{ background:none; border:none; border-bottom:3px solid transparent; font:inherit; font-family:'Barlow Condensed',sans-serif; font-weight:700; font-size:14px; letter-spacing:.03em; text-transform:uppercase; color:var(--ink); padding:10px 14px; cursor:pointer; }
+  .nav-dropdown-btn:hover{ color:var(--red-dark); }
+  .nav-dropdown-menu{ display:none; position:absolute; top:100%; left:0; background:var(--paper); border:1px solid var(--line); min-width:170px; box-shadow:0 8px 18px rgba(0,0,0,.12); z-index:30; }
+  .nav-dropdown.abierto .nav-dropdown-menu{ display:block; }
+  .nav-dropdown-menu a{ display:block; padding:10px 14px; font-size:13px; border-bottom:1px solid var(--line); }
+  .nav-dropdown-menu a:last-child{ border-bottom:none; }
+  .nav-dropdown-menu a:hover{ background:var(--cream); }
+
   .ticker{ background:var(--navy); color:#fff; font-family:'Barlow Condensed',sans-serif; font-weight:600; font-size:13px; padding:8px 20px; overflow:hidden; white-space:nowrap; }
   .ticker-inner{ max-width:1080px; margin:0 auto; display:flex; gap:26px; }
   .ticker b{ color:var(--gold); }
@@ -129,11 +138,19 @@
   <nav class="navmenu">
     <div class="navmenu-inner">
       <a href="index.html" class="activo">Portada</a>
-      <a href="categoria.html?cat=liga">Liga</a>
-      <a href="categoria.html?cat=champions">Champions</a>
+
+      <div class="nav-dropdown" id="dropdown-liga">
+        <button class="nav-dropdown-btn" type="button">Liga ▾</button>
+        <div class="nav-dropdown-menu">
+          <a href="categoria.html?cat=liga">Noticias</a>
+          <a href="categoria.html?cat=clasificacion">Clasificación</a>
+        </div>
+      </div>
+
+      <a href="categoria.html?cat=clasificacion-champions">Champions</a>
+
       <a href="categoria.html?cat=previa">Previa</a>
       <a href="categoria.html?cat=fichajes">Mercado</a>
-      <a href="categoria.html?cat=clasificacion">Clasificación</a>
       <a href="categoria.html?cat=filial">Filial</a>
       <a href="categoria.html?cat=femenino">Femenino</a>
     </div>
@@ -395,6 +412,20 @@
     document.getElementById("modal-close").addEventListener("click", cerrarModal);
     document.getElementById("modal-overlay").addEventListener("click", (e) => {
       if(e.target.id === "modal-overlay") cerrarModal();
+    });
+
+    // Abrir/cerrar el desplegable de Liga (tap-friendly, sirve también en móvil)
+    document.querySelectorAll(".nav-dropdown-btn").forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const dropdown = btn.closest(".nav-dropdown");
+        const estabaAbierto = dropdown.classList.contains("abierto");
+        document.querySelectorAll(".nav-dropdown.abierto").forEach(d => d.classList.remove("abierto"));
+        if(!estabaAbierto) dropdown.classList.add("abierto");
+      });
+    });
+    document.addEventListener("click", () => {
+      document.querySelectorAll(".nav-dropdown.abierto").forEach(d => d.classList.remove("abierto"));
     });
 
     async function cargar(){
