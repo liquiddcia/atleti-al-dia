@@ -49,6 +49,12 @@
   .card .leer-mas{ margin-top:auto; font-family:'Barlow Condensed',sans-serif; font-weight:700; font-size:12px; color:var(--red-dark); padding-top:6px; border-top:1px dashed var(--line); background:none; border:none; text-align:left; cursor:pointer; }
   .estado{ font-family:'Barlow Condensed',sans-serif; color:var(--grey); padding:40px 0; text-align:center; }
 
+  /* Acciones: me gusta y compartir */
+  .acciones{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+  .btn-like, .btn-compartir{ font-family:'Barlow Condensed',sans-serif; font-weight:700; font-size:12.5px; background:none; border:1px solid var(--line); border-radius:20px; padding:4px 10px; cursor:pointer; color:var(--grey); }
+  .btn-like:hover, .btn-compartir:hover{ border-color:var(--red-dark); color:var(--red-dark); }
+  .btn-like.activo{ color:var(--red); border-color:var(--red); background:rgba(210,18,46,.08); }
+
   .modal-overlay{ position:fixed; inset:0; background:rgba(10,10,14,.6); display:none; align-items:flex-start; justify-content:center; padding: 5vh 16px; z-index:50; overflow-y:auto; }
   .modal-overlay.abierto{ display:flex; }
   .modal-box{ background:var(--paper); max-width:640px; width:100%; margin-bottom:40px; }
@@ -57,6 +63,20 @@
   .modal-content h2{ font-family:'Barlow Condensed',sans-serif; font-weight:800; font-size:26px; text-transform:uppercase; line-height:1.08; margin:10px 0 6px; }
   .modal-content .cuerpo p{ font-size:16px; line-height:1.6; color:#22232b; margin:0 0 12px; }
   .modal-close{ float:right; background:none; border:none; font-family:'Barlow Condensed',sans-serif; font-weight:700; font-size:14px; color:var(--grey); cursor:pointer; padding:4px 0; }
+
+  /* Comentarios */
+  .comentarios-section{ border-top:1px solid var(--line); margin-top:20px; padding-top:18px; }
+  .comentarios-section h4{ font-family:'Barlow Condensed',sans-serif; font-weight:700; font-size:15px; text-transform:uppercase; margin:0 0 12px; }
+  .comentario{ padding:10px 0; border-bottom:1px dashed var(--line); }
+  .comentario-cabeza{ display:flex; justify-content:space-between; align-items:baseline; gap:10px; margin-bottom:3px; }
+  .comentario-nombre{ font-family:'Barlow Condensed',sans-serif; font-weight:700; font-size:13.5px; }
+  .comentario-fecha{ font-family:'Barlow Condensed',sans-serif; font-size:11.5px; color:var(--grey); white-space:nowrap; }
+  .comentario-texto{ font-size:14px; line-height:1.45; margin:0; color:#33343a; }
+  .form-comentario{ display:flex; flex-direction:column; gap:8px; margin-top:14px; }
+  .form-comentario input, .form-comentario textarea{ font-family:'Barlow',sans-serif; font-size:14px; padding:8px 10px; border:1px solid var(--line); border-radius:3px; }
+  .form-comentario textarea{ resize:vertical; min-height:60px; }
+  .form-comentario button{ align-self:flex-start; font-family:'Barlow Condensed',sans-serif; font-weight:700; font-size:13px; background:var(--red); color:#fff; border:none; padding:8px 16px; border-radius:3px; cursor:pointer; text-transform:uppercase; }
+  .form-comentario button:hover{ background:var(--red-dark); }
 
   footer{ max-width:1080px; margin:0 auto; padding:10px 20px 50px; color:var(--grey); font-size:13px; }
   footer .note{ border-top:1px solid var(--line); padding-top:18px; }
@@ -110,6 +130,21 @@
         <h2 id="modal-titulo"></h2>
         <p id="modal-fecha" style="font-family:'Barlow Condensed',sans-serif; font-size:13px; color:var(--grey); margin:0 0 16px;"></p>
         <div class="cuerpo" id="modal-cuerpo"></div>
+
+        <div class="acciones" style="margin-top:18px;">
+          <button class="btn-like" id="modal-like">❤ 0</button>
+          <button class="btn-compartir" id="modal-compartir">Compartir</button>
+        </div>
+
+        <div class="comentarios-section">
+          <h4>Comentarios</h4>
+          <div id="modal-comentarios-lista"><p class="estado" style="padding:10px 0;">Cargando comentarios…</p></div>
+          <form class="form-comentario" id="comentario-form">
+            <input type="text" id="comentario-nombre" placeholder="Tu nombre" maxlength="40" required>
+            <textarea id="comentario-texto" placeholder="Escribe un comentario…" maxlength="500" required></textarea>
+            <button type="submit">Publicar</button>
+          </form>
+        </div>
       </div>
     </div>
   </div>
@@ -119,6 +154,7 @@
 
     const params = new URLSearchParams(window.location.search);
     const CATEGORIA = params.get("cat") || "liga";
+    const ID_COMPARTIDO = params.get("n");
 
     function ilustracionCategoria(cat){
       const imagenes = {
@@ -139,6 +175,125 @@
       return new Date(iso).toLocaleString("es-ES", { day:"numeric", month:"long", hour:"2-digit", minute:"2-digit" });
     }
 
+    // ---------- Me gusta ----------
+    function idsLikeados(){
+      try { return JSON.parse(localStorage.getItem("atleti_likes") || "[]"); }
+      catch(e){ return []; }
+    }
+    function guardarLikeados(arr){
+      try { localStorage.setItem("atleti_likes", JSON.stringify(arr)); } catch(e){}
+    }
+    function haDadoLike(id){ return idsLikeados().includes(id); }
+
+    function botonLikeHtml(n){
+      const activo = haDadoLike(n.id) ? " activo" : "";
+      return `<button class="btn-like${activo}" data-like-id="${n.id}" onclick="event.stopPropagation(); toggleLike(${n.id})">❤ ${n.likes || 0}</button>`;
+    }
+
+    async function toggleLike(id){
+      const likeados = idsLikeados();
+      const yaLike = likeados.includes(id);
+      const accion = yaLike ? "quitar" : "dar";
+      try{
+        const r = await fetch("/api/like", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id, accion })
+        });
+        const datos = await r.json();
+        if(!r.ok) throw new Error(datos.error || "Error al dar me gusta");
+
+        const nuevaLista = yaLike ? likeados.filter(x => x !== id) : [...likeados, id];
+        guardarLikeados(nuevaLista);
+
+        const n = NOTICIAS_ACTUALES.find(x => x.id === id);
+        if(n) n.likes = datos.likes;
+
+        document.querySelectorAll(`[data-like-id="${id}"]`).forEach(el => {
+          el.textContent = "❤ " + datos.likes;
+          el.classList.toggle("activo", !yaLike);
+        });
+      }catch(e){
+        console.error("Error al dar me gusta:", e);
+      }
+    }
+
+    // ---------- Compartir ----------
+    function compartir(n){
+      const url = `${location.origin}/categoria.html?cat=${n.categoria}&n=${n.id}`;
+      if(navigator.share){
+        navigator.share({ title: n.titular, text: n.titular + " — Atleti al Día", url }).catch(() => {});
+      } else if(navigator.clipboard){
+        navigator.clipboard.writeText(url).then(() => alert("Enlace copiado al portapapeles")).catch(() => prompt("Copia este enlace:", url));
+      } else {
+        prompt("Copia este enlace:", url);
+      }
+    }
+    function compartirPorId(id){
+      const n = NOTICIAS_ACTUALES.find(x => x.id === id);
+      if(n) compartir(n);
+    }
+
+    // ---------- Comentarios ----------
+    async function cargarComentarios(id){
+      const cont = document.getElementById("modal-comentarios-lista");
+      cont.innerHTML = '<p class="estado" style="padding:10px 0;">Cargando comentarios…</p>';
+      try{
+        const r = await fetch(`/api/comentarios?noticia_id=${id}`);
+        const datos = await r.json();
+        const lista = datos.comentarios || [];
+        if(!lista.length){
+          cont.innerHTML = '<p class="estado" style="padding:10px 0;">Sé el primero en comentar.</p>';
+          return;
+        }
+        cont.innerHTML = lista.map(() => `
+          <div class="comentario">
+            <div class="comentario-cabeza">
+              <span class="comentario-nombre"></span>
+              <span class="comentario-fecha"></span>
+            </div>
+            <p class="comentario-texto"></p>
+          </div>
+        `).join("");
+        const bloques = cont.querySelectorAll(".comentario");
+        bloques.forEach((bloque, i) => {
+          bloque.querySelector(".comentario-nombre").textContent = lista[i].nombre;
+          bloque.querySelector(".comentario-fecha").textContent = formatearFecha(lista[i].creado_en);
+          bloque.querySelector(".comentario-texto").textContent = lista[i].texto;
+        });
+      }catch(e){
+        cont.innerHTML = '<p class="estado" style="padding:10px 0;">No se pudieron cargar los comentarios.</p>';
+      }
+    }
+
+    async function enviarComentario(id){
+      const inputNombre = document.getElementById("comentario-nombre");
+      const inputTexto = document.getElementById("comentario-texto");
+      const nombre = inputNombre.value.trim();
+      const texto = inputTexto.value.trim();
+      if(!nombre || !texto) return;
+
+      const ultimoEnvio = Number(localStorage.getItem("atleti_ultimo_comentario") || 0);
+      if(Date.now() - ultimoEnvio < 20000){
+        alert("Espera unos segundos antes de comentar de nuevo.");
+        return;
+      }
+
+      try{
+        const r = await fetch("/api/comentarios", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ noticia_id: id, nombre, texto })
+        });
+        if(!r.ok) throw new Error("Error al enviar");
+        localStorage.setItem("atleti_ultimo_comentario", String(Date.now()));
+        inputTexto.value = "";
+        cargarComentarios(id);
+      }catch(e){
+        alert("No se pudo enviar el comentario. Inténtalo de nuevo.");
+      }
+    }
+
     let NOTICIAS_ACTUALES = [];
 
     function abrirModal(indice){
@@ -152,9 +307,30 @@
       document.getElementById("modal-fecha").textContent = formatearFecha(n.publicado_en);
       const cuerpo = n.cuerpo || n.resumen;
       document.getElementById("modal-cuerpo").innerHTML = cuerpo.split(/\n+/).map(p => `<p>${p}</p>`).join("");
+
+      const likeBtn = document.getElementById("modal-like");
+      likeBtn.dataset.likeId = n.id;
+      likeBtn.textContent = "❤ " + (n.likes || 0);
+      likeBtn.classList.toggle("activo", haDadoLike(n.id));
+      likeBtn.onclick = () => toggleLike(n.id);
+
+      document.getElementById("modal-compartir").onclick = () => compartir(n);
+
+      document.getElementById("comentario-nombre").value = "";
+      document.getElementById("comentario-texto").value = "";
+      cargarComentarios(n.id);
+      document.getElementById("comentario-form").onsubmit = (e) => {
+        e.preventDefault();
+        enviarComentario(n.id);
+      };
+
       document.getElementById("modal-overlay").classList.add("abierto");
+      history.replaceState(null, "", `categoria.html?cat=${CATEGORIA}&n=${n.id}`);
     }
-    function cerrarModal(){ document.getElementById("modal-overlay").classList.remove("abierto"); }
+    function cerrarModal(){
+      document.getElementById("modal-overlay").classList.remove("abierto");
+      history.replaceState(null, "", `categoria.html?cat=${CATEGORIA}`);
+    }
     document.getElementById("modal-close").addEventListener("click", cerrarModal);
     document.getElementById("modal-overlay").addEventListener("click", (e) => {
       if(e.target.id === "modal-overlay") cerrarModal();
@@ -195,10 +371,20 @@
               <h3 class="headline-font">${n.titular}</h3>
               <p class="teaser">${n.resumen}</p>
               <p class="teaser" style="font-size:12px; opacity:.65;">${formatearFecha(n.publicado_en)}</p>
+              <div class="acciones">
+                ${botonLikeHtml(n)}
+                <button class="btn-compartir" onclick="compartirPorId(${n.id})">Compartir</button>
+              </div>
               <button class="leer-mas" onclick="abrirModal(${i})">Leer más →</button>
             </div>
           </div>
         `).join("");
+
+        // Si se ha entrado con un enlace compartido (?n=ID), abre esa noticia directamente
+        if(ID_COMPARTIDO){
+          const idx = NOTICIAS_ACTUALES.findIndex(n => String(n.id) === String(ID_COMPARTIDO));
+          if(idx >= 0) abrirModal(idx);
+        }
 
       }catch(e){
         document.getElementById("grid").innerHTML = '<p class="estado">No se pudieron cargar las noticias. Revisa que /api/noticias esté desplegado.</p>';
