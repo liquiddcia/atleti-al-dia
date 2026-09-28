@@ -29,6 +29,17 @@
   .navmenu a:hover{ color:var(--red-dark); }
   .navmenu a.activo{ color:var(--red-dark); border-bottom-color:var(--red); }
 
+  .nav-dropdown{ position:relative; }
+  .nav-dropdown-btn{ background:none; border:none; border-bottom:3px solid transparent; font:inherit; font-family:'Barlow Condensed',sans-serif; font-weight:700; font-size:14px; letter-spacing:.03em; text-transform:uppercase; color:var(--ink); padding:10px 14px; cursor:pointer; }
+  .nav-dropdown-btn:hover{ color:var(--red-dark); }
+  .nav-dropdown-btn.activo{ color:var(--red-dark); border-bottom-color:var(--red); }
+  .nav-dropdown-menu{ display:none; position:absolute; top:100%; left:0; background:var(--paper); border:1px solid var(--line); min-width:170px; box-shadow:0 8px 18px rgba(0,0,0,.12); z-index:30; }
+  .nav-dropdown.abierto .nav-dropdown-menu{ display:block; }
+  .nav-dropdown-menu a{ display:block; padding:10px 14px; font-size:13px; border-bottom:1px solid var(--line); }
+  .nav-dropdown-menu a:last-child{ border-bottom:none; }
+  .nav-dropdown-menu a:hover{ background:var(--cream); }
+  .nav-dropdown-menu a.activo{ color:var(--red-dark); }
+
   main{ max-width:1080px; margin:0 auto; padding:22px 20px 60px; }
   .cat-head{ display:flex; align-items:center; gap:12px; margin-bottom:22px; }
   .cat-head .ribbon{ margin:0; }
@@ -124,11 +135,19 @@
   <nav class="navmenu">
     <div class="navmenu-inner" id="navmenu-inner">
       <a href="index.html">Portada</a>
-      <a href="categoria.html?cat=liga" data-cat="liga">Liga</a>
-      <a href="categoria.html?cat=champions" data-cat="champions">Champions</a>
+
+      <div class="nav-dropdown" id="dropdown-liga">
+        <button class="nav-dropdown-btn" type="button">Liga ▾</button>
+        <div class="nav-dropdown-menu">
+          <a href="categoria.html?cat=liga" data-cat="liga">Noticias</a>
+          <a href="categoria.html?cat=clasificacion" data-cat="clasificacion">Clasificación</a>
+        </div>
+      </div>
+
+      <a href="categoria.html?cat=clasificacion-champions" data-cat="clasificacion-champions">Champions</a>
+
       <a href="categoria.html?cat=previa" data-cat="previa">Previa</a>
       <a href="categoria.html?cat=fichajes" data-cat="fichajes">Mercado</a>
-      <a href="categoria.html?cat=clasificacion" data-cat="clasificacion">Clasificación</a>
       <a href="categoria.html?cat=filial" data-cat="filial">Filial</a>
       <a href="categoria.html?cat=femenino" data-cat="femenino">Femenino</a>
     </div>
@@ -175,7 +194,8 @@
   </div>
 
   <script>
-    const ETIQUETAS = { liga:"Liga", champions:"Champions", previa:"Previa", fichajes:"Mercado", clasificacion:"Clasificación", filial:"Filial", femenino:"Femenino" };
+    const ETIQUETAS = { liga:"Liga", champions:"Champions", previa:"Previa", fichajes:"Mercado", clasificacion:"Clasificación", filial:"Filial", femenino:"Femenino", "clasificacion-champions":"Clasificación Champions" };
+    function claseRibbon(cat){ return cat === "clasificacion-champions" ? "champions" : cat; }
 
     const params = new URLSearchParams(window.location.search);
     const CATEGORIA = params.get("cat") || "liga";
@@ -397,6 +417,8 @@
           slot.innerHTML = '<p class="estado">Clasificación no disponible todavía.</p>';
           return;
         }
+        document.getElementById("hora-actualizado").textContent =
+          "ACTUALIZADO " + (formatearFecha(entrada.actualizado_en) || "—");
         slot.innerHTML =
           `<p class="clasif-actualizado">Actualizado ${formatearFecha(entrada.actualizado_en)}</p>` +
           renderizarClasificacion(entrada.tabla, tipo);
@@ -447,21 +469,44 @@
       if(e.target.id === "modal-overlay") cerrarModal();
     });
 
+    // Abrir/cerrar los desplegables del menú (tap-friendly, sirve también en móvil)
+    document.querySelectorAll(".nav-dropdown-btn").forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const dropdown = btn.closest(".nav-dropdown");
+        const estabaAbierto = dropdown.classList.contains("abierto");
+        document.querySelectorAll(".nav-dropdown.abierto").forEach(d => d.classList.remove("abierto"));
+        if(!estabaAbierto) dropdown.classList.add("abierto");
+      });
+    });
+    document.addEventListener("click", () => {
+      document.querySelectorAll(".nav-dropdown.abierto").forEach(d => d.classList.remove("abierto"));
+    });
+
     async function cargar(){
       document.getElementById("fecha-hoy").textContent =
         new Date().toLocaleDateString("es-ES", { weekday:"long", day:"numeric", month:"long", year:"numeric" }).toUpperCase();
 
-      // Resalta en el menú la categoría activa
+      // Resalta en el menú la categoría activa (y su desplegable padre, si lo tiene)
       const link = document.querySelector(`.navmenu a[data-cat="${CATEGORIA}"]`);
-      if(link) link.classList.add("activo");
+      if(link){
+        link.classList.add("activo");
+        const dropdownPadre = link.closest(".nav-dropdown");
+        if(dropdownPadre) dropdownPadre.querySelector(".nav-dropdown-btn").classList.add("activo");
+      }
 
       document.getElementById("cat-titulo").textContent = ETIQUETAS[CATEGORIA] || CATEGORIA;
       const ribbon = document.getElementById("cat-ribbon");
       ribbon.textContent = ETIQUETAS[CATEGORIA] || CATEGORIA;
-      ribbon.className = "ribbon " + CATEGORIA;
+      ribbon.className = "ribbon " + claseRibbon(CATEGORIA);
 
-      if(CATEGORIA === "clasificacion") cargarClasificacion("liga");
-      if(CATEGORIA === "champions") cargarClasificacion("champions");
+      // "Clasificación" (Liga) y "Champions" muestran solo la tabla, sin grid de noticias
+      const esVistaClasificacion = CATEGORIA === "clasificacion" || CATEGORIA === "clasificacion-champions";
+      if(esVistaClasificacion){
+        document.getElementById("grid").style.display = "none";
+        await cargarClasificacion(CATEGORIA === "clasificacion-champions" ? "champions" : "liga");
+        return;
+      }
 
       try{
         const r = await fetch("/api/noticias");
