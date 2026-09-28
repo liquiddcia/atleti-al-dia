@@ -2,6 +2,7 @@ const Parser = require("rss-parser");
 const supabase = require("../lib/supabase");
 const fuentes = require("../lib/fuentes");
 const { reescribirNoticia } = require("../lib/reescribir");
+const { actualizarClasificaciones } = require("../lib/clasificacion");
 
 const parser = new Parser();
 const MAX_NOTICIAS = 12;
@@ -24,6 +25,11 @@ module.exports = async function handler(req, res) {
   }
 
   try {
+    // No bloqueante para las noticias: si falla, se registra pero no interrumpe el resto
+    await actualizarClasificaciones().catch((e) =>
+      console.error("Error actualizando clasificaciones:", e.message)
+    );
+
     const resultados = await Promise.allSettled(
       fuentes.map((fuente) => parser.parseURL(fuente.url))
     );
