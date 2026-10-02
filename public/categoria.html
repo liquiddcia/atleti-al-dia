@@ -3,9 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Atleti al Día — Diario Colchonero</title>
+<title>Diario Colchonero</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,400;0,500;0,600;0,700;1,500&family=Barlow+Condensed:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+<!-- Google AdSense: sustituye ca-pub-XXXXXXXXXXXXXXXX por tu ID de editor una vez aprobado -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script>
 <style>
   :root{
     --red: #D2122E; --red-dark: #9A0B21; --ink: #14151A; --cream: #F5F3EE;
@@ -128,7 +130,7 @@
   </div>
 
   <div class="masthead-banner">
-    <img src="/banner.png" alt="Atlético al Día" class="banner-img">
+    <img src="/banner.png" alt="Diario Colchonero" class="banner-img">
   </div>
   <div class="strapline-bar">EL DIARIO COLCHONERO — NOTICIAS DEL ATLÉTICO DE MADRID</div>
 
@@ -159,6 +161,17 @@
       <h1 class="headline-font" id="cat-titulo">Cargando…</h1>
     </div>
     <div id="clasificacion-slot"></div>
+
+    <!-- Bloque de anuncio AdSense: activa cuando tengas cuenta aprobada y crea la unidad "display responsivo" en tu panel de AdSense, luego sustituye data-ad-slot -->
+    <div style="margin:0 0 26px; text-align:center;">
+      <ins class="adsbygoogle"
+           style="display:block"
+           data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
+           data-ad-slot="0000000000"
+           data-ad-format="auto"
+           data-full-width-responsive="true"></ins>
+      <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+    </div>
 
     <div class="grid" id="grid">
       <p class="estado">Cargando noticias…</p>
@@ -267,7 +280,7 @@
     function compartir(n){
       const url = `${location.origin}/categoria.html?cat=${n.categoria}&n=${n.id}`;
       if(navigator.share){
-        navigator.share({ title: n.titular, text: n.titular + " — Atleti al Día", url }).catch(() => {});
+        navigator.share({ title: n.titular, text: n.titular + " — Diario Colchonero", url }).catch(() => {});
       } else if(navigator.clipboard){
         navigator.clipboard.writeText(url).then(() => alert("Enlace copiado al portapapeles")).catch(() => prompt("Copia este enlace:", url));
       } else {
@@ -331,226 +344,4 @@
           body: JSON.stringify({ noticia_id: id, nombre, texto })
         });
         if(!r.ok) throw new Error("Error al enviar");
-        localStorage.setItem("atleti_ultimo_comentario", String(Date.now()));
-        inputTexto.value = "";
-        cargarComentarios(id);
-      }catch(e){
-        alert("No se pudo enviar el comentario. Inténtalo de nuevo.");
-      }
-    }
-
-    // ---------- Clasificación ----------
-    function esAtletico(nombreEquipo){
-      const n = nombreEquipo.toLowerCase();
-      return n.includes("atlético") || n.includes("atletico");
-    }
-
-    function claseZonaLiga(pos, total){
-      if(pos === 1) return "fila-lider fila-ucl";
-      if(pos <= 4) return "fila-ucl";
-      if(pos === 5) return "fila-uel";
-      if(pos === 6) return "fila-uecl";
-      if(pos > total - 3) return "fila-descenso";
-      return "";
-    }
-    function claseZonaChampions(pos){
-      if(pos <= 8) return "fila-ucl";
-      if(pos <= 24) return "fila-uecl";
-      return "fila-eliminado";
-    }
-
-    function renderizarClasificacion(tabla, tipo){
-      const total = tabla.length;
-      const filas = tabla.map(f => {
-        const zona = tipo === "liga" ? claseZonaLiga(f.posicion, total) : claseZonaChampions(f.posicion);
-        const atleti = esAtletico(f.equipo) ? " fila-atleti" : "";
-        return `
-          <tr class="${zona}${atleti}">
-            <td class="pos">${f.posicion}</td>
-            <td>${f.equipo}</td>
-            <td>${f.pj}</td>
-            <td>${f.pg}</td>
-            <td>${f.pe}</td>
-            <td>${f.pp}</td>
-            <td>${f.gf}</td>
-            <td>${f.gc}</td>
-            <td>${f.dg}</td>
-            <td class="pts">${f.pts}</td>
-          </tr>`;
-      }).join("");
-
-      const leyenda = tipo === "liga"
-        ? `<div class="clasif-leyenda">
-             <span><i class="ucl"></i>Champions League</span>
-             <span><i class="uel"></i>Europa League</span>
-             <span><i class="uecl"></i>Conference League</span>
-             <span><i class="descenso"></i>Descenso</span>
-           </div>`
-        : `<div class="clasif-leyenda">
-             <span><i class="ucl"></i>Octavos directos</span>
-             <span><i class="uecl"></i>Repesca (playoff)</span>
-             <span>Sin color: eliminado</span>
-           </div>`;
-
-      return `
-        <div class="clasif-wrap">
-          <table class="tabla-clasif">
-            <thead>
-              <tr>
-                <th></th><th>Equipo</th><th>PJ</th><th>PG</th><th>PE</th><th>PP</th><th>GF</th><th>GC</th><th>DG</th><th>Pts</th>
-              </tr>
-            </thead>
-            <tbody>${filas}</tbody>
-          </table>
-          ${leyenda}
-        </div>`;
-    }
-
-    async function cargarClasificacion(tipo){
-      const slot = document.getElementById("clasificacion-slot");
-      slot.innerHTML = '<p class="estado">Cargando clasificación…</p>';
-      try{
-        const r = await fetch("/api/clasificacion");
-        const datos = await r.json();
-        const entrada = datos[tipo];
-        if(!entrada || !entrada.tabla || !entrada.tabla.length){
-          slot.innerHTML = '<p class="estado">Clasificación no disponible todavía.</p>';
-          return;
-        }
-        document.getElementById("hora-actualizado").textContent =
-          "ACTUALIZADO " + (formatearFecha(entrada.actualizado_en) || "—");
-        slot.innerHTML =
-          `<p class="clasif-actualizado">Actualizado ${formatearFecha(entrada.actualizado_en)}</p>` +
-          renderizarClasificacion(entrada.tabla, tipo);
-      }catch(e){
-        slot.innerHTML = '<p class="estado">No se pudo cargar la clasificación.</p>';
-      }
-    }
-
-    let NOTICIAS_ACTUALES = [];
-
-    function abrirModal(indice){
-      const n = NOTICIAS_ACTUALES[indice];
-      if(!n) return;
-      document.getElementById("modal-img").innerHTML = ilustracionCategoria(n.categoria);
-      const tag = document.getElementById("modal-tag");
-      tag.textContent = ETIQUETAS[n.categoria] || n.categoria;
-      tag.className = "ribbon " + n.categoria;
-      document.getElementById("modal-titulo").textContent = n.titular;
-      document.getElementById("modal-fecha").textContent = formatearFecha(n.publicado_en);
-      const cuerpo = n.cuerpo || n.resumen;
-      document.getElementById("modal-cuerpo").innerHTML = cuerpo.split(/\n+/).map(p => `<p>${p}</p>`).join("");
-
-      const likeBtn = document.getElementById("modal-like");
-      likeBtn.dataset.likeId = n.id;
-      likeBtn.textContent = "❤ " + (n.likes || 0);
-      likeBtn.classList.toggle("activo", haDadoLike(n.id));
-      likeBtn.onclick = () => toggleLike(n.id);
-
-      document.getElementById("modal-compartir").onclick = () => compartir(n);
-
-      document.getElementById("comentario-nombre").value = "";
-      document.getElementById("comentario-texto").value = "";
-      cargarComentarios(n.id);
-      document.getElementById("comentario-form").onsubmit = (e) => {
-        e.preventDefault();
-        enviarComentario(n.id);
-      };
-
-      document.getElementById("modal-overlay").classList.add("abierto");
-      history.replaceState(null, "", `categoria.html?cat=${CATEGORIA}&n=${n.id}`);
-    }
-    function cerrarModal(){
-      document.getElementById("modal-overlay").classList.remove("abierto");
-      history.replaceState(null, "", `categoria.html?cat=${CATEGORIA}`);
-    }
-    document.getElementById("modal-close").addEventListener("click", cerrarModal);
-    document.getElementById("modal-overlay").addEventListener("click", (e) => {
-      if(e.target.id === "modal-overlay") cerrarModal();
-    });
-
-    // Abrir/cerrar los desplegables del menú (tap-friendly, sirve también en móvil)
-    document.querySelectorAll(".nav-dropdown-btn").forEach(btn => {
-      btn.addEventListener("click", (e) => {
-        e.stopPropagation();
-        const dropdown = btn.closest(".nav-dropdown");
-        const estabaAbierto = dropdown.classList.contains("abierto");
-        document.querySelectorAll(".nav-dropdown.abierto").forEach(d => d.classList.remove("abierto"));
-        if(!estabaAbierto) dropdown.classList.add("abierto");
-      });
-    });
-    document.addEventListener("click", () => {
-      document.querySelectorAll(".nav-dropdown.abierto").forEach(d => d.classList.remove("abierto"));
-    });
-
-    async function cargar(){
-      document.getElementById("fecha-hoy").textContent =
-        new Date().toLocaleDateString("es-ES", { weekday:"long", day:"numeric", month:"long", year:"numeric" }).toUpperCase();
-
-      // Resalta en el menú la categoría activa (y su desplegable padre, si lo tiene)
-      const link = document.querySelector(`.navmenu a[data-cat="${CATEGORIA}"]`);
-      if(link){
-        link.classList.add("activo");
-        const dropdownPadre = link.closest(".nav-dropdown");
-        if(dropdownPadre) dropdownPadre.querySelector(".nav-dropdown-btn").classList.add("activo");
-      }
-
-      document.getElementById("cat-titulo").textContent = ETIQUETAS[CATEGORIA] || CATEGORIA;
-      const ribbon = document.getElementById("cat-ribbon");
-      ribbon.textContent = ETIQUETAS[CATEGORIA] || CATEGORIA;
-      ribbon.className = "ribbon " + claseRibbon(CATEGORIA);
-
-      // "Clasificación" (Liga) y "Champions" muestran solo la tabla, sin grid de noticias
-      const esVistaClasificacion = CATEGORIA === "clasificacion" || CATEGORIA === "clasificacion-champions";
-      if(esVistaClasificacion){
-        document.getElementById("grid").style.display = "none";
-        await cargarClasificacion(CATEGORIA === "clasificacion-champions" ? "champions" : "liga");
-        return;
-      }
-
-      try{
-        const r = await fetch("/api/noticias");
-        const datos = await r.json();
-        NOTICIAS_ACTUALES = datos.noticias.filter(n => n.categoria === CATEGORIA);
-        document.getElementById("hora-actualizado").textContent =
-          "ACTUALIZADO " + (formatearFecha(datos.actualizado) || "—");
-
-        const grid = document.getElementById("grid");
-
-        if(!NOTICIAS_ACTUALES.length){
-          grid.innerHTML = '<p class="estado">Todavía no hay noticias guardadas en esta categoría.</p>';
-          return;
-        }
-
-        grid.innerHTML = NOTICIAS_ACTUALES.map((n, i) => `
-          <div class="card">
-            <div class="card-img">${ilustracionCategoria(n.categoria)}</div>
-            <div class="card-body">
-              <span class="tag ${n.categoria}">${ETIQUETAS[n.categoria] || n.categoria}</span>
-              <h3 class="headline-font">${n.titular}</h3>
-              <p class="teaser">${n.resumen}</p>
-              <p class="teaser" style="font-size:12px; opacity:.65;">${formatearFecha(n.publicado_en)}</p>
-              <div class="acciones">
-                ${botonLikeHtml(n)}
-                <button class="btn-compartir" onclick="compartirPorId(${n.id})">Compartir</button>
-              </div>
-              <button class="leer-mas" onclick="abrirModal(${i})">Leer más →</button>
-            </div>
-          </div>
-        `).join("");
-
-        // Si se ha entrado con un enlace compartido (?n=ID), abre esa noticia directamente
-        if(ID_COMPARTIDO){
-          const idx = NOTICIAS_ACTUALES.findIndex(n => String(n.id) === String(ID_COMPARTIDO));
-          if(idx >= 0) abrirModal(idx);
-        }
-
-      }catch(e){
-        document.getElementById("grid").innerHTML = '<p class="estado">No se pudieron cargar las noticias. Revisa que /api/noticias esté desplegado.</p>';
-      }
-    }
-
-    cargar();
-  </script>
-</body>
-</html>
+        localSt
