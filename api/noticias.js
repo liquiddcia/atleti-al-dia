@@ -1,11 +1,9 @@
 const supabase = require("../lib/supabase");
-const { imagenJugador } = require("../lib/jugadores");
 
 module.exports = async function handler(req, res) {
   const { data, error } = await supabase
     .from("noticias")
-    .select("id, categoria, titular, resumen, cuerpo, publicado_en, likes, imagen_url")
-    .eq("oculta", false)
+    .select("id, categoria, titular, resumen, cuerpo, publicado_en, likes")
     .order("publicado_en", { ascending: false })
     .limit(60);
 
@@ -21,8 +19,6 @@ module.exports = async function handler(req, res) {
     cuerpo: n.cuerpo,
     publicado_en: n.publicado_en,
     likes: n.likes || 0,
-    // Prioridad: imagen puesta a mano > imagen del jugador mencionado > (el frontend usa la de la categoría)
-    imagen_url: n.imagen_url || imagenJugador(n.titular, n.resumen) || null,
   }));
 
   res.setHeader("Cache-Control", "s-maxage=300");
