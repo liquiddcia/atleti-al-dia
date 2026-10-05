@@ -78,6 +78,7 @@
   table.tabla-clasif tr.fila-lider td:nth-child(2)::after{ content:" 👑"; }
   table.tabla-clasif tr.fila-atleti{ background:rgba(210,18,46,.07); }
   table.tabla-clasif tr.fila-atleti td:nth-child(2){ color:var(--red-dark); }
+  .eq{ display:inline-flex; align-items:center; gap:8px; } .eq img{ width:22px; height:22px; object-fit:contain; }
   .clasif-leyenda{ display:flex; flex-wrap:wrap; gap:14px; padding:12px 16px 16px; font-family:'Barlow Condensed',sans-serif; font-size:12px; color:var(--grey); }
   .clasif-leyenda span{ display:flex; align-items:center; gap:6px; }
   .clasif-leyenda i{ width:10px; height:10px; border-radius:50%; display:inline-block; }
@@ -367,11 +368,14 @@
       const total = tabla.length;
       const filas = tabla.map(f => {
         const zona = tipo === "liga" ? claseZonaLiga(f.posicion, total) : claseZonaChampions(f.posicion);
-        const atleti = esAtletico(f.equipo) ? " fila-atleti" : "";
+        const esA = esAtletico(f.equipo);
+        const atleti = esA ? " fila-atleti" : "";
+        const nombre = esA ? "Atlético de Madrid" : f.equipo;
+        const escudo = esA ? "/escudos/escudoB.png" : f.escudo;
         return `
           <tr class="${zona}${atleti}">
             <td class="pos">${f.posicion}</td>
-            <td>${esAtletico(f.equipo) ? "Atlético de Madrid" : f.equipo}</td>
+            <td><span class="eq">${escudo ? `<img src="${escudo}" alt="" loading="lazy">` : ""}${nombre}</span></td>
             <td>${f.pj}</td>
             <td>${f.pg}</td>
             <td>${f.pe}</td>
