@@ -3,7 +3,8 @@ const supabase = require("../lib/supabase");
 module.exports = async function handler(req, res) {
   const { data, error } = await supabase
     .from("noticias")
-    .select("id, categoria, titular, resumen, cuerpo, publicado_en, likes")
+    .select("id, categoria, titular, resumen, cuerpo, publicado_en, likes, imagen_url")
+    .eq("oculta", false)
     .order("publicado_en", { ascending: false })
     .limit(60);
 
@@ -19,6 +20,7 @@ module.exports = async function handler(req, res) {
     cuerpo: n.cuerpo,
     publicado_en: n.publicado_en,
     likes: n.likes || 0,
+    imagen_url: n.imagen_url || null,
   }));
 
   res.setHeader("Cache-Control", "s-maxage=300");
