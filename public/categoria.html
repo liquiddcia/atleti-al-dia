@@ -346,7 +346,7 @@
     // ---------- Clasificación ----------
     function esAtletico(nombreEquipo){
       const n = nombreEquipo.toLowerCase();
-      return n.includes("atlético") || n.includes("atletico");
+        return n.includes("atlético") || n.includes("atletico") || n.includes("atleti");
     }
 
     function claseZonaLiga(pos, total){
@@ -371,7 +371,7 @@
         return `
           <tr class="${zona}${atleti}">
             <td class="pos">${f.posicion}</td>
-            <td>${f.equipo}</td>
+            <td>${esAtletico(f.equipo) ? "Atlético de Madrid" : f.equipo}</td>
             <td>${f.pj}</td>
             <td>${f.pg}</td>
             <td>${f.pe}</td>
