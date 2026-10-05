@@ -32,22 +32,45 @@
   .nav-dropdown{ position:relative; }
   .nav-dropdown-btn{ background:none; border:none; border-bottom:3px solid transparent; font:inherit; font-family:'Barlow Condensed',sans-serif; font-weight:700; font-size:14px; letter-spacing:.03em; text-transform:uppercase; color:var(--ink); padding:10px 14px; cursor:pointer; }
   .nav-dropdown-btn:hover{ color:var(--red-dark); }
-  .nav-dropdown-btn.activo{ color:var(--red-dark); border-bottom-color:var(--red); }
   .nav-dropdown-menu{ display:none; position:absolute; top:100%; left:0; background:var(--paper); border:1px solid var(--line); min-width:170px; box-shadow:0 8px 18px rgba(0,0,0,.12); z-index:30; }
   .nav-dropdown.abierto .nav-dropdown-menu{ display:block; }
   .nav-dropdown-menu a{ display:block; padding:10px 14px; font-size:13px; border-bottom:1px solid var(--line); }
   .nav-dropdown-menu a:last-child{ border-bottom:none; }
   .nav-dropdown-menu a:hover{ background:var(--cream); }
-  .nav-dropdown-menu a.activo{ color:var(--red-dark); }
 
+  .ticker{ background:var(--navy); color:#fff; font-family:'Barlow Condensed',sans-serif; font-weight:600; font-size:13px; padding:8px 20px; overflow:hidden; white-space:nowrap; }
+  .ticker-inner{ max-width:1080px; margin:0 auto; display:flex; gap:26px; }
+  .ticker b{ color:var(--gold); }
   main{ max-width:1080px; margin:0 auto; padding:22px 20px 60px; }
-  .cat-head{ display:flex; align-items:center; gap:12px; margin-bottom:22px; }
-  .cat-head .ribbon{ margin:0; }
-  .cat-head h1.headline-font{ font-size:clamp(22px,3.6vw,32px); margin:0; text-transform:uppercase; }
 
-  .ribbon{ display:inline-block; font-family:'Barlow Condensed',sans-serif; font-weight:700; font-size:13px; letter-spacing:.03em; background:var(--red); color:#fff; padding:4px 10px 5px; border-radius:2px; text-transform:uppercase; }
+  /* Cara a cara configurable */
+  .matchup{ background:var(--paper); border:1px solid var(--line); padding:20px 24px 24px; margin-bottom:30px; }
+  .matchup-head{ display:flex; flex-wrap:wrap; align-items:center; gap:12px; margin-bottom:18px; }
+  .matchup-when{ font-family:'Barlow Condensed',sans-serif; font-weight:600; font-size:13.5px; color:var(--grey); }
+  .matchup-teams{ display:flex; align-items:center; justify-content:center; gap:34px; padding:6px 0 22px; }
+  .team{ display:flex; flex-direction:column; align-items:center; gap:8px; width:150px; }
+  .crest{ width:104px; height:auto; }
+  .team-name{ font-family:'Barlow Condensed',sans-serif; font-weight:700; font-size:15px; text-align:center; }
+  .vs-mark{ font-family:'Barlow Condensed',sans-serif; font-weight:800; font-size:22px; color:var(--grey); }
+  .lineups{ display:grid; grid-template-columns:1fr 1fr; gap:30px; border-top:1px solid var(--line); padding-top:18px; }
+  .lineup-title{ font-family:'Barlow Condensed',sans-serif; font-weight:700; font-size:14.5px; text-transform:uppercase; letter-spacing:.02em; margin:0 0 10px; }
+  .lineup-list{ list-style:none; margin:0; padding:0; font-size:14.5px; }
+  .lineup-list li{ display:flex; justify-content:space-between; padding:5px 0; border-bottom:1px dashed var(--line); }
+  .lineup-list li span{ font-family:'Barlow Condensed',sans-serif; font-weight:600; color:var(--grey); font-size:12px; }
+  .lineup-note{ font-family:'Barlow Condensed',sans-serif; font-size:12.5px; color:var(--grey); margin:14px 0 0; }
+  @media (max-width:640px){ .lineups{ grid-template-columns:1fr; } .matchup-teams{ gap:20px; } .team{ width:120px; } }
+
+  /* Portada / hero dinámico */
+  .hero{ position:relative; border-radius:2px; overflow:hidden; margin-bottom:26px; color:#fff; min-height:260px; display:flex; align-items:flex-end; }
+  .hero-illustration{ position:absolute; inset:0; }
+  .hero-scrim{ position:absolute; inset:0; background:linear-gradient(0deg, rgba(10,10,14,.92) 0%, rgba(10,10,14,.35) 55%, rgba(10,10,14,.05) 100%); }
+  .hero-content{ position:relative; padding:26px 28px 24px; max-width:640px; }
+  .ribbon{ display:inline-block; font-family:'Barlow Condensed',sans-serif; font-weight:700; font-size:13px; letter-spacing:.03em; background:var(--red); color:#fff; padding:4px 10px 5px; border-radius:2px; margin-bottom:10px; text-transform:uppercase; }
   .ribbon.champions{ background:var(--navy); } .ribbon.previa{ background:var(--grey); } .ribbon.fichajes{ background:var(--gold); color:#1c1608; } .ribbon.clasificacion{ background:var(--ink); } .ribbon.filial{ background:var(--teal); } .ribbon.femenino{ background:var(--plum); }
+  .hero h1.headline-font{ font-size:clamp(26px,4.2vw,40px); line-height:1.04; margin:0 0 10px; text-transform:uppercase; }
+  .hero p.dek{ font-family:'Barlow',sans-serif; font-size:16px; max-width:56ch; opacity:.94; margin:0; }
 
+  /* Grid de tarjetas */
   .grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:22px; }
   .card{ background:var(--paper); border:1px solid var(--line); display:flex; flex-direction:column; }
   .card-img{ height:140px; position:relative; }
@@ -57,47 +80,18 @@
   .tag.previa{ background:var(--grey); } .tag.fichajes{ background:var(--gold); color:#1c1608; } .tag.clasificacion{ background:var(--ink); } .tag.filial{ background:var(--teal); } .tag.femenino{ background:var(--plum); }
   .card h3.headline-font{ font-size:19px; line-height:1.08; margin:0; text-transform:uppercase; }
   .card p.teaser{ font-size:14.5px; color:#33343a; margin:0; line-height:1.4; }
-  .card .leer-mas{ margin-top:auto; font-family:'Barlow Condensed',sans-serif; font-weight:700; font-size:12px; color:var(--red-dark); padding-top:6px; border-top:1px dashed var(--line); background:none; border:none; text-align:left; cursor:pointer; }
+  .card .leer-mas{ margin-top:auto; font-family:'Barlow Condensed',sans-serif; font-weight:700; font-size:12px; color:var(--red-dark); padding-top:6px; border-top:1px dashed var(--line); background:none; border:none; border-top:1px dashed var(--line); text-align:left; cursor:pointer; }
   .estado{ font-family:'Barlow Condensed',sans-serif; color:var(--grey); padding:40px 0; text-align:center; }
-
-  /* Tabla de clasificación */
-  .clasif-wrap{ background:var(--paper); border:1px solid var(--line); margin-bottom:30px; overflow-x:auto; }
-  .clasif-actualizado{ font-family:'Barlow Condensed',sans-serif; font-size:12px; color:var(--grey); padding:10px 16px 0; }
-  table.tabla-clasif{ width:100%; border-collapse:collapse; font-family:'Barlow Condensed',sans-serif; min-width:560px; }
-  table.tabla-clasif th{ font-size:11.5px; font-weight:700; text-transform:uppercase; letter-spacing:.02em; color:var(--grey); text-align:center; padding:10px 6px; border-bottom:2px solid var(--ink); }
-  table.tabla-clasif th:nth-child(2){ text-align:left; }
-  table.tabla-clasif td{ font-size:14px; font-weight:600; text-align:center; padding:8px 6px; border-bottom:1px solid var(--line); }
-  table.tabla-clasif td:nth-child(2){ text-align:left; font-weight:700; }
-  table.tabla-clasif td.pts{ font-weight:800; }
-  table.tabla-clasif td.pos{ position:relative; width:26px; }
-  table.tabla-clasif tr.fila-ucl td.pos{ box-shadow: inset 4px 0 0 var(--navy); }
-  table.tabla-clasif tr.fila-uel td.pos{ box-shadow: inset 4px 0 0 var(--teal); }
-  table.tabla-clasif tr.fila-uecl td.pos{ box-shadow: inset 4px 0 0 var(--gold); }
-  table.tabla-clasif tr.fila-descenso td.pos{ box-shadow: inset 4px 0 0 var(--red); }
-  table.tabla-clasif tr.fila-eliminado{ opacity:.55; }
-  table.tabla-clasif tr.fila-lider td:nth-child(2)::after{ content:" 👑"; }
-  table.tabla-clasif tr.fila-atleti{ background:rgba(210,18,46,.07); }
-  table.tabla-clasif tr.fila-atleti td:nth-child(2){ color:var(--red-dark); }
-  .eq{ display:inline-flex; align-items:center; gap:8px; } .eq img{ width:22px; height:22px; object-fit:contain; }
-  .cal-titulo{ font-family:'Barlow Condensed',sans-serif; font-weight:800; font-size:18px; text-transform:uppercase; margin:22px 0 10px; }
-  .partido{ background:var(--paper); border:1px solid var(--line); padding:12px 16px; margin-bottom:8px; }
-  .partido.proximo{ border-left:4px solid var(--red); }
-  .p-meta{ font-family:'Barlow Condensed',sans-serif; font-size:12.5px; color:var(--grey); margin-bottom:8px; text-transform:capitalize; }
-  .p-eq{ display:grid; grid-template-columns:1fr auto 1fr; align-items:center; gap:12px; font-family:'Barlow Condensed',sans-serif; font-weight:700; font-size:16px; }
-  .p-eq .local{ text-align:right; } .p-eq .visit{ text-align:left; }
-  .p-eq .marcador{ font-weight:800; font-size:18px; min-width:56px; text-align:center; color:var(--ink); }
-  .p-eq .es-atleti{ color:var(--red-dark); }
-  .clasif-leyenda{ display:flex; flex-wrap:wrap; gap:14px; padding:12px 16px 16px; font-family:'Barlow Condensed',sans-serif; font-size:12px; color:var(--grey); }
-  .clasif-leyenda span{ display:flex; align-items:center; gap:6px; }
-  .clasif-leyenda i{ width:10px; height:10px; border-radius:50%; display:inline-block; }
-  .clasif-leyenda i.ucl{ background:var(--navy); } .clasif-leyenda i.uel{ background:var(--teal); } .clasif-leyenda i.uecl{ background:var(--gold); } .clasif-leyenda i.descenso{ background:var(--red); }
 
   /* Acciones: me gusta y compartir */
   .acciones{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
   .btn-like, .btn-compartir{ font-family:'Barlow Condensed',sans-serif; font-weight:700; font-size:12.5px; background:none; border:1px solid var(--line); border-radius:20px; padding:4px 10px; cursor:pointer; color:var(--grey); }
   .btn-like:hover, .btn-compartir:hover{ border-color:var(--red-dark); color:var(--red-dark); }
   .btn-like.activo{ color:var(--red); border-color:var(--red); background:rgba(210,18,46,.08); }
+  .hero .acciones .btn-like, .hero .acciones .btn-compartir{ border-color:rgba(255,255,255,.5); color:#fff; }
+  .hero .acciones .btn-like.activo{ color:#fff; border-color:var(--red); background:rgba(210,18,46,.55); }
 
+  /* Modal de noticia completa */
   .modal-overlay{ position:fixed; inset:0; background:rgba(10,10,14,.6); display:none; align-items:flex-start; justify-content:center; padding: 5vh 16px; z-index:50; overflow-y:auto; }
   .modal-overlay.abierto{ display:flex; }
   .modal-box{ background:var(--paper); max-width:640px; width:100%; margin-bottom:40px; }
@@ -126,7 +120,7 @@
   footer b{ color:var(--ink); }
 
   @media (max-width:860px){ .grid{ grid-template-columns:repeat(2,1fr); } }
-  @media (max-width:560px){ .grid{ grid-template-columns:1fr; } }
+  @media (max-width:560px){ .grid{ grid-template-columns:1fr; } .hero h1.headline-font{ font-size:24px; } }
 </style>
 </head>
 <body>
@@ -142,44 +136,60 @@
   <div class="strapline-bar">EL DIARIO COLCHONERO — NOTICIAS DEL ATLÉTICO DE MADRID</div>
 
   <nav class="navmenu">
-    <div class="navmenu-inner" id="navmenu-inner">
-      <a href="index.html">Portada</a>
+    <div class="navmenu-inner">
+      <a href="index.html" class="activo">Portada</a>
 
       <div class="nav-dropdown" id="dropdown-liga">
         <button class="nav-dropdown-btn" type="button">Liga ▾</button>
         <div class="nav-dropdown-menu">
-          <a href="categoria.html?cat=liga" data-cat="liga">Noticias</a>
-          <a href="categoria.html?cat=clasificacion" data-cat="clasificacion">Clasificación</a>
-          <a href="categoria.html?cat=calendario-liga" data-cat="calendario-liga">Calendario</a>
+          <a href="categoria.html?cat=liga">Noticias</a>
+          <a href="categoria.html?cat=clasificacion">Clasificación</a>
+          <a href="categoria.html?cat=calendario-liga">Calendario</a>
         </div>
       </div>
 
       <div class="nav-dropdown" id="dropdown-champions">
         <button class="nav-dropdown-btn" type="button">Champions ▾</button>
         <div class="nav-dropdown-menu">
-          <a href="categoria.html?cat=champions" data-cat="champions">Noticias</a>
-          <a href="categoria.html?cat=clasificacion-champions" data-cat="clasificacion-champions">Clasificación</a>
-          <a href="categoria.html?cat=calendario-champions" data-cat="calendario-champions">Calendario</a>
+          <a href="categoria.html?cat=champions">Noticias</a>
+          <a href="categoria.html?cat=clasificacion-champions">Clasificación</a>
+          <a href="categoria.html?cat=calendario-champions">Calendario</a>
         </div>
       </div>
 
-      <a href="categoria.html?cat=previa" data-cat="previa">Previa</a>
-      <a href="categoria.html?cat=fichajes" data-cat="fichajes">Mercado</a>
-      <a href="categoria.html?cat=filial" data-cat="filial">Filial</a>
-      <a href="categoria.html?cat=femenino" data-cat="femenino">Femenino</a>
+      <a href="categoria.html?cat=previa">Previa</a>
+      <a href="categoria.html?cat=fichajes">Mercado</a>
+      <a href="categoria.html?cat=filial">Filial</a>
+      <a href="categoria.html?cat=femenino">Femenino</a>
     </div>
   </nav>
 
-  <main>
-    <div class="cat-head">
-      <span class="ribbon" id="cat-ribbon">Categoría</span>
-      <h1 class="headline-font" id="cat-titulo">Cargando…</h1>
+  <div class="ticker">
+    <div class="ticker-inner" id="ticker-inner">
+      <span>Cargando última hora…</span>
     </div>
-    <div id="clasificacion-slot"></div>
+  </div>
+
+  <main>
+
+    <!--
+      CARA A CARA — esto es manual a propósito: no hay una fuente de datos
+      automática fiable para alineaciones/convocatorias, así que se edita
+      aquí a mano antes de cada partido importante. Cambia estos valores
+      y el rival/hora/escudos se actualizan solos abajo.
+    -->
+    <section class="matchup" id="matchup" data-equipo-local="Alavés"
+      data-escudo-local="/escudos/escudoA.png" data-equipo-visitante="Atlético de Madrid"
+      data-escudo-visitante="/escudos/escudoB.png" data-cuando="Sábado 10 de octubre, 16:15h · Mendizorroza">
+      <!-- El contenido real se rellena por JS a partir de los data-* de arriba -->
+    </section>
+
+    <div id="hero-slot"></div>
 
     <div class="grid" id="grid">
       <p class="estado">Cargando noticias…</p>
     </div>
+
   </main>
   <footer style="max-width:1080px;margin:0 auto;padding:10px 20px 50px;color:#55565C;font-size:13px;text-align:center;border-top:1px solid rgba(20,21,26,.13)">
     <p>Diario Colchonero · Independiente, no afiliado al Atlético de Madrid.</p>
@@ -215,12 +225,31 @@
   </div>
 
   <script>
-    const ETIQUETAS = { liga:"Liga", champions:"Champions", previa:"Previa", fichajes:"Mercado", clasificacion:"Clasificación", filial:"Filial", femenino:"Femenino", "clasificacion-champions":"Clasificación Champions", "calendario-liga":"Calendario Liga", "calendario-champions":"Calendario Champions" };
-    function claseRibbon(cat){ return cat.includes("champions") ? "champions" : (cat.startsWith("calendario") ? "liga" : cat); }
+    const ETIQUETAS = { liga:"Liga", champions:"Champions", previa:"Previa", fichajes:"Mercado", clasificacion:"Clasificación", filial:"Filial", femenino:"Femenino" };
+    // La portada solo muestra las categorías del primer equipo. Filial y Femenino
+    // tienen su propia página (categoria.html) enlazada desde el menú.
+    const CATEGORIAS_PORTADA = ["liga", "champions", "previa", "fichajes", "clasificacion"];
+    // Máximo de noticias en portada (garantizando al menos 1 de cada sección que tenga noticias)
+    const TOTAL_PORTADA = 8;
 
-    const params = new URLSearchParams(window.location.search);
-    const CATEGORIA = params.get("cat") || "liga";
-    const ID_COMPARTIDO = params.get("n");
+    function pintarMatchup(){
+      const el = document.getElementById("matchup");
+      const local = el.dataset.equipoLocal, visitante = el.dataset.equipoVisitante;
+      const escudoLocal = el.dataset.escudoLocal, escudoVisitante = el.dataset.escudoVisitante;
+      const cuando = el.dataset.cuando;
+
+      el.innerHTML = `
+        <div class="matchup-head">
+          <span class="ribbon previa" style="margin:0;">Próxima Jornada</span>
+          <span class="matchup-when">${cuando}</span>
+        </div>
+        <div class="matchup-teams">
+          <div class="team"><img src="${escudoLocal}" class="crest" alt="${local}"><span class="team-name">${local}</span></div>
+          <div class="vs-mark">VS</div>
+          <div class="team"><img src="${escudoVisitante}" class="crest" alt="${visitante}"><span class="team-name">${visitante}</span></div>
+        </div>
+      `;
+    }
 
     function ilustracionCategoria(cat){
       const imagenes = {
@@ -360,144 +389,6 @@
       }
     }
 
-    // ---------- Clasificación ----------
-    function esAtletico(nombreEquipo){
-      const n = nombreEquipo.toLowerCase();
-      return n.includes("atlético") || n.includes("atletico") || n.includes("atleti");
-    }
-
-    function claseZonaLiga(pos, total){
-      if(pos === 1) return "fila-lider fila-ucl";
-      if(pos <= 4) return "fila-ucl";
-      if(pos === 5) return "fila-uel";
-      if(pos === 6) return "fila-uecl";
-      if(pos > total - 3) return "fila-descenso";
-      return "";
-    }
-    function claseZonaChampions(pos){
-      if(pos <= 8) return "fila-ucl";
-      if(pos <= 24) return "fila-uecl";
-      return "fila-eliminado";
-    }
-
-    function renderizarClasificacion(tabla, tipo){
-      const total = tabla.length;
-      const filas = tabla.map(f => {
-        const zona = tipo === "liga" ? claseZonaLiga(f.posicion, total) : claseZonaChampions(f.posicion);
-        const esA = esAtletico(f.equipo);
-        const atleti = esA ? " fila-atleti" : "";
-        const nombre = esA ? "Atlético de Madrid" : f.equipo;
-        const escudo = esA ? "/escudos/escudoB.png" : f.escudo;
-        return `
-          <tr class="${zona}${atleti}">
-            <td class="pos">${f.posicion}</td>
-            <td><span class="eq">${escudo ? `<img src="${escudo}" alt="" loading="lazy">` : ""}${nombre}</span></td>
-            <td>${f.pj}</td>
-            <td>${f.pg}</td>
-            <td>${f.pe}</td>
-            <td>${f.pp}</td>
-            <td>${f.gf}</td>
-            <td>${f.gc}</td>
-            <td>${f.dg}</td>
-            <td class="pts">${f.pts}</td>
-          </tr>`;
-      }).join("");
-
-      const leyenda = tipo === "liga"
-        ? `<div class="clasif-leyenda">
-             <span><i class="ucl"></i>Champions League</span>
-             <span><i class="uel"></i>Europa League</span>
-             <span><i class="uecl"></i>Conference League</span>
-             <span><i class="descenso"></i>Descenso</span>
-           </div>`
-        : `<div class="clasif-leyenda">
-             <span><i class="ucl"></i>Octavos directos</span>
-             <span><i class="uecl"></i>Repesca (playoff)</span>
-             <span>Sin color: eliminado</span>
-           </div>`;
-
-      return `
-        <div class="clasif-wrap">
-          <table class="tabla-clasif">
-            <thead>
-              <tr>
-                <th></th><th>Equipo</th><th>PJ</th><th>PG</th><th>PE</th><th>PP</th><th>GF</th><th>GC</th><th>DG</th><th>Pts</th>
-              </tr>
-            </thead>
-            <tbody>${filas}</tbody>
-          </table>
-          ${leyenda}
-        </div>`;
-    }
-
-    async function cargarClasificacion(tipo){
-      const slot = document.getElementById("clasificacion-slot");
-      slot.innerHTML = '<p class="estado">Cargando clasificación…</p>';
-      try{
-        const r = await fetch("/api/clasificacion");
-        const datos = await r.json();
-        const entrada = datos[tipo];
-        if(!entrada || !entrada.tabla || !entrada.tabla.length){
-          slot.innerHTML = '<p class="estado">Clasificación no disponible todavía.</p>';
-          return;
-        }
-        document.getElementById("hora-actualizado").textContent =
-          "ACTUALIZADO " + (formatearFecha(entrada.actualizado_en) || "—");
-        slot.innerHTML =
-          `<p class="clasif-actualizado">Actualizado ${formatearFecha(entrada.actualizado_en)}</p>` +
-          renderizarClasificacion(entrada.tabla, tipo);
-      }catch(e){
-        slot.innerHTML = '<p class="estado">No se pudo cargar la clasificación.</p>';
-      }
-    }
-
-    function nombreEq(n){ return esAtletico(n) ? "Atlético de Madrid" : n; }
-    function escudoEq(n, url){ const u = esAtletico(n) ? "/escudos/escudoB.png" : url; return u ? `<img src="${u}" alt="" loading="lazy" style="width:22px;height:22px;object-fit:contain;vertical-align:middle;">` : ""; }
-
-    function filaPartido(p, proximo){
-      const fecha = new Date(p.fecha).toLocaleString("es-ES", { weekday:"short", day:"numeric", month:"short", hour:"2-digit", minute:"2-digit", timeZone:"Europe/Madrid" });
-      const marcador = p.estado === "FINISHED" ? `${p.golesLocal} - ${p.golesVisitante}` : (p.estado === "POSTPONED" ? "Aplazado" : "vs");
-      const jornada = p.jornada ? ` · J${p.jornada}` : "";
-      return `
-        <div class="partido${proximo ? " proximo" : ""}">
-          <div class="p-meta">${fecha} · ${p.competicion}${jornada}</div>
-          <div class="p-eq">
-            <span class="local ${esAtletico(p.local) ? "es-atleti" : ""}">${nombreEq(p.local)} ${escudoEq(p.local, p.localEscudo)}</span>
-            <span class="marcador">${marcador}</span>
-            <span class="visit ${esAtletico(p.visitante) ? "es-atleti" : ""}">${escudoEq(p.visitante, p.visitanteEscudo)} ${nombreEq(p.visitante)}</span>
-          </div>
-        </div>`;
-    }
-
-    async function cargarCalendario(cat){
-      const slot = document.getElementById("clasificacion-slot");
-      slot.innerHTML = '<p class="estado">Cargando calendario…</p>';
-      try{
-        const r = await fetch("/api/clasificacion");
-        const datos = await r.json();
-        const entrada = datos.calendario;
-        if(!entrada || !entrada.tabla || !entrada.tabla.length){
-          slot.innerHTML = '<p class="estado">Calendario no disponible todavía.</p>';
-          return;
-        }
-        document.getElementById("hora-actualizado").textContent =
-          "ACTUALIZADO " + (formatearFecha(entrada.actualizado_en) || "—");
-        const esChampions = cat === "calendario-champions";
-        const todos = entrada.tabla.filter(p => esChampions
-          ? (p.codigoCompeticion === "CL" || /champions/i.test(p.competicion || ""))
-          : (p.codigoCompeticion === "PD" || /primera|liga/i.test(p.competicion || "")));
-        const proximos = todos.filter(p => p.estado !== "FINISHED").sort((a,b) => new Date(a.fecha) - new Date(b.fecha));
-        const jugados = todos.filter(p => p.estado === "FINISHED").sort((a,b) => new Date(b.fecha) - new Date(a.fecha));
-        slot.innerHTML =
-          `<h2 class="cal-titulo">Próximos partidos</h2>` +
-          (proximos.length ? proximos.map((p,i) => filaPartido(p, i === 0)).join("") : '<p class="estado">No hay partidos programados.</p>') +
-          `<h2 class="cal-titulo">Resultados</h2>` +
-          (jugados.length ? jugados.map(p => filaPartido(p, false)).join("") : '<p class="estado">Aún no hay resultados.</p>');
-      }catch(e){
-        slot.innerHTML = '<p class="estado">No se pudo cargar el calendario.</p>';
-      }
-    }
-
     let NOTICIAS_ACTUALES = [];
 
     function abrirModal(indice){
@@ -529,18 +420,14 @@
       };
 
       document.getElementById("modal-overlay").classList.add("abierto");
-      history.replaceState(null, "", `categoria.html?cat=${CATEGORIA}&n=${n.id}`);
     }
-    function cerrarModal(){
-      document.getElementById("modal-overlay").classList.remove("abierto");
-      history.replaceState(null, "", `categoria.html?cat=${CATEGORIA}`);
-    }
+    function cerrarModal(){ document.getElementById("modal-overlay").classList.remove("abierto"); }
     document.getElementById("modal-close").addEventListener("click", cerrarModal);
     document.getElementById("modal-overlay").addEventListener("click", (e) => {
       if(e.target.id === "modal-overlay") cerrarModal();
     });
 
-    // Abrir/cerrar los desplegables del menú (tap-friendly, sirve también en móvil)
+    // Abrir/cerrar el desplegable de Liga (tap-friendly, sirve también en móvil)
     document.querySelectorAll(".nav-dropdown-btn").forEach(btn => {
       btn.addEventListener("click", (e) => {
         e.stopPropagation();
@@ -555,51 +442,66 @@
     });
 
     async function cargar(){
+      pintarMatchup();
       document.getElementById("fecha-hoy").textContent =
         new Date().toLocaleDateString("es-ES", { weekday:"long", day:"numeric", month:"long", year:"numeric" }).toUpperCase();
-
-      // Resalta en el menú la categoría activa (y su desplegable padre, si lo tiene)
-      const link = document.querySelector(`.navmenu a[data-cat="${CATEGORIA}"]`);
-      if(link){
-        link.classList.add("activo");
-        const dropdownPadre = link.closest(".nav-dropdown");
-        if(dropdownPadre) dropdownPadre.querySelector(".nav-dropdown-btn").classList.add("activo");
-      }
-
-      document.getElementById("cat-titulo").textContent = ETIQUETAS[CATEGORIA] || CATEGORIA;
-      const ribbon = document.getElementById("cat-ribbon");
-      ribbon.textContent = ETIQUETAS[CATEGORIA] || CATEGORIA;
-      ribbon.className = "ribbon " + claseRibbon(CATEGORIA);
-
-      // "Clasificación" (Liga) y "Champions" muestran solo la tabla, sin grid de noticias
-      if(CATEGORIA === "calendario-liga" || CATEGORIA === "calendario-champions"){
-        document.getElementById("grid").style.display = "none";
-        await cargarCalendario(CATEGORIA);
-        return;
-      }
-
-      const esVistaClasificacion = CATEGORIA === "clasificacion" || CATEGORIA === "clasificacion-champions";
-      if(esVistaClasificacion){
-        document.getElementById("grid").style.display = "none";
-        await cargarClasificacion(CATEGORIA === "clasificacion-champions" ? "champions" : "liga");
-        return;
-      }
 
       try{
         const r = await fetch("/api/noticias");
         const datos = await r.json();
-        NOTICIAS_ACTUALES = datos.noticias.filter(n => n.categoria === CATEGORIA);
+
+        // Al menos 1 de cada sección (la más reciente de esa sección),
+        // y rellena el resto de huecos con las más recientes en general
+        // hasta un máximo de TOTAL_PORTADA. Nada se duplica: es la misma
+        // lista de noticias, solo elegida con este criterio.
+        const porCategoria = {};
+        datos.noticias.forEach(n => {
+          if (!CATEGORIAS_PORTADA.includes(n.categoria)) return;
+          if (!porCategoria[n.categoria]) porCategoria[n.categoria] = n;
+        });
+        const destacadas = Object.values(porCategoria);
+        const yaIncluidas = new Set(destacadas.map(n => n.titular));
+        const resto = datos.noticias.filter(n =>
+          CATEGORIAS_PORTADA.includes(n.categoria) && !yaIncluidas.has(n.titular)
+        );
+        const extra = resto.slice(0, Math.max(0, TOTAL_PORTADA - destacadas.length));
+        NOTICIAS_ACTUALES = [...destacadas, ...extra]
+          .sort((a, b) => new Date(b.publicado_en) - new Date(a.publicado_en));
+
         document.getElementById("hora-actualizado").textContent =
           "ACTUALIZADO " + (formatearFecha(datos.actualizado) || "—");
 
         const grid = document.getElementById("grid");
+        const heroSlot = document.getElementById("hero-slot");
+        const ticker = document.getElementById("ticker-inner");
 
         if(!NOTICIAS_ACTUALES.length){
-          grid.innerHTML = '<p class="estado">Todavía no hay noticias guardadas en esta categoría.</p>';
+          grid.innerHTML = '<p class="estado">Todavía no hay noticias guardadas. Ejecuta /api/actualizar una vez (o espera al próximo cron).</p>';
+          heroSlot.innerHTML = "";
+          ticker.innerHTML = "<span>Sin noticias todavía</span>";
           return;
         }
 
-        grid.innerHTML = NOTICIAS_ACTUALES.map((n, i) => `
+        ticker.innerHTML = NOTICIAS_ACTUALES.slice(0,4).map(n => `<span>${n.titular}</span>`).join("");
+
+        const [primera, ...resto2] = NOTICIAS_ACTUALES;
+        heroSlot.innerHTML = `
+          <div class="hero">
+            <div class="hero-illustration">${ilustracionCategoria(primera.categoria)}</div>
+            <div class="hero-scrim"></div>
+            <div class="hero-content">
+              <span class="ribbon ${primera.categoria}">${ETIQUETAS[primera.categoria] || primera.categoria}</span>
+              <h1 class="headline-font" style="cursor:pointer;" onclick="abrirModal(0)">${primera.titular}</h1>
+              <p class="dek">${primera.resumen}</p>
+              <p class="dek" style="font-size:13px; opacity:.75; margin:8px 0 14px;">${formatearFecha(primera.publicado_en)}</p>
+              <div class="acciones">
+                ${botonLikeHtml(primera)}
+                <button class="btn-compartir" onclick="event.stopPropagation(); compartirPorId(${primera.id})">Compartir</button>
+              </div>
+            </div>
+          </div>`;
+
+        grid.innerHTML = resto2.map((n, i) => `
           <div class="card">
             <div class="card-img">${ilustracionCategoria(n.categoria)}</div>
             <div class="card-body">
@@ -611,16 +513,10 @@
                 ${botonLikeHtml(n)}
                 <button class="btn-compartir" onclick="compartirPorId(${n.id})">Compartir</button>
               </div>
-              <button class="leer-mas" onclick="abrirModal(${i})">Leer más →</button>
+              <button class="leer-mas" onclick="abrirModal(${i + 1})">Leer más →</button>
             </div>
           </div>
         `).join("");
-
-        // Si se ha entrado con un enlace compartido (?n=ID), abre esa noticia directamente
-        if(ID_COMPARTIDO){
-          const idx = NOTICIAS_ACTUALES.findIndex(n => String(n.id) === String(ID_COMPARTIDO));
-          if(idx >= 0) abrirModal(idx);
-        }
 
       }catch(e){
         document.getElementById("grid").innerHTML = '<p class="estado">No se pudieron cargar las noticias. Revisa que /api/noticias esté desplegado.</p>';
