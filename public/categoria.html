@@ -79,6 +79,14 @@
   table.tabla-clasif tr.fila-atleti{ background:rgba(210,18,46,.07); }
   table.tabla-clasif tr.fila-atleti td:nth-child(2){ color:var(--red-dark); }
   .eq{ display:inline-flex; align-items:center; gap:8px; } .eq img{ width:22px; height:22px; object-fit:contain; }
+  .cal-titulo{ font-family:'Barlow Condensed',sans-serif; font-weight:800; font-size:18px; text-transform:uppercase; margin:22px 0 10px; }
+  .partido{ background:var(--paper); border:1px solid var(--line); padding:12px 16px; margin-bottom:8px; }
+  .partido.proximo{ border-left:4px solid var(--red); }
+  .p-meta{ font-family:'Barlow Condensed',sans-serif; font-size:12.5px; color:var(--grey); margin-bottom:8px; text-transform:capitalize; }
+  .p-eq{ display:grid; grid-template-columns:1fr auto 1fr; align-items:center; gap:12px; font-family:'Barlow Condensed',sans-serif; font-weight:700; font-size:16px; }
+  .p-eq .local{ text-align:right; } .p-eq .visit{ text-align:left; }
+  .p-eq .marcador{ font-weight:800; font-size:18px; min-width:56px; text-align:center; color:var(--ink); }
+  .p-eq .es-atleti{ color:var(--red-dark); }
   .clasif-leyenda{ display:flex; flex-wrap:wrap; gap:14px; padding:12px 16px 16px; font-family:'Barlow Condensed',sans-serif; font-size:12px; color:var(--grey); }
   .clasif-leyenda span{ display:flex; align-items:center; gap:6px; }
   .clasif-leyenda i{ width:10px; height:10px; border-radius:50%; display:inline-block; }
@@ -142,14 +150,16 @@
         <div class="nav-dropdown-menu">
           <a href="categoria.html?cat=liga" data-cat="liga">Noticias</a>
           <a href="categoria.html?cat=clasificacion" data-cat="clasificacion">Clasificación</a>
+          <a href="categoria.html?cat=calendario-liga" data-cat="calendario-liga">Calendario</a>
         </div>
       </div>
 
-           <div class="nav-dropdown" id="dropdown-champions">
+      <div class="nav-dropdown" id="dropdown-champions">
         <button class="nav-dropdown-btn" type="button">Champions ▾</button>
         <div class="nav-dropdown-menu">
           <a href="categoria.html?cat=champions" data-cat="champions">Noticias</a>
           <a href="categoria.html?cat=clasificacion-champions" data-cat="clasificacion-champions">Clasificación</a>
+          <a href="categoria.html?cat=calendario-champions" data-cat="calendario-champions">Calendario</a>
         </div>
       </div>
 
@@ -171,7 +181,7 @@
       <p class="estado">Cargando noticias…</p>
     </div>
   </main>
-    <footer style="max-width:1080px;margin:0 auto;padding:10px 20px 50px;color:#55565C;font-size:13px;text-align:center;border-top:1px solid rgba(20,21,26,.13)">
+  <footer style="max-width:1080px;margin:0 auto;padding:10px 20px 50px;color:#55565C;font-size:13px;text-align:center;border-top:1px solid rgba(20,21,26,.13)">
     <p>Diario Colchonero · Independiente, no afiliado al Atlético de Madrid.</p>
     <p><a href="/sobre-nosotros.html">Quiénes somos</a> · <a href="/privacidad.html">Privacidad</a> · <a href="/cookies.html">Cookies</a> · <a href="/aviso-legal.html">Aviso legal</a> · <a href="/contacto.html">Contacto</a></p>
   </footer>
@@ -205,8 +215,8 @@
   </div>
 
   <script>
-    const ETIQUETAS = { liga:"Liga", champions:"Champions", previa:"Previa", fichajes:"Mercado", clasificacion:"Clasificación", filial:"Filial", femenino:"Femenino", "clasificacion-champions":"Clasificación Champions" };
-    function claseRibbon(cat){ return cat === "clasificacion-champions" ? "champions" : cat; }
+    const ETIQUETAS = { liga:"Liga", champions:"Champions", previa:"Previa", fichajes:"Mercado", clasificacion:"Clasificación", filial:"Filial", femenino:"Femenino", "clasificacion-champions":"Clasificación Champions", "calendario-liga":"Calendario Liga", "calendario-champions":"Calendario Champions" };
+    function claseRibbon(cat){ return cat.includes("champions") ? "champions" : (cat.startsWith("calendario") ? "liga" : cat); }
 
     const params = new URLSearchParams(window.location.search);
     const CATEGORIA = params.get("cat") || "liga";
@@ -353,7 +363,7 @@
     // ---------- Clasificación ----------
     function esAtletico(nombreEquipo){
       const n = nombreEquipo.toLowerCase();
-        return n.includes("atlético") || n.includes("atletico") || n.includes("atleti");
+      return n.includes("atlético") || n.includes("atletico") || n.includes("atleti");
     }
 
     function claseZonaLiga(pos, total){
@@ -441,6 +451,53 @@
       }
     }
 
+    function nombreEq(n){ return esAtletico(n) ? "Atlético de Madrid" : n; }
+    function escudoEq(n, url){ const u = esAtletico(n) ? "/escudos/escudoB.png" : url; return u ? `<img src="${u}" alt="" loading="lazy" style="width:22px;height:22px;object-fit:contain;vertical-align:middle;">` : ""; }
+
+    function filaPartido(p, proximo){
+      const fecha = new Date(p.fecha).toLocaleString("es-ES", { weekday:"short", day:"numeric", month:"short", hour:"2-digit", minute:"2-digit", timeZone:"Europe/Madrid" });
+      const marcador = p.estado === "FINISHED" ? `${p.golesLocal} - ${p.golesVisitante}` : (p.estado === "POSTPONED" ? "Aplazado" : "vs");
+      const jornada = p.jornada ? ` · J${p.jornada}` : "";
+      return `
+        <div class="partido${proximo ? " proximo" : ""}">
+          <div class="p-meta">${fecha} · ${p.competicion}${jornada}</div>
+          <div class="p-eq">
+            <span class="local ${esAtletico(p.local) ? "es-atleti" : ""}">${nombreEq(p.local)} ${escudoEq(p.local, p.localEscudo)}</span>
+            <span class="marcador">${marcador}</span>
+            <span class="visit ${esAtletico(p.visitante) ? "es-atleti" : ""}">${escudoEq(p.visitante, p.visitanteEscudo)} ${nombreEq(p.visitante)}</span>
+          </div>
+        </div>`;
+    }
+
+    async function cargarCalendario(cat){
+      const slot = document.getElementById("clasificacion-slot");
+      slot.innerHTML = '<p class="estado">Cargando calendario…</p>';
+      try{
+        const r = await fetch("/api/clasificacion");
+        const datos = await r.json();
+        const entrada = datos.calendario;
+        if(!entrada || !entrada.tabla || !entrada.tabla.length){
+          slot.innerHTML = '<p class="estado">Calendario no disponible todavía.</p>';
+          return;
+        }
+        document.getElementById("hora-actualizado").textContent =
+          "ACTUALIZADO " + (formatearFecha(entrada.actualizado_en) || "—");
+        const esChampions = cat === "calendario-champions";
+        const todos = entrada.tabla.filter(p => esChampions
+          ? (p.codigoCompeticion === "CL" || /champions/i.test(p.competicion || ""))
+          : (p.codigoCompeticion === "PD" || /primera|liga/i.test(p.competicion || "")));
+        const proximos = todos.filter(p => p.estado !== "FINISHED").sort((a,b) => new Date(a.fecha) - new Date(b.fecha));
+        const jugados = todos.filter(p => p.estado === "FINISHED").sort((a,b) => new Date(b.fecha) - new Date(a.fecha));
+        slot.innerHTML =
+          `<h2 class="cal-titulo">Próximos partidos</h2>` +
+          (proximos.length ? proximos.map((p,i) => filaPartido(p, i === 0)).join("") : '<p class="estado">No hay partidos programados.</p>') +
+          `<h2 class="cal-titulo">Resultados</h2>` +
+          (jugados.length ? jugados.map(p => filaPartido(p, false)).join("") : '<p class="estado">Aún no hay resultados.</p>');
+      }catch(e){
+        slot.innerHTML = '<p class="estado">No se pudo cargar el calendario.</p>';
+      }
+    }
+
     let NOTICIAS_ACTUALES = [];
 
     function abrirModal(indice){
@@ -515,6 +572,12 @@
       ribbon.className = "ribbon " + claseRibbon(CATEGORIA);
 
       // "Clasificación" (Liga) y "Champions" muestran solo la tabla, sin grid de noticias
+      if(CATEGORIA === "calendario-liga" || CATEGORIA === "calendario-champions"){
+        document.getElementById("grid").style.display = "none";
+        await cargarCalendario(CATEGORIA);
+        return;
+      }
+
       const esVistaClasificacion = CATEGORIA === "clasificacion" || CATEGORIA === "clasificacion-champions";
       if(esVistaClasificacion){
         document.getElementById("grid").style.display = "none";
