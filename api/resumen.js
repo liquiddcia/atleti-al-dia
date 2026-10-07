@@ -17,7 +17,7 @@ function construirMensaje(noticias) {
   return (
     `📰 LO MÁS IMPORTANTE DEL ATLETI HOY\n\n` +
     lineas.join("\n\n") +
-    `\n\n🔴⚪ Todas las noticias en ${SITIO}\n📲 Canal de Telegram: t.me/diariocolchonero`
+    `\n\n🔴⚪ Todas las noticias en ${SITIO}\n📲 Telegram: t.me/diariocolchonero\n📲 WhatsApp: https://whatsapp.com/channel/0029VbDayGCF1YlZa2aj5j0J`
   );
 }
 
