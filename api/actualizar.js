@@ -3,6 +3,7 @@ const supabase = require("../lib/supabase");
 const fuentes = require("../lib/fuentes");
 const { reescribirNoticia } = require("../lib/reescribir");
 const { actualizarClasificaciones } = require("../lib/clasificacion");
+const { publicarEnTelegram } = require("../lib/telegram");
 
 const parser = new Parser();
 const MAX_NOTICIAS = 12;
@@ -96,14 +97,20 @@ module.exports = async function handler(req, res) {
 
     const filas = reescritas.filter(Boolean);
 
+    let enviadasTelegram = 0;
     if (filas.length > 0) {
-      const { error } = await supabase.from("noticias").insert(filas);
+      const { data: guardadas, error } = await supabase
+        .from("noticias")
+        .insert(filas)
+        .select("id, categoria, titular, resumen");
       if (error) throw error;
+      enviadasTelegram = await publicarEnTelegram(guardadas || []);
     }
 
     return res.status(200).json({
       ok: true,
       total: filas.length,
+      enviadasTelegram,
       encontrados: unicos.length,
       yaGuardadosEnBD: yaGuardados.size,
       nuevosTrasFiltro: nuevos.length,
