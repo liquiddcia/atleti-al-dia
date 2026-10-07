@@ -207,6 +207,7 @@
   </main>
   <footer style="max-width:1080px;margin:0 auto;padding:10px 20px 50px;color:#55565C;font-size:13px;text-align:center;border-top:1px solid rgba(20,21,26,.13)">
     <p>Diario Colchonero · Independiente, no afiliado al Atlético de Madrid.</p>
+    <p>📲 Síguenos: <a href="https://whatsapp.com/channel/0029VbDayGCF1YlZa2aj5j0J" target="_blank" rel="noopener">Canal de WhatsApp</a> · <a href="https://t.me/diariocolchonero" target="_blank" rel="noopener">Canal de Telegram</a></p>
     <p><a href="/sobre-nosotros.html">Quiénes somos</a> · <a href="/privacidad.html">Privacidad</a> · <a href="/cookies.html">Cookies</a> · <a href="/aviso-legal.html">Aviso legal</a> · <a href="/contacto.html">Contacto</a></p>
   </footer>
 
@@ -265,7 +266,7 @@
       `;
     }
 
-    function ilustracionCategoria(cat){
+    function ilustracionCategoria(cat, url){
       const imagenes = {
         liga: "/imagenes/liga.png",
         champions: "/imagenes/champions.png",
@@ -275,8 +276,9 @@
         filial: "/imagenes/filial.png",
         femenino: "/imagenes/femenino.png"
       };
-      const src = imagenes[cat] || imagenes.liga;
-      return `<img src="${src}" alt="" style="width:100%;height:100%;object-fit:cover;display:block;">`;
+      const src = url || imagenes[cat] || imagenes.liga;
+      const respaldo = imagenes[cat] || imagenes.liga;
+      return `<img src="${src}" alt="" onerror="this.onerror=null;this.src='${respaldo}'" style="width:100%;height:100%;object-fit:cover;display:block;">`;
     }
 
     function formatearFecha(iso){
@@ -408,7 +410,7 @@
     function abrirModal(indice){
       const n = NOTICIAS_ACTUALES[indice];
       if(!n) return;
-      document.getElementById("modal-img").innerHTML = ilustracionCategoria(n.categoria);
+      document.getElementById("modal-img").innerHTML = ilustracionCategoria(n.categoria, n.imagen_url);
       const tag = document.getElementById("modal-tag");
       tag.textContent = ETIQUETAS[n.categoria] || n.categoria;
       tag.className = "ribbon " + n.categoria;
@@ -501,7 +503,7 @@
         const [primera, ...resto2] = NOTICIAS_ACTUALES;
         heroSlot.innerHTML = `
           <div class="hero">
-            <div class="hero-illustration">${ilustracionCategoria(primera.categoria)}</div>
+            <div class="hero-illustration">${ilustracionCategoria(primera.categoria, primera.imagen_url)}</div>
             <div class="hero-scrim"></div>
             <div class="hero-content">
               <span class="ribbon ${primera.categoria}">${ETIQUETAS[primera.categoria] || primera.categoria}</span>
@@ -517,7 +519,7 @@
 
         grid.innerHTML = resto2.map((n, i) => `
           <div class="card">
-            <div class="card-img">${ilustracionCategoria(n.categoria)}</div>
+            <div class="card-img">${ilustracionCategoria(n.categoria, n.imagen_url)}</div>
             <div class="card-body">
               <span class="tag ${n.categoria}">${ETIQUETAS[n.categoria] || n.categoria}</span>
               <h3 class="headline-font">${n.titular}</h3>
@@ -539,6 +541,6 @@
 
     cargar();
   </script>
-<script defer src="/_vercel/insights/script.js"></script>
+  <script defer src="/_vercel/insights/script.js"></script>
 </body>
 </html>
