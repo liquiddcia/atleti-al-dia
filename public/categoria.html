@@ -249,7 +249,7 @@
 
     const params = new URLSearchParams(window.location.search);
     let CATEGORIA = params.get("cat") || "liga";
-    const ID_COMPARTIDO = params.get("n");
+    const ID_COMPARTIDO = params.get("n") || params.get("amp;n");
 
     function ilustracionCategoria(cat, url){
       const imagenes = {
