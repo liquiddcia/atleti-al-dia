@@ -248,7 +248,7 @@
     function claseRibbon(cat){ return cat.includes("champions") ? "champions" : (cat.startsWith("calendario") ? "liga" : cat); }
 
     const params = new URLSearchParams(window.location.search);
-    const CATEGORIA = params.get("cat") || "liga";
+    let CATEGORIA = params.get("cat") || "liga";
     const ID_COMPARTIDO = params.get("n");
 
     function ilustracionCategoria(cat, url){
@@ -585,6 +585,15 @@
     });
 
     async function cargar(){
+      // Enlace corto (?n=ID sin cat): busca la categoría de esa noticia
+      if(!params.get("cat") && ID_COMPARTIDO){
+        try{
+          const r0 = await fetch("/api/noticias");
+          const d0 = await r0.json();
+          const n0 = (d0.noticias || []).find(x => String(x.id) === String(ID_COMPARTIDO));
+          if(n0) CATEGORIA = n0.categoria;
+        }catch(e){}
+      }
       document.getElementById("fecha-hoy").textContent =
         new Date().toLocaleDateString("es-ES", { weekday:"long", day:"numeric", month:"long", year:"numeric" }).toUpperCase();
 
