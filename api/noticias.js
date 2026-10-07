@@ -1,10 +1,18 @@
 const supabase = require("../lib/supabase");
 
 module.exports = async function handler(req, res) {
-  const { data, error } = await supabase
+  const cat = req.query && req.query.cat ? String(req.query.cat) : null;
+  const id = req.query && req.query.id ? parseInt(req.query.id, 10) : null;
+
+  let consulta = supabase
     .from("noticias")
     .select("id, categoria, titular, resumen, cuerpo, publicado_en, likes, imagen_url, video_url")
-    .eq("oculta", false)
+    .eq("oculta", false);
+
+  if (cat) consulta = consulta.eq("categoria", cat);
+  if (id) consulta = consulta.eq("id", id);
+
+  const { data, error } = await consulta
     .order("publicado_en", { ascending: false })
     .limit(60);
 
