@@ -588,7 +588,7 @@
       // Enlace corto (?n=ID sin cat): busca la categoría de esa noticia
       if(!params.get("cat") && ID_COMPARTIDO){
         try{
-          const r0 = await fetch("/api/noticias");
+         const r0 = await fetch("/api/noticias?id=" + encodeURIComponent(ID_COMPARTIDO));
           const d0 = await r0.json();
           const n0 = (d0.noticias || []).find(x => String(x.id) === String(ID_COMPARTIDO));
           if(n0) CATEGORIA = n0.categoria;
@@ -625,7 +625,7 @@
       }
 
       try{
-        const r = await fetch("/api/noticias");
+        const r = await fetch("/api/noticias?cat=" + encodeURIComponent(CATEGORIA));
         const datos = await r.json();
         NOTICIAS_ACTUALES = datos.noticias.filter(n => n.categoria === CATEGORIA);
         document.getElementById("hora-actualizado").textContent =
