@@ -6,7 +6,7 @@ const { actualizarClasificaciones } = require("../lib/clasificacion");
 const { publicarEnTelegram } = require("../lib/telegram");
 
 const parser = new Parser();
-const MAX_NOTICIAS = 12;
+const MAX_NOTICIAS = 6;
 
 function corregirCategoria(texto, categoriaIA) {
   const t = texto.toLowerCase();
