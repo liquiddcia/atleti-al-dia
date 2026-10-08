@@ -19,6 +19,37 @@ function corregirCategoria(texto, categoriaIA) {
   return categoriaIA;
 }
 
+// ---- Detección de noticias repetidas sobre el mismo tema ----
+const PALABRAS_VACIAS = new Set([
+  "para", "pero", "como", "tras", "ante", "sobre", "entre", "desde", "hasta", "este", "esta", "esto",
+  "estos", "estas", "sus", "con", "sin", "por", "los", "las", "del", "una", "uno", "unos", "unas",
+  "que", "más", "mas", "muy", "ser", "han", "hay", "dos", "tres", "ver", "así", "asi", "ya",
+  "atlético", "atletico", "madrid", "atleti", "club", "colchonero", "colchoneros", "rojiblanco",
+  "rojiblancos", "equipo", "partido", "liga", "noticia", "última", "ultima", "hora", "oficial",
+]);
+
+function palabrasClave(texto) {
+  const limpio = String(texto || "")
+    .toLowerCase()
+    .replace(/\s[-–|]\s[^-–|]+$/, "") // quita el " - Marca" del final de los titulares de Google News
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9ñ\s]/g, " ");
+  const vacias = new Set([...PALABRAS_VACIAS].map((p) => p.normalize("NFD").replace(/[\u0300-\u036f]/g, "")));
+  return new Set(limpio.split(/\s+/).filter((w) => w.length > 3 && !vacias.has(w)));
+}
+
+// Dos titulares hablan de lo mismo si comparten al menos 3 palabras clave
+// y esas palabras son el 60 % o más del más corto de los dos.
+function sonParecidos(a, b) {
+  const A = palabrasClave(a);
+  const B = palabrasClave(b);
+  if (!A.size || !B.size) return false;
+  let comunes = 0;
+  A.forEach((w) => { if (B.has(w)) comunes++; });
+  return comunes >= 3 && comunes / Math.min(A.size, B.size) >= 0.6;
+}
+
 module.exports = async function handler(req, res) {
   const secreto = req.headers.authorization;
   if (secreto !== `Bearer ${process.env.CRON_SECRET}`) {
@@ -69,13 +100,29 @@ module.exports = async function handler(req, res) {
 
     const yaGuardados = new Set((existentes || []).map((n) => n.titulo_original));
 
+    // Titulares de las últimas noticias, para no repetir el mismo tema
+    const { data: recientesBD } = await supabase
+      .from("noticias")
+      .select("titular")
+      .order("id", { ascending: false })
+      .limit(40);
+    const recientes = (recientesBD || []).map((n) => n.titular);
+
+    const aceptados = [];
     const nuevos = unicos
       .filter((it) => !yaGuardados.has(it.titulo.toLowerCase().slice(0, 40)))
+      .filter((it) => {
+        // Descarta si se parece a una noticia reciente o a otra de esta misma tanda
+        if (recientes.some((t) => sonParecidos(it.titulo, t))) return false;
+        if (aceptados.some((t) => sonParecidos(it.titulo, t))) return false;
+        aceptados.push(it.titulo);
+        return true;
+      })
       .slice(0, MAX_NOTICIAS);
 
     const reescritas = await Promise.all(
       nuevos.map(async (item) => {
-        const resultado = await reescribirNoticia(item);
+        const resultado = await reescribirNoticia({ ...item, recientes });
         if (!resultado || resultado.descartar) return null;
         return {
           categoria: corregirCategoria(
