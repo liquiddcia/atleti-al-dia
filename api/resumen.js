@@ -12,7 +12,7 @@ const MAX_NOTICIAS = 6;
 function construirMensaje(noticias) {
   const lineas = noticias.map(
     (n, i) =>
-           `${i + 1}. ${n.titular}\n${SITIO}/categoria.html?n=${n.id}`
+      `${i + 1}. ${n.titular}\n${SITIO}/api/noticia?id=${n.id}`
   );
   return (
     `📰 LO MÁS IMPORTANTE DEL ATLETI HOY\n\n` +
