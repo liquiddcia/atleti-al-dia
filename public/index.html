@@ -206,15 +206,13 @@
   <main>
 
     <!--
-      CARA A CARA — esto es manual a propósito: no hay una fuente de datos
-      automática fiable para alineaciones/convocatorias, así que se edita
-      aquí a mano antes de cada partido importante. Cambia estos valores
-      y el rival/hora/escudos se actualizan solos abajo.
+      PRÓXIMO PARTIDO — se rellena solo con el siguiente partido del calendario.
+      Los datos de abajo son un RESPALDO: solo se ven si el calendario no carga.
     -->
     <section class="matchup" id="matchup" data-equipo-local="Alavés"
       data-escudo-local="/escudos/escudoA.png" data-equipo-visitante="Atlético de Madrid"
       data-escudo-visitante="/escudos/escudoB.png" data-cuando="Sábado 10 de octubre, 16:15h · Mendizorroza">
-      <!-- El contenido real se rellena por JS a partir de los data-* de arriba -->
+      <!-- El contenido real se rellena por JS -->
     </section>
 
     <div id="hero-slot"></div>
@@ -267,23 +265,61 @@
     // Máximo de noticias en portada (garantizando al menos 1 de cada sección que tenga noticias)
     const TOTAL_PORTADA = 8;
 
-    function pintarMatchup(){
+    function dibujarMatchup(d){
       const el = document.getElementById("matchup");
-      const local = el.dataset.equipoLocal, visitante = el.dataset.equipoVisitante;
-      const escudoLocal = el.dataset.escudoLocal, escudoVisitante = el.dataset.escudoVisitante;
-      const cuando = el.dataset.cuando;
-
       el.innerHTML = `
         <div class="matchup-head">
-          <span class="ribbon previa" style="margin:0;">Próxima Jornada</span>
-          <span class="matchup-when">${cuando}</span>
+          <span class="ribbon previa" style="margin:0;">Próximo partido</span>
+          <span class="matchup-when">${d.cuando}</span>
         </div>
         <div class="matchup-teams">
-          <div class="team"><img src="${escudoLocal}" class="crest" alt="${local}"><span class="team-name">${local}</span></div>
+          <div class="team"><img src="${d.escudoLocal}" class="crest" alt="${d.local}"><span class="team-name">${d.local}</span></div>
           <div class="vs-mark">VS</div>
-          <div class="team"><img src="${escudoVisitante}" class="crest" alt="${visitante}"><span class="team-name">${visitante}</span></div>
+          <div class="team"><img src="${d.escudoVisitante}" class="crest" alt="${d.visitante}"><span class="team-name">${d.visitante}</span></div>
         </div>
       `;
+    }
+
+    // Primero pinta los datos manuales (respaldo) y después los sustituye
+    // por el siguiente partido real del calendario, si se puede cargar.
+    function pintarMatchup(){
+      const el = document.getElementById("matchup");
+      dibujarMatchup({
+        local: el.dataset.equipoLocal, visitante: el.dataset.equipoVisitante,
+        escudoLocal: el.dataset.escudoLocal, escudoVisitante: el.dataset.escudoVisitante,
+        cuando: el.dataset.cuando
+      });
+      matchupAutomatico();
+    }
+
+    function esAtleti(nombre){
+      const n = String(nombre || "").toLowerCase();
+      return n.includes("atlético") || n.includes("atletico") || n.includes("atleti");
+    }
+
+    async function matchupAutomatico(){
+      try{
+        const r = await fetch("/api/clasificacion");
+        const datos = await r.json();
+        const tabla = (datos.calendario && datos.calendario.tabla) || [];
+        const limite = Date.now() - 3 * 60 * 60 * 1000; // un partido en juego sigue contando
+        const proximos = tabla
+          .filter(p => p.estado !== "FINISHED" && p.estado !== "POSTPONED" && p.estado !== "CANCELLED" && new Date(p.fecha).getTime() > limite)
+          .sort((a, b) => new Date(a.fecha) - new Date(b.fecha));
+        const p = proximos[0];
+        if(!p) return;
+        const f = new Date(p.fecha);
+        const dia = f.toLocaleDateString("es-ES", { weekday:"long", day:"numeric", month:"long", timeZone:"Europe/Madrid" });
+        const hora = f.toLocaleTimeString("es-ES", { hour:"2-digit", minute:"2-digit", timeZone:"Europe/Madrid" });
+        const diaTxt = dia.charAt(0).toUpperCase() + dia.slice(1);
+        dibujarMatchup({
+          local: esAtleti(p.local) ? "Atlético de Madrid" : p.local,
+          visitante: esAtleti(p.visitante) ? "Atlético de Madrid" : p.visitante,
+          escudoLocal: esAtleti(p.local) ? "/escudos/escudoB.png" : (p.localEscudo || "/escudos/escudoA.png"),
+          escudoVisitante: esAtleti(p.visitante) ? "/escudos/escudoB.png" : (p.visitanteEscudo || "/escudos/escudoA.png"),
+          cuando: `${diaTxt}, ${hora}h` + (p.competicion ? ` · ${p.competicion}` : "")
+        });
+      }catch(e){}
     }
 
     function ilustracionCategoria(cat, url){
