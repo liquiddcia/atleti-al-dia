@@ -1,0 +1,161 @@
+// api/partido.js
+// Avisos automáticos de partido en el canal de Telegram:
+//   1) Un aviso cuando falta como máximo 1 hora para el partido del Atleti.
+//   2) Un aviso con el resultado cuando el partido termina.
+// Lo llama cron-job.org cada 10 minutos (con la cabecera Authorization: Bearer CRON_SECRET).
+// Variables de entorno: FOOTBALL_DATA_API_KEY, TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID, CRON_SECRET.
+// Para no repetir avisos guarda los partidos ya avisados en la tabla "clasificaciones"
+// (fila "avisos_partido"), así que no hace falta crear ninguna tabla nueva.
+
+const supabase = require("../lib/supabase");
+const { actualizarClasificaciones } = require("../lib/clasificacion");
+
+const SITIO = "https://diariocolchonero.com";
+const API = "https://api.football-data.org/v4";
+const MINUTOS_PREVIA = 70; // avisa cuando faltan entre 0 y 70 minutos
+const HORAS_MAX_FINAL = 8; // no avisa de resultados de partidos de hace más de 8 horas
+
+const COMPETICIONES = {
+  PD: "LaLiga",
+  CL: "Champions League",
+  CDR: "Copa del Rey",
+  SC: "Supercopa",
+};
+
+function esc(t) {
+  return String(t == null ? "" : t).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+function esAtleti(equipo) {
+  const n = String((equipo && (equipo.name || equipo.shortName)) || "").toLowerCase();
+  return equipo && (equipo.id === 78 || n.includes("atl"));
+}
+
+function nombre(equipo) {
+  return esAtleti(equipo) ? "Atlético de Madrid" : (equipo.shortName || equipo.name);
+}
+
+function dia(fecha) {
+  return fecha.toISOString().slice(0, 10);
+}
+
+async function enviarTelegram(texto) {
+  const token = process.env.TELEGRAM_BOT_TOKEN;
+  const chat = process.env.TELEGRAM_CHAT_ID;
+  if (!token || !chat) throw new Error("Faltan TELEGRAM_BOT_TOKEN o TELEGRAM_CHAT_ID");
+  const r = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ chat_id: chat, text: texto, parse_mode: "HTML", disable_web_page_preview: true }),
+  });
+  if (!r.ok) {
+    const detalle = await r.text();
+    throw new Error(`Telegram ${r.status}: ${detalle.slice(0, 200)}`);
+  }
+}
+
+function mensajePrevia(m) {
+  const comp = COMPETICIONES[m.competition && m.competition.code] || (m.competition && m.competition.name) || "";
+  const hora = new Date(m.utcDate).toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit", timeZone: "Europe/Madrid" });
+  return (
+    `⚽ <b>¡El Atleti juega en menos de una hora!</b>\n\n` +
+    `${esc(nombre(m.homeTeam))} - ${esc(nombre(m.awayTeam))}\n` +
+    `🕒 ${hora}h (hora de España)${comp ? ` · ${esc(comp)}` : ""}\n\n` +
+    `🔴⚪ Previa y noticias: <a href="${SITIO}">diariocolchonero.com</a>`
+  );
+}
+
+function mensajeFinal(m) {
+  const comp = COMPETICIONES[m.competition && m.competition.code] || (m.competition && m.competition.name) || "";
+  const gl = m.score.fullTime.home;
+  const gv = m.score.fullTime.away;
+  const atletiLocal = esAtleti(m.homeTeam);
+  const gAtleti = atletiLocal ? gl : gv;
+  const gRival = atletiLocal ? gv : gl;
+  const icono = gAtleti > gRival ? "✅" : gAtleti === gRival ? "🤝" : "❌";
+  const titulo = gAtleti > gRival ? "¡Victoria del Atleti!" : gAtleti === gRival ? "Empate del Atleti" : "Derrota del Atleti";
+  return (
+    `${icono} <b>FINAL${comp ? ` · ${esc(comp)}` : ""}</b>\n\n` +
+    `${esc(nombre(m.homeTeam))} <b>${gl} - ${gv}</b> ${esc(nombre(m.awayTeam))}\n` +
+    `${titulo}\n\n` +
+    `📰 Todas las noticias: <a href="${SITIO}">diariocolchonero.com</a>`
+  );
+}
+
+module.exports = async function handler(req, res) {
+  if (req.headers.authorization !== `Bearer ${process.env.CRON_SECRET}`) {
+    return res.status(401).json({ error: "No autorizado" });
+  }
+  if (!process.env.FOOTBALL_DATA_API_KEY) {
+    return res.status(500).json({ error: "Falta FOOTBALL_DATA_API_KEY" });
+  }
+
+  try {
+    const ahora = Date.now();
+    const desde = dia(new Date(ahora - 24 * 3600 * 1000));
+    const hasta = dia(new Date(ahora + 48 * 3600 * 1000));
+    const r = await fetch(`${API}/teams/78/matches?dateFrom=${desde}&dateTo=${hasta}`, {
+      headers: { "X-Auth-Token": process.env.FOOTBALL_DATA_API_KEY },
+    });
+    if (!r.ok) throw new Error(`football-data.org respondió ${r.status}`);
+    const datos = await r.json();
+    const partidos = datos.matches || [];
+
+    // Partidos ya avisados
+    const { data: fila } = await supabase
+      .from("clasificaciones")
+      .select("datos")
+      .eq("competicion", "avisos_partido")
+      .maybeSingle();
+    const estado = (fila && fila.datos) || {};
+    const previa = Array.isArray(estado.previa) ? estado.previa : [];
+    const final = Array.isArray(estado.final) ? estado.final : [];
+
+    const enviados = [];
+    let hayFinal = false;
+
+    for (const m of partidos) {
+      const minutos = (new Date(m.utcDate).getTime() - ahora) / 60000;
+
+      // 1) Aviso previo: falta como máximo 1 hora y todavía no ha empezado
+      if (["TIMED", "SCHEDULED"].includes(m.status) && minutos > 0 && minutos <= MINUTOS_PREVIA && !previa.includes(m.id)) {
+        await enviarTelegram(mensajePrevia(m));
+        previa.push(m.id);
+        enviados.push(`previa ${m.id}`);
+      }
+
+      // 2) Aviso de resultado: terminado, con marcador y reciente
+      const horasDesde = -minutos / 60;
+      if (
+        m.status === "FINISHED" &&
+        m.score && m.score.fullTime && m.score.fullTime.home != null && m.score.fullTime.away != null &&
+        horasDesde <= HORAS_MAX_FINAL &&
+        !final.includes(m.id)
+      ) {
+        await enviarTelegram(mensajeFinal(m));
+        final.push(m.id);
+        hayFinal = true;
+        enviados.push(`final ${m.id}`);
+      }
+    }
+
+    if (enviados.length) {
+      const { error } = await supabase.from("clasificaciones").upsert({
+        competicion: "avisos_partido",
+        datos: { previa: previa.slice(-20), final: final.slice(-20) },
+        actualizado_en: new Date().toISOString(),
+      });
+      if (error) console.error("Error guardando avisos_partido:", error.message);
+    }
+
+    // Al terminar un partido, refresca clasificación y calendario de la web
+    if (hayFinal) {
+      try { await actualizarClasificaciones(); } catch (e) { console.error("Error refrescando clasificaciones:", e.message); }
+    }
+
+    return res.status(200).json({ ok: true, partidos: partidos.length, enviados });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: error.message });
+  }
+};
