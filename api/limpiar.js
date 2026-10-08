@@ -2,7 +2,8 @@
 // Busca noticias repetidas sobre el mismo tema y las oculta (no las borra).
 // Por defecto SOLO MUESTRA lo que ocultaría (prueba en seco). Para ocultarlas de verdad:
 //   /api/limpiar?aplicar=1
-// Opcional: /api/limpiar?max=300  (cuántas noticias recientes revisar, por defecto 300)
+// Opcional: /api/limpiar?max=400  (cuántas noticias recientes revisar, por defecto 300)
+// Opcional: &excluir=339,300  (ids que NO quieres ocultar aunque salgan como repetidas)
 // Se llama con la cabecera Authorization: Bearer CRON_SECRET (por ejemplo desde cron-job.org).
 // De cada grupo de noticias repetidas se queda la más antigua (la que ya se envió a Telegram,
 // así sus enlaces compartidos siguen funcionando). Las demás se marcan como ocultas.
@@ -29,10 +30,17 @@ function palabrasClave(texto) {
 
 // Mismo criterio que el filtro de api/actualizar.js: al menos 3 palabras clave en común
 // y que sean el 60 % o más del titular más corto.
+// Palabras que cambian el sentido: si una noticia las tiene y la otra no, no son la misma
+// (por ejemplo "Jugadora" frente a "Jugador", o el derbi de filiales frente al del primer equipo).
+const DISTINTIVAS = ["jugadora", "filial", "filiales", "castilla", "juvenil", "cadete"];
+
 function sonParecidos(a, b) {
   const A = palabrasClave(a);
   const B = palabrasClave(b);
   if (!A.size || !B.size) return false;
+  for (const w of DISTINTIVAS) {
+    if (A.has(w) !== B.has(w)) return false;
+  }
   let comunes = 0;
   A.forEach((w) => { if (B.has(w)) comunes++; });
   return comunes >= 3 && comunes / Math.min(A.size, B.size) >= 0.6;
@@ -46,6 +54,12 @@ module.exports = async function handler(req, res) {
   try {
     const aplicar = req.query && req.query.aplicar === "1";
     const max = Math.min(parseInt(req.query && req.query.max, 10) || 300, 1000);
+    const excluir = new Set(
+      String((req.query && req.query.excluir) || "")
+        .split(",")
+        .map((x) => parseInt(x, 10))
+        .filter((x) => !isNaN(x))
+    );
 
     const { data, error } = await supabase
       .from("noticias")
@@ -60,7 +74,9 @@ module.exports = async function handler(req, res) {
     const grupos = []; // { conservar: noticia, repetidas: [noticia] }
 
     for (const n of noticias) {
-      const grupo = grupos.find((g) => sonParecidos(g.conservar.titular, n.titular));
+      const grupo = excluir.has(n.id)
+        ? null
+        : grupos.find((g) => g.conservar.categoria === n.categoria && sonParecidos(g.conservar.titular, n.titular));
       if (grupo) {
         grupo.repetidas.push(n);
       } else {
