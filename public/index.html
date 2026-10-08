@@ -1,4 +1,211 @@
- <!--
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Diario Colchonero</title>
+<meta name="description" content="Última hora del Atlético de Madrid: noticias, fichajes, previas, clasificación y calendario de LaLiga y Champions, actualizados cada día.">
+<meta property="og:site_name" content="Diario Colchonero">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="es_ES">
+<meta property="og:title" content="Diario Colchonero – Noticias del Atlético de Madrid">
+<meta property="og:description" content="Última hora del Atlético de Madrid: noticias, fichajes, previas, clasificación y calendario de LaLiga y Champions, actualizados cada día.">
+<meta property="og:url" content="https://diariocolchonero.com/">
+<meta property="og:image" content="https://diariocolchonero.com/og-image.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Diario Colchonero – Noticias del Atlético de Madrid">
+<meta name="twitter:description" content="Última hora del Atlético de Madrid: noticias, fichajes, previas, clasificación y calendario de LaLiga y Champions, actualizados cada día.">
+<meta name="twitter:image" content="https://diariocolchonero.com/og-image.jpg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,400;0,500;0,600;0,700;1,500&family=Barlow+Condensed:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --red: #D2122E; --red-dark: #9A0B21; --ink: #14151A; --cream: #F5F3EE;
+    --paper: #FFFFFF; --navy: #10203D; --gold: #C79A3C; --grey: #55565C; --teal: #0E6B5C; --plum: #8C2F6B;
+    --line: rgba(20,21,26,0.13);
+  }
+  *{ box-sizing:border-box; }
+  body{ margin:0; background:var(--cream); color:var(--ink); font-family:'Barlow',Arial,sans-serif; }
+  a{ color:inherit; text-decoration:none; }
+  .headline-font{ font-family:'Barlow Condensed','Arial Narrow',sans-serif; font-weight:800; }
+  .topbar{ background:var(--ink); color:#EDEDED; font-family:'Barlow Condensed',sans-serif; font-size:12.5px; font-weight:500; display:flex; justify-content:space-between; align-items:center; padding:6px 20px; letter-spacing:.02em; }
+  .topbar span.dot{ color:var(--red); margin:0 6px; }
+
+  .masthead-banner{ width:100%; background:var(--navy); border-bottom:5px solid var(--red); }
+  .banner-img{ width:100%; height:auto; display:block; }
+  .strapline-bar{ background:var(--paper); text-align:center; padding:8px 12px; font-family:'Barlow Condensed',sans-serif; font-size:13px; font-weight:600; color:var(--grey); letter-spacing:.04em; border-bottom:1px solid var(--line); }
+
+  .navmenu{ background:var(--paper); border-bottom:1px solid var(--line); }
+  .navmenu-inner{ max-width:1080px; margin:0 auto; display:flex; flex-wrap:wrap; justify-content:center; gap:2px; padding:2px 12px; }
+  .navmenu a{ font-family:'Barlow Condensed',sans-serif; font-weight:700; font-size:14px; letter-spacing:.03em; text-transform:uppercase; color:var(--ink); padding:10px 14px; border-bottom:3px solid transparent; }
+  .navmenu a:hover{ color:var(--red-dark); }
+  .navmenu a.activo{ color:var(--red-dark); border-bottom-color:var(--red); }
+
+  .nav-dropdown{ position:relative; }
+  .nav-dropdown-btn{ background:none; border:none; border-bottom:3px solid transparent; font:inherit; font-family:'Barlow Condensed',sans-serif; font-weight:700; font-size:14px; letter-spacing:.03em; text-transform:uppercase; color:var(--ink); padding:10px 14px; cursor:pointer; }
+  .nav-dropdown-btn:hover{ color:var(--red-dark); }
+  .nav-dropdown-menu{ display:none; position:absolute; top:100%; left:0; background:var(--paper); border:1px solid var(--line); min-width:170px; box-shadow:0 8px 18px rgba(0,0,0,.12); z-index:30; }
+  .nav-dropdown.abierto .nav-dropdown-menu{ display:block; }
+  .nav-dropdown-menu a{ display:block; padding:10px 14px; font-size:13px; border-bottom:1px solid var(--line); }
+  .nav-dropdown-menu a:last-child{ border-bottom:none; }
+  .nav-dropdown-menu a:hover{ background:var(--cream); }
+
+  .ticker{ background:var(--navy); color:#fff; font-family:'Barlow Condensed',sans-serif; font-weight:600; font-size:13px; padding:8px 20px; overflow:hidden; white-space:nowrap; }
+  .ticker-inner{ max-width:1080px; margin:0 auto; display:flex; gap:26px; }
+  .ticker b{ color:var(--gold); }
+  main{ max-width:1080px; margin:0 auto; padding:22px 20px 60px; }
+
+  /* Cara a cara configurable */
+  .matchup{ background:var(--paper); border:1px solid var(--line); padding:20px 24px 24px; margin-bottom:30px; }
+  .matchup-head{ display:flex; flex-wrap:wrap; align-items:center; gap:12px; margin-bottom:18px; }
+  .matchup-when{ font-family:'Barlow Condensed',sans-serif; font-weight:600; font-size:13.5px; color:var(--grey); }
+  .matchup-teams{ display:flex; align-items:center; justify-content:center; gap:34px; padding:6px 0 22px; }
+  .team{ display:flex; flex-direction:column; align-items:center; gap:8px; width:150px; }
+  .crest{ width:104px; height:auto; }
+  .team-name{ font-family:'Barlow Condensed',sans-serif; font-weight:700; font-size:15px; text-align:center; }
+  .vs-mark{ font-family:'Barlow Condensed',sans-serif; font-weight:800; font-size:22px; color:var(--grey); }
+  .lineups{ display:grid; grid-template-columns:1fr 1fr; gap:30px; border-top:1px solid var(--line); padding-top:18px; }
+  .lineup-title{ font-family:'Barlow Condensed',sans-serif; font-weight:700; font-size:14.5px; text-transform:uppercase; letter-spacing:.02em; margin:0 0 10px; }
+  .lineup-list{ list-style:none; margin:0; padding:0; font-size:14.5px; }
+  .lineup-list li{ display:flex; justify-content:space-between; padding:5px 0; border-bottom:1px dashed var(--line); }
+  .lineup-list li span{ font-family:'Barlow Condensed',sans-serif; font-weight:600; color:var(--grey); font-size:12px; }
+  .lineup-note{ font-family:'Barlow Condensed',sans-serif; font-size:12.5px; color:var(--grey); margin:14px 0 0; }
+  @media (max-width:640px){ .lineups{ grid-template-columns:1fr; } .matchup-teams{ gap:20px; } .team{ width:120px; } }
+
+  /* Portada / hero dinámico */
+  .hero{ position:relative; border-radius:2px; overflow:hidden; margin-bottom:26px; color:#fff; min-height:260px; display:flex; align-items:flex-end; }
+  .hero-illustration{ position:absolute; inset:0; }
+  .hero-scrim{ position:absolute; inset:0; background:linear-gradient(0deg, rgba(10,10,14,.92) 0%, rgba(10,10,14,.35) 55%, rgba(10,10,14,.05) 100%); }
+  .hero-content{ position:relative; padding:26px 28px 24px; max-width:640px; }
+  .ribbon{ display:inline-block; font-family:'Barlow Condensed',sans-serif; font-weight:700; font-size:13px; letter-spacing:.03em; background:var(--red); color:#fff; padding:4px 10px 5px; border-radius:2px; margin-bottom:10px; text-transform:uppercase; }
+  .ribbon.champions{ background:var(--navy); } .ribbon.previa{ background:var(--grey); } .ribbon.fichajes{ background:var(--gold); color:#1c1608; } .ribbon.clasificacion{ background:var(--ink); } .ribbon.filial{ background:var(--teal); } .ribbon.femenino{ background:var(--plum); }
+  .hero h1.headline-font{ font-size:clamp(26px,4.2vw,40px); line-height:1.04; margin:0 0 10px; text-transform:uppercase; }
+  .hero p.dek{ font-family:'Barlow',sans-serif; font-size:16px; max-width:56ch; opacity:.94; margin:0; }
+
+  /* Grid de tarjetas */
+  .grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:22px; }
+  .card{ background:var(--paper); border:1px solid var(--line); display:flex; flex-direction:column; }
+  .card-img{ height:140px; position:relative; }
+  .card-body{ padding:14px 16px 18px; display:flex; flex-direction:column; gap:8px; flex:1; }
+  .tag{ align-self:flex-start; font-family:'Barlow Condensed',sans-serif; font-weight:700; font-size:12px; letter-spacing:.02em; padding:3px 8px 4px; border-radius:2px; color:#fff; text-transform:uppercase; }
+  .tag.liga{ background:var(--red); } .tag.champions{ background:var(--navy); }
+  .tag.previa{ background:var(--grey); } .tag.fichajes{ background:var(--gold); color:#1c1608; } .tag.clasificacion{ background:var(--ink); } .tag.filial{ background:var(--teal); } .tag.femenino{ background:var(--plum); }
+  .card h3.headline-font{ font-size:19px; line-height:1.08; margin:0; text-transform:uppercase; }
+  .card p.teaser{ font-size:14.5px; color:#33343a; margin:0; line-height:1.4; }
+  .card .leer-mas{ margin-top:auto; font-family:'Barlow Condensed',sans-serif; font-weight:700; font-size:12px; color:var(--red-dark); padding-top:6px; border-top:1px dashed var(--line); background:none; border:none; border-top:1px dashed var(--line); text-align:left; cursor:pointer; }
+  .estado{ font-family:'Barlow Condensed',sans-serif; color:var(--grey); padding:40px 0; text-align:center; }
+
+  /* Acciones: me gusta y compartir */
+  .acciones{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+  .btn-like, .btn-compartir{ font-family:'Barlow Condensed',sans-serif; font-weight:700; font-size:12.5px; background:none; border:1px solid var(--line); border-radius:20px; padding:4px 10px; cursor:pointer; color:var(--grey); }
+  .btn-like:hover, .btn-compartir:hover{ border-color:var(--red-dark); color:var(--red-dark); }
+  .btn-like.activo{ color:var(--red); border-color:var(--red); background:rgba(210,18,46,.08); }
+  .hero .acciones .btn-like, .hero .acciones .btn-compartir{ border-color:rgba(255,255,255,.5); color:#fff; }
+  .hero .acciones .btn-like.activo{ color:#fff; border-color:var(--red); background:rgba(210,18,46,.55); }
+
+  /* Modal de noticia completa */
+  .modal-overlay{ position:fixed; inset:0; background:rgba(10,10,14,.6); display:none; align-items:flex-start; justify-content:center; padding: 5vh 16px; z-index:50; overflow-y:auto; }
+  .modal-overlay.abierto{ display:flex; }
+  .modal-box{ background:var(--paper); max-width:640px; width:100%; margin-bottom:40px; }
+  .modal-img{ height:200px; }
+  .modal-content{ padding:22px 26px 28px; }
+  .modal-content h2{ font-family:'Barlow Condensed',sans-serif; font-weight:800; font-size:26px; text-transform:uppercase; line-height:1.08; margin:10px 0 6px; }
+  .modal-content .cuerpo p{ font-size:16px; line-height:1.6; color:#22232b; margin:0 0 12px; }
+  .modal-close{ float:right; background:none; border:none; font-family:'Barlow Condensed',sans-serif; font-weight:700; font-size:14px; color:var(--grey); cursor:pointer; padding:4px 0; }
+
+  /* Comentarios */
+  .comentarios-section{ border-top:1px solid var(--line); margin-top:20px; padding-top:18px; }
+  .comentarios-section h4{ font-family:'Barlow Condensed',sans-serif; font-weight:700; font-size:15px; text-transform:uppercase; margin:0 0 12px; }
+  .comentario{ padding:10px 0; border-bottom:1px dashed var(--line); }
+  .comentario-cabeza{ display:flex; justify-content:space-between; align-items:baseline; gap:10px; margin-bottom:3px; }
+  .comentario-nombre{ font-family:'Barlow Condensed',sans-serif; font-weight:700; font-size:13.5px; }
+  .comentario-fecha{ font-family:'Barlow Condensed',sans-serif; font-size:11.5px; color:var(--grey); white-space:nowrap; }
+  .comentario-texto{ font-size:14px; line-height:1.45; margin:0; color:#33343a; }
+  .form-comentario{ display:flex; flex-direction:column; gap:8px; margin-top:14px; }
+  .form-comentario input, .form-comentario textarea{ font-family:'Barlow',sans-serif; font-size:14px; padding:8px 10px; border:1px solid var(--line); border-radius:3px; }
+  .form-comentario textarea{ resize:vertical; min-height:60px; }
+  .form-comentario button{ align-self:flex-start; font-family:'Barlow Condensed',sans-serif; font-weight:700; font-size:13px; background:var(--red); color:#fff; border:none; padding:8px 16px; border-radius:3px; cursor:pointer; text-transform:uppercase; }
+  .form-comentario button:hover{ background:var(--red-dark); }
+
+  footer{ max-width:1080px; margin:0 auto; padding:10px 20px 50px; color:var(--grey); font-size:13px; }
+  footer .note{ border-top:1px solid var(--line); padding-top:18px; }
+  footer b{ color:var(--ink); }
+
+  @media (max-width:860px){ .grid{ grid-template-columns:repeat(2,1fr); } }
+  @media (max-width:560px){ .grid{ grid-template-columns:1fr; } .hero h1.headline-font{ font-size:24px; } }
+
+  /* Barra de seguidores (WhatsApp / Telegram) */
+  .seguir-bar{ background:var(--paper); border-bottom:1px solid var(--line); padding:10px 16px; display:flex; flex-wrap:wrap; justify-content:center; align-items:center; gap:10px 14px; }
+  .seguir-txt{ font-family:'Barlow Condensed',sans-serif; font-weight:700; font-size:15px; text-transform:uppercase; letter-spacing:.03em; color:var(--ink); }
+  .btn-seguir{ display:inline-flex; align-items:center; gap:8px; font-family:'Barlow Condensed',sans-serif; font-weight:700; font-size:15px; letter-spacing:.02em; color:#fff; padding:8px 16px; border-radius:24px; }
+  .btn-seguir svg{ width:20px; height:20px; fill:#fff; flex:none; }
+  .btn-seguir.wa{ background:#25D366; } .btn-seguir.tg{ background:#229ED9; }
+  .btn-seguir:hover{ filter:brightness(.92); }
+
+  /* Vídeo incrustado en la noticia */
+  .video-wrap{ position:relative; width:100%; aspect-ratio:16/9; margin:6px 0 16px; background:#000; }
+  .video-wrap iframe{ position:absolute; inset:0; width:100%; height:100%; border:0; }
+  .video-link{ display:inline-block; margin:6px 0 16px; font-family:'Barlow Condensed',sans-serif; font-weight:700; font-size:14px; color:var(--red-dark); }
+</style>
+</head>
+<body>
+
+  <div class="topbar">
+    <span id="fecha-hoy">—</span>
+    <span><span class="dot">•</span>EDICIÓN DIGITAL<span class="dot">•</span><span id="hora-actualizado">—</span></span>
+  </div>
+
+  <div class="masthead-banner">
+    <img src="/banner.png" alt="Diario Colchonero" class="banner-img">
+  </div>
+  <div class="strapline-bar">EL DIARIO COLCHONERO — NOTICIAS DEL ATLÉTICO DE MADRID</div>
+
+  <nav class="navmenu">
+    <div class="navmenu-inner">
+      <a href="index.html" class="activo">Portada</a>
+
+      <div class="nav-dropdown" id="dropdown-liga">
+        <button class="nav-dropdown-btn" type="button">Liga ▾</button>
+        <div class="nav-dropdown-menu">
+          <a href="categoria.html?cat=liga">Noticias</a>
+          <a href="categoria.html?cat=clasificacion">Clasificación</a>
+          <a href="categoria.html?cat=calendario-liga">Calendario</a>
+        </div>
+      </div>
+
+      <div class="nav-dropdown" id="dropdown-champions">
+        <button class="nav-dropdown-btn" type="button">Champions ▾</button>
+        <div class="nav-dropdown-menu">
+          <a href="categoria.html?cat=champions">Noticias</a>
+          <a href="categoria.html?cat=clasificacion-champions">Clasificación</a>
+          <a href="categoria.html?cat=calendario-champions">Calendario</a>
+        </div>
+      </div>
+
+      <a href="categoria.html?cat=previa">Previa</a>
+      <a href="categoria.html?cat=fichajes">Mercado</a>
+      <a href="categoria.html?cat=filial">Filial</a>
+      <a href="categoria.html?cat=femenino">Femenino</a>
+    </div>
+  </nav>
+
+  <div class="seguir-bar">
+    <span class="seguir-txt">📲 Recibe las noticias del Atleti en tu móvil</span>
+    <a class="btn-seguir wa" href="https://whatsapp.com/channel/0029VbDayGCF1YlZa2aj5j0J" target="_blank" rel="noopener"><svg viewBox="0 0 24 24"><path d="M17.5 14.4c-.3-.1-1.7-.8-2-.9-.3-.1-.5-.1-.7.1-.2.3-.8.9-.9 1.1-.2.2-.3.2-.6.1-.3-.1-1.2-.4-2.3-1.4-.9-.8-1.4-1.7-1.6-2-.2-.3 0-.4.1-.6l.4-.5c.1-.2.2-.3.3-.5.1-.2 0-.4 0-.5-.1-.1-.7-1.6-.9-2.2-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1.1 2.9 1.2 3.1c.1.2 2.1 3.2 5.1 4.5.7.3 1.3.5 1.7.6.7.2 1.4.2 1.9.1.6-.1 1.7-.7 2-1.4.2-.7.2-1.3.2-1.4-.1-.1-.3-.2-.6-.3zM12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2c-1.5 0-2.9-.4-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2z"/></svg>Canal de WhatsApp</a>
+    <a class="btn-seguir tg" href="https://t.me/diariocolchonero" target="_blank" rel="noopener"><svg viewBox="0 0 24 24"><path d="M9.8 15.6l-.4 4.1c.6 0 .9-.3 1.2-.6l2.9-2.7 6 4.4c1.1.6 1.9.3 2.2-1L23.9 4c.4-1.6-.6-2.2-1.6-1.8L1.2 10.3c-1.5.6-1.5 1.5-.3 1.9l5.4 1.7L18.9 6c.6-.4 1.1-.2.7.2z"/></svg>Canal de Telegram</a>
+  </div>
+
+  <div class="ticker">
+    <div class="ticker-inner" id="ticker-inner">
+      <span>Cargando última hora…</span>
+    </div>
+  </div>
+
+  <main>
+
+    <!--
       CARA A CARA — esto es manual a propósito: no hay una fuente de datos
       automática fiable para alineaciones/convocatorias, así que se edita
       aquí a mano antes de cada partido importante. Cambia estos valores
