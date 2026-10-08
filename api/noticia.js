@@ -48,7 +48,7 @@ module.exports = async function handler(req, res) {
 
   const url = `${SITIO}/api/noticia?id=${data.id}`;
   const etiqueta = ETIQUETAS[data.categoria] || data.categoria;
-  const imagen = data.imagen_url && /^https:\/\//.test(data.imagen_url) ? data.imagen_url : `${SITIO}/og-image.jpg`;
+  const imagen = `${SITIO}/og-image.jpg`;
   const descripcion = String(data.resumen || "").slice(0, 200);
   const fecha = data.publicado_en ? new Date(data.publicado_en) : null;
   const fechaTxt = fecha
