@@ -71,11 +71,14 @@ module.exports = async function handler(req, res) {
       if (resultado.status !== "fulfilled") return;
       const fuente = fuentes[i];
       for (const item of resultado.value.items.slice(0, 8)) {
+        // Los feeds generales de Google News acaban el titular con " - Nombre del medio":
+        // se guarda ese nombre para poder citar la fuente en la página de la noticia.
+        const medio = (String(item.title || "").match(/\s[-–|]\s([^-–|]+)$/) || [])[1];
         items.push({
           titulo: item.title,
           resumenOriginal: (item.contentSnippet || "").slice(0, 500),
           enlace: item.link,
-          fuente: fuente.nombre,
+          fuente: /^Google News/.test(fuente.nombre) && medio ? medio.trim() : fuente.nombre,
           publicado: item.isoDate || item.pubDate,
         });
       }
