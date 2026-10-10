@@ -12,7 +12,7 @@ const MAX_NOTICIAS = 6;
 function construirMensaje(noticias) {
   const lineas = noticias.map(
     (n, i) =>
-      `${i + 1}. ${n.titular}\n${SITIO}/api/noticia?id=${n.id}`
+      `${i + 1}. ${n.titular}\n${SITIO}/categoria.html?n=${n.id}`
   );
   return (
     `📰 LO MÁS IMPORTANTE DEL ATLETI HOY\n\n` +
@@ -35,7 +35,17 @@ module.exports = async function handler(req, res) {
 
   try {
     const desde = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
-    const { data, error } = await supabase
+    // Los días de partido, la noticia del resultado va siempre la primera del resumen
+    const { data: resultados } = await supabase
+      .from("noticias")
+      .select("id, categoria, titular, likes, publicado_en")
+      .eq("oculta", false)
+      .gte("publicado_en", desde)
+      .like("titulo_original", "final partido %")
+      .order("publicado_en", { ascending: false })
+      .limit(2);
+
+    const { data: populares, error } = await supabase
       .from("noticias")
       .select("id, categoria, titular, likes, publicado_en")
       .eq("oculta", false)
@@ -45,6 +55,11 @@ module.exports = async function handler(req, res) {
       .limit(MAX_NOTICIAS);
 
     if (error) throw error;
+
+    const vistos = new Set();
+    const data = [...(resultados || []), ...(populares || [])]
+      .filter((n) => (vistos.has(n.id) ? false : (vistos.add(n.id), true)))
+      .slice(0, MAX_NOTICIAS);
 
     if (!data || data.length === 0) {
       return res.status(200).json({ ok: true, enviado: false, motivo: "Sin noticias en las últimas 24 horas" });
