@@ -1,8 +1,9 @@
 // api/partido.js
 // Avisos automáticos de partido en el canal de Telegram:
 //   1) Un aviso cuando falta como máximo 1 hora para el partido del Atleti.
-//   2) Un aviso con el resultado cuando el partido termina (y una noticia con el resultado en la web).
-// Lo llama cron-job.org cada 10 minutos (con la cabecera Authorization: Bearer CRON_SECRET).
+//   2) Un aviso en el descanso con el marcador (y una noticia en la web con el marcador y los goles, si la fuente los da).
+//   3) Un aviso con el resultado cuando el partido termina (y una noticia con el resultado en la web).
+// Lo llama cron-job.org cada 5 minutos (con la cabecera Authorization: Bearer CRON_SECRET).
 // Variables de entorno: FOOTBALL_DATA_API_KEY, TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID, CRON_SECRET.
 // Para no repetir avisos guarda los partidos ya avisados en la tabla "clasificaciones"
 // (fila "avisos_partido"), así que no hace falta crear ninguna tabla nueva.
@@ -97,6 +98,85 @@ function mensajeFinal(m) {
   );
 }
 
+// Goles del partido (si la fuente de datos los devuelve; en caso contrario, lista vacía)
+async function golesDelPartido(id) {
+  try {
+    const r = await fetch(`${API}/matches/${id}`, { headers: { "X-Auth-Token": process.env.FOOTBALL_DATA_API_KEY } });
+    if (!r.ok) return [];
+    const d = await r.json();
+    return (Array.isArray(d.goals) ? d.goals : [])
+      .filter((g) => g && g.scorer && g.scorer.name && g.minute != null)
+      .map((g) => ({
+        minuto: g.injuryTime ? `${g.minute}+${g.injuryTime}` : `${g.minute}`,
+        jugador: g.scorer.name,
+        equipo: g.team && (g.team.shortName || g.team.name) ? (g.team.shortName || g.team.name) : "",
+      }));
+  } catch (e) {
+    console.error("Error pidiendo goles:", e.message);
+    return [];
+  }
+}
+
+function marcadorDescanso(m) {
+  const s = m.score || {};
+  const ht = s.halfTime && s.halfTime.home != null && s.halfTime.away != null ? s.halfTime : s.fullTime;
+  return { gl: ht ? ht.home : null, gv: ht ? ht.away : null };
+}
+
+function mensajeDescanso(m, goles) {
+  const comp = COMPETICIONES[m.competition && m.competition.code] || (m.competition && m.competition.name) || "";
+  const { gl, gv } = marcadorDescanso(m);
+  const marcador = gl != null && gv != null ? `<b>${gl} - ${gv}</b>` : "-";
+  const lineaGoles = goles.length
+    ? `\n\n⚽ Goles:\n` + goles.map((g) => `${esc(g.minuto)}' ${esc(g.jugador)}${g.equipo ? ` (${esc(g.equipo)})` : ""}`).join("\n")
+    : "";
+  return (
+    `⏸ <b>DESCANSO${comp ? ` · ${esc(comp)}` : ""}</b>\n\n` +
+    `${esc(nombre(m.homeTeam))} ${marcador} ${esc(nombre(m.awayTeam))}` +
+    lineaGoles +
+    `\n\n📰 Sigue el partido y las noticias: <a href="${SITIO}">diariocolchonero.com</a>`
+  );
+}
+
+// Noticia del descanso en la web, solo con datos del partido (sin IA)
+async function guardarNoticiaDescanso(m, goles) {
+  const clave = `descanso partido ${m.id}`;
+  const { data: ya } = await supabase.from("noticias").select("id").eq("titulo_original", clave).maybeSingle();
+  if (ya) return false;
+
+  const compNombre = COMPETICIONES[m.competition && m.competition.code] || (m.competition && m.competition.name) || "";
+  const { gl, gv } = marcadorDescanso(m);
+  if (gl == null || gv == null) return false;
+  const local = nombre(m.homeTeam);
+  const visitante = nombre(m.awayTeam);
+
+  const titular = `Descanso: ${local} ${gl}-${gv} ${visitante}`;
+  const resumen = `Al descanso del partido${compNombre ? ` de ${compNombre}` : ""}, el marcador es ${local} ${gl}-${gv} ${visitante}.`;
+  const parrafos = [`Se llega al descanso con el marcador ${local} ${gl}-${gv} ${visitante}${compNombre ? ` en ${compNombre}` : ""}.`];
+  if (goles.length) {
+    parrafos.push("Goles hasta ahora: " + goles.map((g) => `${g.minuto}' ${g.jugador}${g.equipo ? ` (${g.equipo})` : ""}`).join("; ") + ".");
+  } else if (gl + gv === 0) {
+    parrafos.push("De momento no se han marcado goles.");
+  }
+  parrafos.push("El resultado final se publicará en una noticia aparte cuando termine el partido.");
+
+  const { error } = await supabase.from("noticias").insert({
+    categoria: m.competition && m.competition.code === "CL" ? "champions" : "liga",
+    titular,
+    resumen,
+    cuerpo: parrafos.join("\n"),
+    fuentes: "Diario Colchonero",
+    enlace_original: SITIO,
+    titulo_original: clave,
+    publicado_en: new Date().toISOString(),
+  });
+  if (error) {
+    console.error("Error guardando noticia del descanso:", error.message);
+    return false;
+  }
+  return true;
+}
+
 // Guarda en la web una noticia con el resultado final (sin IA, solo con datos del partido),
 // para que los días de partido siempre haya una noticia del resultado en la portada y en el resumen.
 async function guardarNoticiaResultado(m) {
@@ -168,6 +248,7 @@ module.exports = async function handler(req, res) {
     const estado = (fila && fila.datos) || {};
     const previa = Array.isArray(estado.previa) ? estado.previa : [];
     const final = Array.isArray(estado.final) ? estado.final : [];
+    const descanso = Array.isArray(estado.descanso) ? estado.descanso : [];
 
     const enviados = [];
     let hayFinal = false;
@@ -182,7 +263,16 @@ module.exports = async function handler(req, res) {
         enviados.push(`previa ${m.id}`);
       }
 
-      // 2) Aviso de resultado: terminado, con marcador y reciente
+      // 2) Aviso del descanso: el partido está en el descanso
+      if (m.status === "PAUSED" && !descanso.includes(m.id)) {
+        const goles = await golesDelPartido(m.id);
+        await enviarTelegram(mensajeDescanso(m, goles));
+        descanso.push(m.id);
+        enviados.push(`descanso ${m.id}`);
+        if (await guardarNoticiaDescanso(m, goles)) enviados.push(`noticia descanso ${m.id}`);
+      }
+
+      // 3) Aviso de resultado: terminado, con marcador y reciente
       const horasDesde = -minutos / 60;
       if (
         m.status === "FINISHED" &&
@@ -201,7 +291,7 @@ module.exports = async function handler(req, res) {
     if (enviados.length) {
       const { error } = await supabase.from("clasificaciones").upsert({
         competicion: "avisos_partido",
-        datos: { previa: previa.slice(-20), final: final.slice(-20) },
+        datos: { previa: previa.slice(-20), descanso: descanso.slice(-20), final: final.slice(-20) },
         actualizado_en: new Date().toISOString(),
       });
       if (error) console.error("Error guardando avisos_partido:", error.message);
