@@ -3,6 +3,7 @@
 //   1) Un aviso cuando falta como máximo 1 hora para el partido del Atleti.
 //   2) Un aviso en el descanso con el marcador (y una noticia en la web con el marcador y los goles, si la fuente los da).
 //   3) Un aviso con el resultado cuando el partido termina (y una noticia con el resultado en la web).
+// Además refresca la clasificación y el calendario cada 30 minutos en horas de partidos.
 // Lo llama cron-job.org cada 5 minutos (con la cabecera Authorization: Bearer CRON_SECRET).
 // Variables de entorno: FOOTBALL_DATA_API_KEY, TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID, CRON_SECRET.
 // Para no repetir avisos guarda los partidos ya avisados en la tabla "clasificaciones"
@@ -220,6 +221,28 @@ async function guardarNoticiaResultado(m) {
   return true;
 }
 
+// Refresca la clasificación y el calendario cada 30 minutos durante las horas de partidos
+// (de 13:00 a 02:00, hora de España), para que reflejen también los partidos de otros equipos.
+const MINUTOS_REFRESCO_CLASIFICACION = 30;
+
+async function refrescarClasificacionSiToca() {
+  const hora = Number(
+    new Intl.DateTimeFormat("en-GB", { hour: "numeric", hourCycle: "h23", timeZone: "Europe/Madrid" }).format(new Date())
+  );
+  if (hora >= 2 && hora < 13) return false;
+
+  const { data: fila } = await supabase
+    .from("clasificaciones")
+    .select("actualizado_en")
+    .eq("competicion", "liga")
+    .maybeSingle();
+  const ultima = fila && fila.actualizado_en ? new Date(fila.actualizado_en).getTime() : 0;
+  if (Date.now() - ultima < MINUTOS_REFRESCO_CLASIFICACION * 60000) return false;
+
+  await actualizarClasificaciones();
+  return true;
+}
+
 module.exports = async function handler(req, res) {
   if (req.headers.authorization !== `Bearer ${process.env.CRON_SECRET}`) {
     return res.status(401).json({ error: "No autorizado" });
@@ -302,7 +325,13 @@ module.exports = async function handler(req, res) {
       try { await actualizarClasificaciones(); } catch (e) { console.error("Error refrescando clasificaciones:", e.message); }
     }
 
-    return res.status(200).json({ ok: true, partidos: partidos.length, enviados });
+    // Si no se ha refrescado ya por un final de partido, refresca de vez en cuando
+    let clasificacionRefrescada = hayFinal;
+    if (!hayFinal) {
+      try { clasificacionRefrescada = await refrescarClasificacionSiToca(); } catch (e) { console.error("Error refrescando clasificaciones:", e.message); }
+    }
+
+    return res.status(200).json({ ok: true, partidos: partidos.length, enviados, clasificacionRefrescada });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ error: error.message });
