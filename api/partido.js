@@ -1,7 +1,7 @@
 // api/partido.js
 // Avisos automáticos de partido en el canal de Telegram:
 //   1) Un aviso cuando falta como máximo 1 hora para el partido del Atleti.
-//   2) Un aviso con el resultado cuando el partido termina.
+//   2) Un aviso con el resultado cuando el partido termina (y una noticia con el resultado en la web).
 // Lo llama cron-job.org cada 10 minutos (con la cabecera Authorization: Bearer CRON_SECRET).
 // Variables de entorno: FOOTBALL_DATA_API_KEY, TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID, CRON_SECRET.
 // Para no repetir avisos guarda los partidos ya avisados en la tabla "clasificaciones"
@@ -11,6 +11,7 @@ const supabase = require("../lib/supabase");
 const { actualizarClasificaciones } = require("../lib/clasificacion");
 
 const SITIO = "https://diariocolchonero.com";
+const IMAGEN_AVISO = `${SITIO}/banner.jpg`; // imagen que acompaña a los avisos
 const API = "https://api.football-data.org/v4";
 const MINUTOS_PREVIA = 70; // avisa cuando faltan entre 0 y 70 minutos
 const HORAS_MAX_FINAL = 8; // no avisa de resultados de partidos de hace más de 8 horas
@@ -43,6 +44,20 @@ async function enviarTelegram(texto) {
   const token = process.env.TELEGRAM_BOT_TOKEN;
   const chat = process.env.TELEGRAM_CHAT_ID;
   if (!token || !chat) throw new Error("Faltan TELEGRAM_BOT_TOKEN o TELEGRAM_CHAT_ID");
+
+  // Primero intenta enviarlo con la imagen del banner; si falla, lo manda solo como texto
+  try {
+    const rf = await fetch(`https://api.telegram.org/bot${token}/sendPhoto`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ chat_id: chat, photo: IMAGEN_AVISO, caption: texto, parse_mode: "HTML" }),
+    });
+    if (rf.ok) return;
+    console.error("sendPhoto falló:", rf.status, (await rf.text()).slice(0, 200));
+  } catch (e) {
+    console.error("sendPhoto error:", e.message);
+  }
+
   const r = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -80,6 +95,49 @@ function mensajeFinal(m) {
     `${titulo}\n\n` +
     `📰 Todas las noticias: <a href="${SITIO}">diariocolchonero.com</a>`
   );
+}
+
+// Guarda en la web una noticia con el resultado final (sin IA, solo con datos del partido),
+// para que los días de partido siempre haya una noticia del resultado en la portada y en el resumen.
+async function guardarNoticiaResultado(m) {
+  const clave = `final partido ${m.id}`;
+  const { data: ya } = await supabase.from("noticias").select("id").eq("titulo_original", clave).maybeSingle();
+  if (ya) return false;
+
+  const compNombre = COMPETICIONES[m.competition && m.competition.code] || (m.competition && m.competition.name) || "";
+  const gl = m.score.fullTime.home;
+  const gv = m.score.fullTime.away;
+  const atletiLocal = esAtleti(m.homeTeam);
+  const gAtleti = atletiLocal ? gl : gv;
+  const gRival = atletiLocal ? gv : gl;
+  const local = nombre(m.homeTeam);
+  const visitante = nombre(m.awayTeam);
+  const rival = atletiLocal ? visitante : local;
+  const resultado = gAtleti > gRival ? "victoria rojiblanca" : gAtleti === gRival ? "reparto de puntos" : "derrota rojiblanca";
+  const verbo = gAtleti > gRival ? "ganó" : gAtleti === gRival ? "empató" : "perdió";
+  const fecha = new Date(m.utcDate).toLocaleDateString("es-ES", { day: "numeric", month: "long", timeZone: "Europe/Madrid" });
+
+  const titular = `${local} ${gl}-${gv} ${visitante}: ${resultado}`;
+  const resumen = `Final del partido${compNombre ? ` de ${compNombre}` : ""}: ${local} ${gl}-${gv} ${visitante}.`;
+  const cuerpo =
+    `El Atlético de Madrid ${verbo} ante ${rival} en el partido${compNombre ? ` de ${compNombre}` : ""} disputado el ${fecha}. El resultado final fue ${local} ${gl}-${gv} ${visitante}.\n` +
+    `La clasificación y el calendario de la web se actualizan automáticamente tras el partido. Aquí iremos publicando las reacciones y la información posterior.`;
+
+  const { error } = await supabase.from("noticias").insert({
+    categoria: m.competition && m.competition.code === "CL" ? "champions" : "liga",
+    titular,
+    resumen,
+    cuerpo,
+    fuentes: "Diario Colchonero",
+    enlace_original: SITIO,
+    titulo_original: clave,
+    publicado_en: new Date().toISOString(),
+  });
+  if (error) {
+    console.error("Error guardando noticia del resultado:", error.message);
+    return false;
+  }
+  return true;
 }
 
 module.exports = async function handler(req, res) {
@@ -136,6 +194,7 @@ module.exports = async function handler(req, res) {
         final.push(m.id);
         hayFinal = true;
         enviados.push(`final ${m.id}`);
+        if (await guardarNoticiaResultado(m)) enviados.push(`noticia ${m.id}`);
       }
     }
 
