@@ -6,6 +6,39 @@ const { actualizarClasificaciones } = require("../lib/clasificacion");
 const { publicarEnTelegram } = require("../lib/telegram");
 
 const parser = new Parser();
+const MAX_HORAS_ANTIGUEDAD = 48; // no se publican noticias cuyo medio las publicó hace más de 48 horas
+
+function esMuyAntigua(publicado) {
+  const t = publicado ? new Date(publicado).getTime() : NaN;
+  return !isNaN(t) && Date.now() - t > MAX_HORAS_ANTIGUEDAD * 3600 * 1000;
+}
+
+// Partidos del Atlético ya terminados en los últimos días, para que la IA no publique
+// previas de partidos que ya se han jugado.
+async function partidosYaJugados() {
+  if (!process.env.FOOTBALL_DATA_API_KEY) return "";
+  try {
+    const dia = (d) => d.toISOString().slice(0, 10);
+    const ahora = Date.now();
+    const r = await fetch(
+      `https://api.football-data.org/v4/teams/78/matches?dateFrom=${dia(new Date(ahora - 5 * 86400000))}&dateTo=${dia(new Date(ahora + 86400000))}`,
+      { headers: { "X-Auth-Token": process.env.FOOTBALL_DATA_API_KEY } }
+    );
+    if (!r.ok) return "";
+    const d = await r.json();
+    return (d.matches || [])
+      .filter((m) => m.status === "FINISHED" && m.score && m.score.fullTime && m.score.fullTime.home != null)
+      .map((m) => {
+        const fecha = new Date(m.utcDate).toLocaleDateString("es-ES", { weekday: "long", day: "numeric", month: "long", timeZone: "Europe/Madrid" });
+        const comp = (m.competition && m.competition.name) || "";
+        return `- ${fecha}: ${m.homeTeam.shortName || m.homeTeam.name} ${m.score.fullTime.home}-${m.score.fullTime.away} ${m.awayTeam.shortName || m.awayTeam.name}${comp ? ` (${comp})` : ""}`;
+      })
+      .join("\n");
+  } catch (e) {
+    console.error("Error pidiendo partidos jugados:", e.message);
+    return "";
+  }
+}
 const MAX_NOTICIAS = 6;
 
 function corregirCategoria(texto, categoriaIA) {
@@ -111,6 +144,7 @@ module.exports = async function handler(req, res) {
     const aceptados = [];
     const nuevos = unicos
       .filter((it) => !yaGuardados.has(it.titulo.toLowerCase().slice(0, 40)))
+      .filter((it) => !esMuyAntigua(it.publicado))
       .filter((it) => {
         // Descarta si se parece a una noticia reciente o a otra de esta misma tanda
         if (recientes.some((t) => sonParecidos(it.titulo, t))) return false;
@@ -120,9 +154,11 @@ module.exports = async function handler(req, res) {
       })
       .slice(0, MAX_NOTICIAS);
 
+    const contexto = await partidosYaJugados();
+
     const reescritas = await Promise.all(
       nuevos.map(async (item) => {
-        const resultado = await reescribirNoticia({ ...item, recientes });
+        const resultado = await reescribirNoticia({ ...item, recientes, contexto });
         if (!resultado || resultado.descartar) return null;
         return {
           categoria: corregirCategoria(
