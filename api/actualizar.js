@@ -141,18 +141,22 @@ module.exports = async function handler(req, res) {
       .limit(40);
     const recientes = (recientesBD || []).map((n) => n.titular);
 
+    let descartadasYaGuardadas = 0;
+    let descartadasAntiguas = 0;
+    let descartadasParecidas = 0;
     const aceptados = [];
-    const nuevos = unicos
-      .filter((it) => !yaGuardados.has(it.titulo.toLowerCase().slice(0, 40)))
-      .filter((it) => !esMuyAntigua(it.publicado))
-      .filter((it) => {
-        // Descarta si se parece a una noticia reciente o a otra de esta misma tanda
-        if (recientes.some((t) => sonParecidos(it.titulo, t))) return false;
-        if (aceptados.some((t) => sonParecidos(it.titulo, t))) return false;
-        aceptados.push(it.titulo);
-        return true;
-      })
-      .slice(0, MAX_NOTICIAS);
+    const candidatos = unicos.filter((it) => {
+      if (yaGuardados.has(it.titulo.toLowerCase().slice(0, 40))) { descartadasYaGuardadas++; return false; }
+      if (esMuyAntigua(it.publicado)) { descartadasAntiguas++; return false; }
+      // Descarta si se parece a una noticia reciente o a otra de esta misma tanda
+      if (recientes.some((t) => sonParecidos(it.titulo, t)) || aceptados.some((t) => sonParecidos(it.titulo, t))) {
+        descartadasParecidas++;
+        return false;
+      }
+      aceptados.push(it.titulo);
+      return true;
+    });
+    const nuevos = candidatos.slice(0, MAX_NOTICIAS);
 
     const contexto = await partidosYaJugados();
 
@@ -197,6 +201,13 @@ module.exports = async function handler(req, res) {
       encontrados: unicos.length,
       yaGuardadosEnBD: yaGuardados.size,
       nuevosTrasFiltro: nuevos.length,
+      descartadasYaGuardadas,
+      descartadasAntiguas,
+      descartadasParecidas,
+      pendientesPorLimite: candidatos.length - nuevos.length,
+      leidasPorLaIA: nuevos.length,
+      descartadasPorLaIA: nuevos.length - filas.length,
+      publicadas: filas.length,
       errorConsulta: errorExistentes ? errorExistentes.message : null,
     });
   } catch (error) {
