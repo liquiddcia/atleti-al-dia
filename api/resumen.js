@@ -5,6 +5,7 @@
 // Variables de entorno: TELEGRAM_BOT_TOKEN y TELEGRAM_RESUMEN_CHAT_ID (tu id numérico).
 
 const supabase = require("../lib/supabase");
+const { urlNoticia } = require("../lib/url");
 
 const SITIO = "https://diariocolchonero.com";
 const MAX_NOTICIAS = 6;
@@ -12,7 +13,7 @@ const MAX_NOTICIAS = 6;
 function construirMensaje(noticias) {
   const lineas = noticias.map(
     (n, i) =>
-      `${i + 1}. ${n.titular}\n${SITIO}/categoria.html?n=${n.id}`
+      `${i + 1}. ${n.titular}\n${urlNoticia(n)}`
   );
   return (
     `📰 LO MÁS IMPORTANTE DEL ATLETI HOY\n\n` +

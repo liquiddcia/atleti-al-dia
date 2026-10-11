@@ -8,6 +8,14 @@
   "functions": {
     "api/actualizar.js": {
       "maxDuration": 60
+    },
+    "api/partido.js": {
+      "maxDuration": 60
     }
-  }
+  },
+  "rewrites": [
+    { "source": "/noticia/:slug", "destination": "/api/noticia?slug=:slug" },
+    { "source": "/noticias", "destination": "/api/archivo" },
+    { "source": "/sitemap.xml", "destination": "/api/sitemap" }
+  ]
 }

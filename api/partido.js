@@ -3,20 +3,27 @@
 //   1) Un aviso cuando falta como máximo 1 hora para el partido del Atleti.
 //   2) Un aviso en el descanso con el marcador (y una noticia en la web con el marcador y los goles, si la fuente los da).
 //   3) Un aviso con el resultado cuando el partido termina (y una noticia con el resultado en la web).
+// El día antes de cada partido publica además en la web (y en el canal) una previa propia
+// con datos: rachas de los dos equipos, clasificación y enfrentamientos anteriores (lib/previa.js).
 // Además refresca la clasificación y el calendario cada 30 minutos en horas de partidos.
 // Lo llama cron-job.org cada 5 minutos (con la cabecera Authorization: Bearer CRON_SECRET).
-// Variables de entorno: FOOTBALL_DATA_API_KEY, TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID, CRON_SECRET.
+// Variables de entorno: FOOTBALL_DATA_API_KEY, TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID, CRON_SECRET
+// (y ANTHROPIC_API_KEY para redactar la previa).
 // Para no repetir avisos guarda los partidos ya avisados en la tabla "clasificaciones"
 // (fila "avisos_partido"), así que no hace falta crear ninguna tabla nueva.
 
 const supabase = require("../lib/supabase");
 const { actualizarClasificaciones } = require("../lib/clasificacion");
+const { generarPrevia } = require("../lib/previa");
+const { publicarEnTelegram } = require("../lib/telegram");
 
 const SITIO = "https://diariocolchonero.com";
 const IMAGEN_AVISO = `${SITIO}/banner.jpg`; // imagen que acompaña a los avisos
 const API = "https://api.football-data.org/v4";
 const MINUTOS_PREVIA = 70; // avisa cuando faltan entre 0 y 70 minutos
 const HORAS_MAX_FINAL = 8; // no avisa de resultados de partidos de hace más de 8 horas
+const HORAS_PREVIA_WEB = 30; // la previa con datos se publica cuando faltan 30 horas o menos
+const MINUTOS_MIN_PREVIA_WEB = 90; // ...pero no si queda menos de hora y media para el partido
 
 const COMPETICIONES = {
   PD: "LaLiga",
@@ -272,12 +279,30 @@ module.exports = async function handler(req, res) {
     const previa = Array.isArray(estado.previa) ? estado.previa : [];
     const final = Array.isArray(estado.final) ? estado.final : [];
     const descanso = Array.isArray(estado.descanso) ? estado.descanso : [];
+    const previaWeb = Array.isArray(estado.previaWeb) ? estado.previaWeb : [];
 
     const enviados = [];
     let hayFinal = false;
 
     for (const m of partidos) {
       const minutos = (new Date(m.utcDate).getTime() - ahora) / 60000;
+
+      // 0) Previa con datos en la web: el día antes del partido. Si algo falla (por ejemplo,
+      //    la fuente de datos no responde) no se apunta como hecha y se reintenta en la siguiente pasada.
+      if (
+        ["TIMED", "SCHEDULED"].includes(m.status) &&
+        minutos > MINUTOS_MIN_PREVIA_WEB && minutos <= HORAS_PREVIA_WEB * 60 &&
+        !previaWeb.includes(m.id)
+      ) {
+        try {
+          const noticia = await generarPrevia(m);
+          previaWeb.push(m.id);
+          enviados.push(`previa web ${m.id}`);
+          if (noticia) await publicarEnTelegram([noticia]);
+        } catch (e) {
+          console.error("Error generando la previa:", e.message);
+        }
+      }
 
       // 1) Aviso previo: falta como máximo 1 hora y todavía no ha empezado
       if (["TIMED", "SCHEDULED"].includes(m.status) && minutos > 0 && minutos <= MINUTOS_PREVIA && !previa.includes(m.id)) {
@@ -314,7 +339,7 @@ module.exports = async function handler(req, res) {
     if (enviados.length) {
       const { error } = await supabase.from("clasificaciones").upsert({
         competicion: "avisos_partido",
-        datos: { previa: previa.slice(-20), descanso: descanso.slice(-20), final: final.slice(-20) },
+        datos: { previa: previa.slice(-20), descanso: descanso.slice(-20), final: final.slice(-20), previaWeb: previaWeb.slice(-20) },
         actualizado_en: new Date().toISOString(),
       });
       if (error) console.error("Error guardando avisos_partido:", error.message);

@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Diario Colchonero</title>
+<title>Diario Colchonero – Noticias del Atlético de Madrid</title>
+<link rel="canonical" href="https://diariocolchonero.com/">
 <meta name="description" content="Última hora del Atlético de Madrid: noticias, fichajes, previas, clasificación y calendario de LaLiga y Champions, actualizados cada día.">
 <meta property="og:site_name" content="Diario Colchonero">
 <meta property="og:type" content="website">
@@ -134,6 +135,9 @@
   footer b{ color:var(--ink); }
 
   @media (max-width:860px){ .grid{ grid-template-columns:repeat(2,1fr); } }
+  .ver-todas{ grid-column:1/-1; text-align:center; margin:8px 0 0; font-family:'Barlow Condensed',sans-serif; font-weight:700; font-size:16px; }
+  .ver-todas a{ color:var(--red-dark); }
+  .card h3 a:hover, .card .leer-mas:hover{ color:var(--red-dark); }
   @media (max-width:560px){ .grid{ grid-template-columns:1fr; } .hero h1.headline-font{ font-size:24px; } }
 
   /* Barra de seguidores (WhatsApp / Telegram) */
@@ -158,7 +162,7 @@
   </div>
 
   <div class="masthead-banner">
-    <img src="/banner.png" alt="Diario Colchonero" class="banner-img">
+    <img src="/banner.jpg" width="1600" height="533" alt="Diario Colchonero" class="banner-img">
   </div>
   <div class="strapline-bar">EL DIARIO COLCHONERO — NOTICIAS DEL ATLÉTICO DE MADRID</div>
 
@@ -227,7 +231,7 @@
   <footer style="max-width:1080px;margin:0 auto;padding:10px 20px 50px;color:#55565C;font-size:13px;text-align:center;border-top:1px solid rgba(20,21,26,.13)">
     <p>Diario Colchonero · Independiente, no afiliado al Atlético de Madrid.</p>
     <p>📲 Síguenos: <a href="https://whatsapp.com/channel/0029VbDayGCF1YlZa2aj5j0J" target="_blank" rel="noopener">Canal de WhatsApp</a> · <a href="https://t.me/diariocolchonero" target="_blank" rel="noopener">Canal de Telegram</a></p>
-    <p><a href="/sobre-nosotros.html">Quiénes somos</a> · <a href="/privacidad.html">Privacidad</a> · <a href="/cookies.html">Cookies</a> · <a href="/aviso-legal.html">Aviso legal</a> · <a href="/contacto.html">Contacto</a></p>
+    <p><a href="/noticias">Todas las noticias</a> · <a href="/sobre-nosotros.html">Quiénes somos</a> · <a href="/privacidad.html">Privacidad</a> · <a href="/cookies.html">Cookies</a> · <a href="/aviso-legal.html">Aviso legal</a> · <a href="/contacto.html">Contacto</a></p>
   </footer>
 
   <div class="modal-overlay" id="modal-overlay">
@@ -324,15 +328,23 @@
       }catch(e){}
     }
 
+    // Dirección propia de cada noticia (la misma que genera el servidor en lib/url.js)
+    function rutaNoticia(n){
+      let s = String(n.titular || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+        .replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+      if(s.length > 80) s = s.slice(0, 80).replace(/-[^-]*$/, "");
+      return "/noticia/" + n.id + (s ? "-" + s : "");
+    }
+
     function ilustracionCategoria(cat, url){
       const imagenes = {
-        liga: "/imagenes/liga.png",
-        champions: "/imagenes/champions.png",
-        previa: "/imagenes/previa.png",
-        fichajes: "/imagenes/mercado.png",
-        clasificacion: "/imagenes/clasificacion.png",
-        filial: "/imagenes/filial.png",
-        femenino: "/imagenes/femenino.png"
+        liga: "/imagenes/liga.jpg",
+        champions: "/imagenes/champions.jpg",
+        previa: "/imagenes/previa.jpg",
+        fichajes: "/imagenes/mercado.jpg",
+        clasificacion: "/imagenes/clasificacion.jpg",
+        filial: "/imagenes/filial.jpg",
+        femenino: "/imagenes/femenino.jpg"
       };
       const src = url || imagenes[cat] || imagenes.liga;
       const respaldo = imagenes[cat] || imagenes.liga;
@@ -402,7 +414,7 @@
 
     // ---------- Compartir ----------
     function compartir(n){
-      const url = `${location.origin}/api/noticia?id=${n.id}`;
+      const url = location.origin + rutaNoticia(n);
       if(navigator.share){
         navigator.share({ title: n.titular, text: n.titular + " — Diario Colchonero", url }).catch(() => {});
       } else if(navigator.clipboard){
@@ -488,7 +500,10 @@
       document.getElementById("modal-titulo").textContent = n.titular;
       document.getElementById("modal-fecha").textContent = formatearFecha(n.publicado_en);
       const cuerpo = n.cuerpo || n.resumen;
-      document.getElementById("modal-cuerpo").innerHTML = cuerpo.split(/\n+/).map(p => `<p>${p}</p>`).join("");
+      document.getElementById("modal-cuerpo").innerHTML = cuerpo.split(/\n+/).map(p =>
+        p.startsWith("## ") ? `<h4 style="margin:18px 0 8px;">${p.slice(3)}</h4>`
+        : p.startsWith("- ") ? `<p style="margin:0 0 6px;">• ${p.slice(2)}</p>`
+        : `<p>${p}</p>`).join("");
       document.getElementById("modal-video").innerHTML = videoHtml(n.video_url);
 
       const likeBtn = document.getElementById("modal-like");
@@ -579,7 +594,7 @@
             <div class="hero-scrim"></div>
             <div class="hero-content">
               <span class="ribbon ${primera.categoria}">${ETIQUETAS[primera.categoria] || primera.categoria}</span>
-              <h1 class="headline-font" style="cursor:pointer;" onclick="abrirModal(0)">${primera.titular}</h1>
+              <h1 class="headline-font"><a href="${rutaNoticia(primera)}">${primera.titular}</a></h1>
               <p class="dek">${primera.resumen}</p>
               <p class="dek" style="font-size:13px; opacity:.75; margin:8px 0 14px;">${formatearFecha(primera.publicado_en)}</p>
               <div class="acciones">
@@ -594,17 +609,17 @@
             <div class="card-img">${ilustracionCategoria(n.categoria, n.imagen_url)}</div>
             <div class="card-body">
               <span class="tag ${n.categoria}">${ETIQUETAS[n.categoria] || n.categoria}</span>
-              <h3 class="headline-font">${n.titular}</h3>
+              <h3 class="headline-font"><a href="${rutaNoticia(n)}">${n.titular}</a></h3>
               <p class="teaser">${n.resumen}</p>
               <p class="teaser" style="font-size:12px; opacity:.65;">${formatearFecha(n.publicado_en)}</p>
               <div class="acciones">
                 ${botonLikeHtml(n)}
                 <button class="btn-compartir" onclick="compartirPorId(${n.id})">Compartir</button>
               </div>
-              <button class="leer-mas" onclick="abrirModal(${i + 1})">Leer más →</button>
+              <a class="leer-mas" href="${rutaNoticia(n)}">Leer más →</a>
             </div>
           </div>
-        `).join("");
+        `).join("") + '<p class="ver-todas"><a href="/noticias">Ver todas las noticias →</a></p>';
 
       }catch(e){
         document.getElementById("grid").innerHTML = '<p class="estado">No se pudieron cargar las noticias. Revisa que /api/noticias esté desplegado.</p>';
