@@ -3,7 +3,6 @@
 //   1) Un aviso cuando falta como máximo 1 hora para el partido del Atleti.
 //   2) Un aviso en el descanso con el marcador (y una noticia en la web con el marcador y los goles, si la fuente los da).
 //   3) Un aviso con el resultado cuando el partido termina (y una noticia con el resultado en la web).
-// Además refresca la clasificación y el calendario cada 30 minutos en horas de partidos.
 // Lo llama cron-job.org cada 5 minutos (con la cabecera Authorization: Bearer CRON_SECRET).
 // Variables de entorno: FOOTBALL_DATA_API_KEY, TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID, CRON_SECRET.
 // Para no repetir avisos guarda los partidos ya avisados en la tabla "clasificaciones"
@@ -11,6 +10,7 @@
 
 const supabase = require("../lib/supabase");
 const { actualizarClasificaciones } = require("../lib/clasificacion");
+const { publicarBorradores } = require("../lib/borradores");
 
 const SITIO = "https://diariocolchonero.com";
 const IMAGEN_AVISO = `${SITIO}/banner.jpg`; // imagen que acompaña a los avisos
@@ -331,7 +331,11 @@ module.exports = async function handler(req, res) {
       try { clasificacionRefrescada = await refrescarClasificacionSiToca(); } catch (e) { console.error("Error refrescando clasificaciones:", e.message); }
     }
 
-    return res.status(200).json({ ok: true, partidos: partidos.length, enviados, clasificacionRefrescada });
+    // Publica los borradores que llevan más de 1 hora sin revisar
+    let autopublicadas = 0;
+    try { autopublicadas = (await publicarBorradores({ soloAntiguos: true })).publicadas; } catch (e) { console.error("Error publicando borradores:", e.message); }
+
+    return res.status(200).json({ ok: true, partidos: partidos.length, enviados, clasificacionRefrescada, autopublicadas });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ error: error.message });
