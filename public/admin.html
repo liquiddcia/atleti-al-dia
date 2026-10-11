@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Revisar noticias</title>
+<style>
+  :root{ --rojo:#c8102e; --azul:#1b2a49; --fondo:#f4f4f6; --linea:#d9d9e0; --texto:#1c1d24; }
+  *{ box-sizing:border-box; }
+  body{ margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif; background:var(--fondo); color:var(--texto); }
+  header{ background:var(--azul); color:#fff; padding:14px 16px; display:flex; justify-content:space-between; align-items:center; gap:10px; }
+  header h1{ margin:0; font-size:18px; }
+  main{ max-width:760px; margin:0 auto; padding:14px 16px 60px; }
+  .caja{ background:#fff; border:1px solid var(--linea); border-radius:10px; padding:14px; margin-bottom:14px; }
+  label{ display:block; font-size:13px; font-weight:600; margin:10px 0 4px; }
+  input[type=text], input[type=password], textarea{ width:100%; font:inherit; font-size:16px; padding:9px 10px; border:1px solid var(--linea); border-radius:8px; background:#fff; }
+  textarea{ min-height:90px; resize:vertical; }
+  textarea.cuerpo{ min-height:200px; }
+  button{ font:inherit; font-size:15px; font-weight:600; border:0; border-radius:8px; padding:10px 14px; cursor:pointer; }
+  .b-pub{ background:var(--rojo); color:#fff; }
+  .b-gua{ background:var(--azul); color:#fff; }
+  .b-des{ background:#e8e8ee; color:#333; }
+  .b-todas{ background:var(--rojo); color:#fff; width:100%; margin-bottom:14px; }
+  button:disabled{ opacity:.5; cursor:default; }
+  .fila{ display:flex; flex-wrap:wrap; gap:8px; margin-top:14px; }
+  .meta{ font-size:12px; color:#666; margin-bottom:6px; }
+  .etiqueta{ display:inline-block; background:var(--rojo); color:#fff; font-size:11px; font-weight:700; padding:2px 8px; border-radius:10px; text-transform:uppercase; margin-right:6px; }
+  .ayuda{ font-size:12px; color:#666; margin-top:3px; }
+  .msg{ padding:10px 12px; border-radius:8px; margin-bottom:12px; font-size:14px; }
+  .msg.ok{ background:#e3f4e6; color:#1b5e20; } .msg.err{ background:#fde7e7; color:#b00020; }
+  .vacio{ text-align:center; color:#666; padding:30px 10px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>📝 Revisar noticias</h1>
+  <button class="b-des" id="salir" style="display:none">Salir</button>
+</header>
+<main>
+  <div id="aviso"></div>
+
+  <div id="entrada" class="caja">
+    <label for="clave">Clave de administración</label>
+    <input type="password" id="clave" autocomplete="current-password">
+    <div class="fila"><button class="b-gua" id="entrar">Entrar</button></div>
+  </div>
+
+  <div id="panel" style="display:none">
+    <p class="meta" id="resumen-panel"></p>
+    <button class="b-todas" id="publicar-todas" style="display:none">Publicar todas</button>
+    <div id="lista"></div>
+  </div>
+</main>
+
+<script>
+(function(){
+  var clave = "";
+  try { clave = sessionStorage.getItem("clave-admin") || ""; } catch(e){}
+  var horas = 1;
+  var $ = function(id){ return document.getElementById(id); };
+
+  function aviso(texto, tipo){
+    var a = $("aviso"); a.innerHTML = "";
+    if(!texto) return;
+    var d = document.createElement("div"); d.className = "msg " + (tipo || "ok"); d.textContent = texto; a.appendChild(d);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  function llamar(metodo, datos){
+    var opciones = { method: metodo, headers: { "Authorization": "Bearer " + clave, "Content-Type": "application/json" } };
+    if(datos) opciones.body = JSON.stringify(datos);
+    return fetch("/api/admin", opciones).then(function(r){
+      return r.json().then(function(j){
+        if(!r.ok) throw new Error(r.status === 401 ? "Clave incorrecta" : (j.error || "Error " + r.status));
+        return j;
+      });
+    });
+  }
+
+  function minutosRestantes(desde){
+    if(!desde) return null;
+    var limite = new Date(desde).getTime() + horas * 3600 * 1000;
+    return Math.max(0, Math.round((limite - Date.now()) / 60000));
+  }
+
+  function campo(tarjeta, tipo, nombre, etiqueta, valor, ayuda){
+    var l = document.createElement("label"); l.textContent = etiqueta; tarjeta.appendChild(l);
+    var el = tipo === "textarea" ? document.createElement("textarea") : document.createElement("input");
+    if(tipo !== "textarea") el.type = "text";
+    if(nombre === "cuerpo") el.className = "cuerpo";
+    el.value = valor || ""; el.dataset.campo = nombre;
+    tarjeta.appendChild(el);
+    if(ayuda){ var h = document.createElement("div"); h.className = "ayuda"; h.textContent = ayuda; tarjeta.appendChild(h); }
+  }
+
+  function leerCampos(tarjeta){
+    var c = {};
+    tarjeta.querySelectorAll("[data-campo]").forEach(function(el){ c[el.dataset.campo] = el.value; });
+    return c;
+  }
+
+  function pintar(n){
+    var t = document.createElement("div"); t.className = "caja";
+    var m = document.createElement("div"); m.className = "meta";
+    var et = document.createElement("span"); et.className = "etiqueta"; et.textContent = n.categoria; m.appendChild(et);
+    var mins = minutosRestantes(n.borrador_desde);
+    m.appendChild(document.createTextNode(
+      "#" + n.id + (n.fuentes ? " · " + n.fuentes : "") + (mins != null ? " · se publica sola en " + mins + " min" : "")
+    ));
+    t.appendChild(m);
+
+    campo(t, "input", "titular", "Titular", n.titular);
+    campo(t, "textarea", "resumen", "Resumen", n.resumen);
+    campo(t, "textarea", "cuerpo", "Texto de la noticia (un párrafo por línea)", n.cuerpo);
+    campo(t, "input", "imagen_url", "Imagen (opcional)", n.imagen_url,
+      "Sube la foto a public/imagenes en GitHub y pon /imagenes/nombre.jpg, o pega una dirección https://…");
+    campo(t, "input", "video_url", "Vídeo de YouTube (opcional)", n.video_url, "Pega el enlace del vídeo.");
+
+    if(n.enlace_original){
+      var e = document.createElement("div"); e.className = "ayuda";
+      var a = document.createElement("a"); a.href = n.enlace_original; a.target = "_blank"; a.rel = "noopener"; a.textContent = "Ver la fuente original";
+      e.appendChild(a); t.appendChild(e);
+    }
+
+    var fila = document.createElement("div"); fila.className = "fila";
+    function boton(clase, texto, fn){
+      var b = document.createElement("button"); b.className = clase; b.textContent = texto;
+      b.onclick = function(){
+        var todos = fila.querySelectorAll("button"); todos.forEach(function(x){ x.disabled = true; });
+        fn().catch(function(err){ aviso(err.message, "err"); }).then(function(){ todos.forEach(function(x){ x.disabled = false; }); });
+      };
+      fila.appendChild(b);
+    }
+    boton("b-pub", "Publicar", function(){
+      return llamar("POST", { accion: "publicar", id: n.id, campos: leerCampos(t) }).then(function(r){
+        aviso("Publicada" + (r.enviadasTelegram ? " y enviada a Telegram." : "."), "ok"); return cargar();
+      });
+    });
+    boton("b-gua", "Guardar cambios", function(){
+      return llamar("POST", { accion: "guardar", id: n.id, campos: leerCampos(t) }).then(function(){ aviso("Cambios guardados.", "ok"); });
+    });
+    boton("b-des", "Descartar", function(){
+      if(!confirm("¿Descartar esta noticia? No se publicará.")) return Promise.resolve();
+      return llamar("POST", { accion: "descartar", id: n.id }).then(function(){ aviso("Descartada.", "ok"); return cargar(); });
+    });
+    t.appendChild(fila);
+    return t;
+  }
+
+  function cargar(){
+    return llamar("GET").then(function(r){
+      horas = r.horasAutopublicar || 1;
+      $("entrada").style.display = "none"; $("panel").style.display = "block"; $("salir").style.display = "";
+      var lista = $("lista"); lista.innerHTML = "";
+      var b = r.borradores || [];
+      $("resumen-panel").textContent = b.length ? b.length + " noticia(s) pendiente(s). Las que no revises se publican solas pasada " + horas + " h." : "";
+      $("publicar-todas").style.display = b.length > 1 ? "" : "none";
+      if(!b.length){ var v = document.createElement("div"); v.className = "vacio"; v.textContent = "No hay noticias pendientes de revisar 🎉"; lista.appendChild(v); }
+      b.forEach(function(n){ lista.appendChild(pintar(n)); });
+    }).catch(function(err){
+      $("entrada").style.display = ""; $("panel").style.display = "none"; $("salir").style.display = "none";
+      try { sessionStorage.removeItem("clave-admin"); } catch(e){}
+      aviso(err.message, "err");
+    });
+  }
+
+  $("entrar").onclick = function(){
+    clave = $("clave").value.trim();
+    if(!clave) return;
+    try { sessionStorage.setItem("clave-admin", clave); } catch(e){}
+    aviso("");
+    cargar();
+  };
+  $("clave").addEventListener("keydown", function(e){ if(e.key === "Enter") $("entrar").click(); });
+  $("salir").onclick = function(){
+    try { sessionStorage.removeItem("clave-admin"); } catch(e){}
+    clave = ""; $("clave").value = ""; $("entrada").style.display = ""; $("panel").style.display = "none"; $("salir").style.display = "none";
+  };
+  $("publicar-todas").onclick = function(){
+    if(!confirm("¿Publicar todas las noticias pendientes tal y como están?")) return;
+    var b = $("publicar-todas"); b.disabled = true;
+    llamar("POST", { accion: "publicarTodas" }).then(function(r){
+      aviso(r.publicadas + " noticia(s) publicada(s).", "ok"); return cargar();
+    }).catch(function(err){ aviso(err.message, "err"); }).then(function(){ b.disabled = false; });
+  };
+
+  if(clave) cargar();
+})();
+</script>
+</body>
+</html>
