@@ -4,6 +4,7 @@ const fuentes = require("../lib/fuentes");
 const { reescribirNoticia } = require("../lib/reescribir");
 const { actualizarClasificaciones } = require("../lib/clasificacion");
 const { publicarEnTelegram } = require("../lib/telegram");
+const { publicarBorradores, avisarBorradores } = require("../lib/borradores");
 
 const parser = new Parser();
 const MAX_HORAS_ANTIGUEDAD = 48; // no se publican noticias cuyo medio las publicó hace más de 48 horas
@@ -40,6 +41,10 @@ async function partidosYaJugados() {
   }
 }
 const MAX_NOTICIAS = 6;
+// Modo revisión: las noticias nuevas quedan como borradores ocultos hasta que las apruebes
+// en /admin.html (o se publican solas pasada 1 hora). Para desactivarlo, pon la variable
+// MODO_REVISION=0 en Vercel.
+const MODO_REVISION = process.env.MODO_REVISION !== "0";
 
 function corregirCategoria(texto, categoriaIA) {
   const t = texto.toLowerCase();
@@ -185,19 +190,41 @@ module.exports = async function handler(req, res) {
     const filas = reescritas.filter(Boolean);
 
     let enviadasTelegram = 0;
+    let borradores = 0;
     if (filas.length > 0) {
+      const ahoraISO = new Date().toISOString();
+      const filasAGuardar = MODO_REVISION
+        ? filas.map((f) => ({ ...f, oculta: true, borrador: true, borrador_desde: ahoraISO }))
+        : filas;
       const { data: guardadas, error } = await supabase
         .from("noticias")
-        .insert(filas)
+        .insert(filasAGuardar)
         .select("id, categoria, titular, resumen");
       if (error) throw error;
-      enviadasTelegram = await publicarEnTelegram(guardadas || []);
+      if (MODO_REVISION) {
+        borradores = (guardadas || []).length;
+        await avisarBorradores(guardadas || []).catch((e) =>
+          console.error("Error avisando de borradores:", e.message)
+        );
+      } else {
+        enviadasTelegram = await publicarEnTelegram(guardadas || []);
+      }
+    }
+
+    // Publica los borradores que llevan más de 1 hora sin revisar
+    let autopublicadas = 0;
+    try {
+      autopublicadas = (await publicarBorradores({ soloAntiguos: true })).publicadas;
+    } catch (e) {
+      console.error("Error autopublicando borradores:", e.message);
     }
 
     return res.status(200).json({
       ok: true,
       total: filas.length,
       enviadasTelegram,
+      borradores,
+      autopublicadas,
       encontrados: unicos.length,
       yaGuardadosEnBD: yaGuardados.size,
       nuevosTrasFiltro: nuevos.length,
@@ -207,7 +234,7 @@ module.exports = async function handler(req, res) {
       pendientesPorLimite: candidatos.length - nuevos.length,
       leidasPorLaIA: nuevos.length,
       descartadasPorLaIA: nuevos.length - filas.length,
-      publicadas: filas.length,
+      guardadasEnBD: filas.length,
       errorConsulta: errorExistentes ? errorExistentes.message : null,
     });
   } catch (error) {
