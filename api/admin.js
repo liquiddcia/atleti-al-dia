@@ -6,9 +6,49 @@
 //   POST { accion: "publicar",  id, campos? }  -> guarda (si hay cambios) y publica un borrador
 //   POST { accion: "descartar", id }           -> descarta un borrador (queda oculto para siempre)
 //   POST { accion: "publicarTodas" }           -> publica todos los borradores
+//   GET ?resumen=1                        -> devuelve el texto del resumen del día, listo para pegar en WhatsApp
 
 const supabase = require("../lib/supabase");
 const { publicarBorradores, HORAS_AUTOPUBLICAR } = require("../lib/borradores");
+
+const SITIO = "https://diariocolchonero.com";
+const MAX_RESUMEN = 6;
+
+// Mismo resumen que se envía a las 21:00 por Telegram: el resultado del partido primero
+// (si lo hay) y después las noticias más votadas de las últimas 24 horas.
+async function textoResumen() {
+  const desde = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+  const { data: resultados } = await supabase
+    .from("noticias")
+    .select("id, titular")
+    .eq("oculta", false)
+    .gte("publicado_en", desde)
+    .like("titulo_original", "final partido %")
+    .order("publicado_en", { ascending: false })
+    .limit(2);
+  const { data: populares, error } = await supabase
+    .from("noticias")
+    .select("id, titular")
+    .eq("oculta", false)
+    .gte("publicado_en", desde)
+    .order("likes", { ascending: false })
+    .order("publicado_en", { ascending: false })
+    .limit(MAX_RESUMEN);
+  if (error) throw error;
+
+  const vistos = new Set();
+  const lista = [...(resultados || []), ...(populares || [])]
+    .filter((n) => (vistos.has(n.id) ? false : (vistos.add(n.id), true)))
+    .slice(0, MAX_RESUMEN);
+  if (!lista.length) return "";
+
+  const lineas = lista.map((n, i) => `${i + 1}. ${n.titular}\n${SITIO}/api/noticia?id=${n.id}`);
+  return (
+    `📰 LO MÁS IMPORTANTE DEL ATLETI HOY\n\n` +
+    lineas.join("\n\n") +
+    `\n\n🔴⚪ Todas las noticias en ${SITIO}\n📲 Telegram: t.me/diariocolchonero`
+  );
+}
 
 const CAMPOS_EDITABLES = ["titular", "resumen", "cuerpo", "imagen_url", "video_url"];
 
@@ -38,6 +78,10 @@ module.exports = async function handler(req, res) {
   }
 
   try {
+    if (req.method === "GET" && req.query && req.query.resumen) {
+      return res.status(200).json({ ok: true, texto: await textoResumen() });
+    }
+
     if (req.method === "GET") {
       const { data, error } = await supabase
         .from("noticias")
