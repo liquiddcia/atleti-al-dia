@@ -97,7 +97,7 @@ module.exports = async function handler(req, res) {
   const parrafos = lineas
     .map((p) => {
       const t = p.trim();
-      let m = t.match(/^\[\[cartel:(\d+),(\d+)\]\]$/);
+            let m = t.match(/^\[\[cartel:(\d+),(\d+)\]\]$/) || t.match(/^<img[^>]*crests\.football-data\.org\/(\d+)\.png[^>]*>.*crests\.football-data\.org\/(\d+)\.png[^>]*>$/);
       if (m) {
         return `<div class="wn-cartel"><img src="https://crests.football-data.org/${m[1]}.png" alt=""><span>VS</span><img src="https://crests.football-data.org/${m[2]}.png" alt=""></div>`;
       }
