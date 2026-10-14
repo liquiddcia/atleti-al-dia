@@ -73,11 +73,6 @@ module.exports = async function handler(req, res) {
   if (error) return paginaError(res, 500, "No se pudo cargar la noticia");
   if (!data) return paginaError(res, 404, "Noticia no encontrada");
 
-  // Cuenta la visita si no es un robot ni una vista previa de WhatsApp/Telegram
-  const agente = String((req.headers && req.headers["user-agent"]) || "");
-  if (!/bot|crawl|spider|slurp|preview|facebookexternalhit|whatsapp|telegram|curl|wget|python|node-fetch|headless|vercel/i.test(agente)) {
-    await supabase.from("noticias").update({ vistas: (data.vistas || 0) + 1 }).eq("id", data.id);
-  }
 
   const url = `${SITIO}/api/noticia?id=${data.id}`;
   const etiqueta = ETIQUETAS[data.categoria] || data.categoria;
@@ -195,6 +190,16 @@ module.exports = async function handler(req, res) {
     <p><a href="${SITIO}">← Todas las noticias del Atlético de Madrid</a></p>
   </main>
   <footer>Diario Colchonero · Independiente, no afiliado al Atlético de Madrid. · <a href="${SITIO}/privacidad.html">Privacidad</a> · <a href="${SITIO}/aviso-legal.html">Aviso legal</a></footer>
+  <script>
+  (function(){ try {
+    if (/bot|crawl|spider|headless|preview/i.test(navigator.userAgent)) return;
+    var id = ${data.id}, clave = "atleti_vistas";
+    var v = JSON.parse(sessionStorage.getItem(clave) || "[]");
+    if (v.indexOf(id) >= 0) return;
+    v.push(id); sessionStorage.setItem(clave, JSON.stringify(v));
+    fetch("/api/like", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: id, accion: "vista" }) }).catch(function(){});
+  } catch (e) {} })();
+  </script>
   <script defer src="/_vercel/insights/script.js"></script>
 </body>
 </html>`;
