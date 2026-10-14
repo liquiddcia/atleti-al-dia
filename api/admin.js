@@ -7,6 +7,7 @@
 //   POST { accion: "descartar", id }           -> descarta un borrador (queda oculto para siempre)
 //   POST { accion: "publicarTodas" }           -> publica todos los borradores
 //   GET ?resumen=1                        -> devuelve el texto del resumen del día, listo para pegar en WhatsApp
+//   GET ?ranking=1                        -> devuelve las noticias más leídas (vistas) y más votadas
 
 const supabase = require("../lib/supabase");
 const { publicarBorradores, HORAS_AUTOPUBLICAR } = require("../lib/borradores");
@@ -78,6 +79,19 @@ module.exports = async function handler(req, res) {
   }
 
   try {
+    if (req.method === "GET" && req.query && req.query.ranking) {
+      const { data, error } = await supabase
+        .from("noticias")
+        .select("id, titular, categoria, vistas, likes, publicado_en")
+        .eq("oculta", false)
+        .gt("vistas", 0)
+        .order("vistas", { ascending: false })
+        .order("likes", { ascending: false })
+        .limit(15);
+      if (error) throw error;
+      return res.status(200).json({ ok: true, ranking: data || [] });
+    }
+
     if (req.method === "GET" && req.query && req.query.resumen) {
       return res.status(200).json({ ok: true, texto: await textoResumen() });
     }
