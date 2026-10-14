@@ -224,7 +224,7 @@
           var li = document.createElement("li");
           var a = document.createElement("a"); a.href = "/api/noticia?id=" + n.id; a.target = "_blank"; a.rel = "noopener";
           a.textContent = (i + 1) + ". " + n.titular; a.style.color = "inherit";
-          var num = document.createElement("span"); num.className = num.textContent = n.vistas + (n.vistas === 1 ? " lectura" : " lecturas") + " · ❤ " + (n.likes |
+          var num = document.createElement("span"); num.className = "num"; num.textContent = n.vistas + (n.vistas === 1 ? " lectura" : " lecturas") + " · ❤ " + (n.likes || 0);
           li.appendChild(a); li.appendChild(num); ul.appendChild(li);
         });
         caja.appendChild(ul);
