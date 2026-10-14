@@ -65,13 +65,19 @@ module.exports = async function handler(req, res) {
 
   const { data, error } = await supabase
     .from("noticias")
-    .select("id, categoria, titular, resumen, cuerpo, publicado_en, imagen_url, video_url")
+    .select("id, categoria, titular, resumen, cuerpo, publicado_en, imagen_url, video_url, vistas")
     .eq("id", id)
     .eq("oculta", false)
     .maybeSingle();
 
   if (error) return paginaError(res, 500, "No se pudo cargar la noticia");
   if (!data) return paginaError(res, 404, "Noticia no encontrada");
+
+  // Cuenta la visita si no es un robot ni una vista previa de WhatsApp/Telegram
+  const agente = String((req.headers && req.headers["user-agent"]) || "");
+  if (!/bot|crawl|spider|slurp|preview|facebookexternalhit|whatsapp|telegram|curl|wget|python|node-fetch|headless|vercel/i.test(agente)) {
+    await supabase.from("noticias").update({ vistas: (data.vistas || 0) + 1 }).eq("id", data.id);
+  }
 
   const url = `${SITIO}/api/noticia?id=${data.id}`;
   const etiqueta = ETIQUETAS[data.categoria] || data.categoria;
@@ -97,7 +103,7 @@ module.exports = async function handler(req, res) {
   const parrafos = lineas
     .map((p) => {
       const t = p.trim();
-            let m = t.match(/^\[\[cartel:(\d+),(\d+)\]\]$/) || t.match(/^<img[^>]*crests\.football-data\.org\/(\d+)\.png[^>]*>.*crests\.football-data\.org\/(\d+)\.png[^>]*>$/);
+      let m = t.match(/^\[\[cartel:(\d+),(\d+)\]\]$/) || t.match(/^<img[^>]*crests\.football-data\.org\/(\d+)\.png[^>]*>.*crests\.football-data\.org\/(\d+)\.png[^>]*>$/);
       if (m) {
         return `<div class="wn-cartel"><img src="https://crests.football-data.org/${m[1]}.png" alt=""><span>VS</span><img src="https://crests.football-data.org/${m[2]}.png" alt=""></div>`;
       }
