@@ -22,6 +22,11 @@
   .b-gua{ background:var(--azul); color:#fff; }
   .b-des{ background:#e8e8ee; color:#333; }
   .b-todas{ background:var(--rojo); color:#fff; width:100%; margin-bottom:14px; }
+  .b-wa{ background:#25D366; color:#fff; width:100%; margin-bottom:14px; }
+  .b-rank{ background:var(--azul); color:#fff; width:100%; margin-bottom:14px; }
+  .rank{ list-style:none; margin:0 0 14px; padding:0; }
+  .rank li{ display:grid; grid-template-columns:1fr auto; gap:10px; padding:9px 0; border-bottom:1px solid var(--linea); font-size:14px; }
+  .rank .num{ font-weight:700; white-space:nowrap; color:var(--rojo); }
   button:disabled{ opacity:.5; cursor:default; }
   .fila{ display:flex; flex-wrap:wrap; gap:8px; margin-top:14px; }
   .meta{ font-size:12px; color:#666; margin-bottom:6px; }
@@ -47,6 +52,9 @@
   </div>
 
   <div id="panel" style="display:none">
+    <button class="b-wa" id="copiar-resumen">📋 Copiar resumen del día para WhatsApp</button>
+    <button class="b-rank" id="ver-ranking">📊 Ver las noticias más leídas</button>
+    <div id="ranking" class="caja" style="display:none"></div>
     <p class="meta" id="resumen-panel"></p>
     <button class="b-todas" id="publicar-todas" style="display:none">Publicar todas</button>
     <div id="lista"></div>
@@ -67,10 +75,10 @@
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
-  function llamar(metodo, datos){
+  function llamar(metodo, datos, consulta){
     var opciones = { method: metodo, headers: { "Authorization": "Bearer " + clave, "Content-Type": "application/json" } };
     if(datos) opciones.body = JSON.stringify(datos);
-    return fetch("/api/admin", opciones).then(function(r){
+    return fetch("/api/admin" + (consulta || ""), opciones).then(function(r){
       return r.json().then(function(j){
         if(!r.ok) throw new Error(r.status === 401 ? "Clave incorrecta" : (j.error || "Error " + r.status));
         return j;
@@ -182,6 +190,46 @@
     var b = $("publicar-todas"); b.disabled = true;
     llamar("POST", { accion: "publicarTodas" }).then(function(r){
       aviso(r.publicadas + " noticia(s) publicada(s).", "ok"); return cargar();
+    }).catch(function(err){ aviso(err.message, "err"); }).then(function(){ b.disabled = false; });
+  };
+
+  $("copiar-resumen").onclick = function(){
+    var b = $("copiar-resumen"); b.disabled = true;
+    llamar("GET", null, "?resumen=1").then(function(r){
+      if(!r.texto){ aviso("No hay noticias de las últimas 24 horas para el resumen.", "err"); return; }
+      function ok(){ aviso("Resumen copiado. Pégalo en tu canal de WhatsApp.", "ok"); }
+      function respaldo(){
+        var t = document.createElement("textarea"); t.value = r.texto; t.style.position = "fixed"; t.style.opacity = "0";
+        document.body.appendChild(t); t.select();
+        try { document.execCommand("copy"); ok(); } catch(e){ prompt("Copia este texto:", r.texto); }
+        document.body.removeChild(t);
+      }
+      if(navigator.clipboard && navigator.clipboard.writeText){
+        navigator.clipboard.writeText(r.texto).then(ok).catch(respaldo);
+      } else { respaldo(); }
+    }).catch(function(err){ aviso(err.message, "err"); }).then(function(){ b.disabled = false; });
+  };
+
+  $("ver-ranking").onclick = function(){
+    var b = $("ver-ranking"), caja = $("ranking");
+    if(caja.style.display !== "none"){ caja.style.display = "none"; return; }
+    b.disabled = true;
+    llamar("GET", null, "?ranking=1").then(function(r){
+      caja.innerHTML = "";
+      var lista = r.ranking || [];
+      if(!lista.length){ caja.textContent = "Todavía no hay lecturas contadas."; }
+      else {
+        var ul = document.createElement("ul"); ul.className = "rank";
+        lista.forEach(function(n, i){
+          var li = document.createElement("li");
+          var a = document.createElement("a"); a.href = "/api/noticia?id=" + n.id; a.target = "_blank"; a.rel = "noopener";
+          a.textContent = (i + 1) + ". " + n.titular; a.style.color = "inherit";
+          var num = document.createElement("span"); num.className = "num"; num.textContent = n.vistas + " lecturas · ❤ " + (n.likes || 0);
+          li.appendChild(a); li.appendChild(num); ul.appendChild(li);
+        });
+        caja.appendChild(ul);
+      }
+      caja.style.display = "block";
     }).catch(function(err){ aviso(err.message, "err"); }).then(function(){ b.disabled = false; });
   };
 
