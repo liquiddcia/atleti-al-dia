@@ -185,6 +185,7 @@ module.exports = async function handler(req, res) {
     <div class="botones">
       <a class="btn b-web" href="${SITIO}/categoria.html?cat=${esc(data.categoria)}&amp;n=${data.id}">Comentar y dar me gusta</a>
       <a class="btn b-wa" href="https://whatsapp.com/channel/0029VbDayGCF1YlZa2aj5j0J" target="_blank" rel="noopener">Canal de WhatsApp</a>
+      <a class="btn b-wa" href="https://chat.whatsapp.com/HErvPhz36yoIuR97jbP0xG" target="_blank" rel="noopener">Grupo de WhatsApp</a>
       <a class="btn b-tg" href="https://t.me/diariocolchonero" target="_blank" rel="noopener">Canal de Telegram</a>
     </div>
     <p><a href="${SITIO}">← Todas las noticias del Atlético de Madrid</a></p>
