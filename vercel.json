@@ -9,5 +9,8 @@
     "api/actualizar.js": {
       "maxDuration": 60
     }
-  }
+  },
+  "rewrites": [
+    { "source": "/api/comentarios", "destination": "/api/like?tipo=comentarios" }
+  ]
 }
