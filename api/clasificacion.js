@@ -22,7 +22,7 @@ function dibujarEquipo(equipo) {
   const atleti = esAtleti(equipo);
   return {
     nombre: atleti ? "Atlético de Madrid" : (equipo.shortName || equipo.name),
-    escudo: atleti ? "/escudos/escudoB.png" : (equipo.crest || ""),
+    escudo: atleti ? "https://crests.football-data.org/78.png" : (equipo.crest || ""),
   };
 }
 
