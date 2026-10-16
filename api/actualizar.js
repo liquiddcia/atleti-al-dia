@@ -2,9 +2,10 @@ const Parser = require("rss-parser");
 const supabase = require("../lib/supabase");
 const fuentes = require("../lib/fuentes");
 const { reescribirNoticia } = require("../lib/reescribir");
+const { leerArticulo } = require("../lib/leerarticulo");
 const { actualizarClasificaciones } = require("../lib/clasificacion");
 const { publicarEnTelegram } = require("../lib/telegram");
-const { publicarBorradores, avisarBorradores } = require("../lib/borradores");
+const { avisarBorradores } = require("../lib/borradores");
 
 const parser = new Parser();
 const MAX_HORAS_ANTIGUEDAD = 48; // no se publican noticias cuyo medio las publicó hace más de 48 horas
@@ -41,9 +42,8 @@ async function partidosYaJugados() {
   }
 }
 const MAX_NOTICIAS = 6;
-// Modo revisión: las noticias nuevas quedan como borradores ocultos hasta que las apruebes
-// en /admin.html (o se publican solas pasada 1 hora). Para desactivarlo, pon la variable
-// MODO_REVISION=0 en Vercel.
+// Modo revisión: las noticias nuevas quedan como borradores hasta que las apruebas en /admin.html
+// (o se publican solas pasada 1 hora). Para volver a publicar directo: MODO_REVISION=0 en Vercel.
 const MODO_REVISION = process.env.MODO_REVISION !== "0";
 
 function corregirCategoria(texto, categoriaIA) {
@@ -146,28 +146,28 @@ module.exports = async function handler(req, res) {
       .limit(40);
     const recientes = (recientesBD || []).map((n) => n.titular);
 
-    let descartadasYaGuardadas = 0;
-    let descartadasAntiguas = 0;
-    let descartadasParecidas = 0;
     const aceptados = [];
-    const candidatos = unicos.filter((it) => {
-      if (yaGuardados.has(it.titulo.toLowerCase().slice(0, 40))) { descartadasYaGuardadas++; return false; }
-      if (esMuyAntigua(it.publicado)) { descartadasAntiguas++; return false; }
-      // Descarta si se parece a una noticia reciente o a otra de esta misma tanda
-      if (recientes.some((t) => sonParecidos(it.titulo, t)) || aceptados.some((t) => sonParecidos(it.titulo, t))) {
-        descartadasParecidas++;
-        return false;
-      }
-      aceptados.push(it.titulo);
-      return true;
-    });
-    const nuevos = candidatos.slice(0, MAX_NOTICIAS);
+    const nuevos = unicos
+      .filter((it) => !yaGuardados.has(it.titulo.toLowerCase().slice(0, 40)))
+      .filter((it) => !esMuyAntigua(it.publicado))
+      .filter((it) => {
+        // Descarta si se parece a una noticia reciente o a otra de esta misma tanda
+        if (recientes.some((t) => sonParecidos(it.titulo, t))) return false;
+        if (aceptados.some((t) => sonParecidos(it.titulo, t))) return false;
+        aceptados.push(it.titulo);
+        return true;
+      })
+      .slice(0, MAX_NOTICIAS);
 
     const contexto = await partidosYaJugados();
 
+    let articulosLeidos = 0;
     const reescritas = await Promise.all(
       nuevos.map(async (item) => {
-        const resultado = await reescribirNoticia({ ...item, recientes, contexto });
+        // Lee el artículo original (si se puede) para que la IA tenga nombres y datos completos
+        const textoArticulo = await leerArticulo(item.enlace);
+        if (textoArticulo) articulosLeidos++;
+        const resultado = await reescribirNoticia({ ...item, recientes, contexto, textoArticulo });
         if (!resultado || resultado.descartar) return null;
         return {
           categoria: corregirCategoria(
@@ -192,31 +192,23 @@ module.exports = async function handler(req, res) {
     let enviadasTelegram = 0;
     let borradores = 0;
     if (filas.length > 0) {
-      const ahoraISO = new Date().toISOString();
-      const filasAGuardar = MODO_REVISION
-        ? filas.map((f) => ({ ...f, oculta: true, borrador: true, borrador_desde: ahoraISO }))
-        : filas;
-      const { data: guardadas, error } = await supabase
-        .from("noticias")
-        .insert(filasAGuardar)
-        .select("id, categoria, titular, resumen");
-      if (error) throw error;
       if (MODO_REVISION) {
+        const ahoraISO = new Date().toISOString();
+        const { data: guardadas, error } = await supabase
+          .from("noticias")
+          .insert(filas.map((f) => ({ ...f, oculta: true, borrador: true, borrador_desde: ahoraISO })))
+          .select("id, categoria, titular, resumen");
+        if (error) throw error;
         borradores = (guardadas || []).length;
-        await avisarBorradores(guardadas || []).catch((e) =>
-          console.error("Error avisando de borradores:", e.message)
-        );
+        try { await avisarBorradores(guardadas || []); } catch (e) { console.error("Error avisando de borradores:", e.message); }
       } else {
+        const { data: guardadas, error } = await supabase
+          .from("noticias")
+          .insert(filas)
+          .select("id, categoria, titular, resumen");
+        if (error) throw error;
         enviadasTelegram = await publicarEnTelegram(guardadas || []);
       }
-    }
-
-    // Publica los borradores que llevan más de 1 hora sin revisar
-    let autopublicadas = 0;
-    try {
-      autopublicadas = (await publicarBorradores({ soloAntiguos: true })).publicadas;
-    } catch (e) {
-      console.error("Error autopublicando borradores:", e.message);
     }
 
     return res.status(200).json({
@@ -224,17 +216,10 @@ module.exports = async function handler(req, res) {
       total: filas.length,
       enviadasTelegram,
       borradores,
-      autopublicadas,
       encontrados: unicos.length,
       yaGuardadosEnBD: yaGuardados.size,
       nuevosTrasFiltro: nuevos.length,
-      descartadasYaGuardadas,
-      descartadasAntiguas,
-      descartadasParecidas,
-      pendientesPorLimite: candidatos.length - nuevos.length,
-      leidasPorLaIA: nuevos.length,
-      descartadasPorLaIA: nuevos.length - filas.length,
-      guardadasEnBD: filas.length,
+      articulosLeidos,
       errorConsulta: errorExistentes ? errorExistentes.message : null,
     });
   } catch (error) {
