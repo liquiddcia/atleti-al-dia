@@ -43,7 +43,7 @@ async function textoResumen() {
     .slice(0, MAX_RESUMEN);
   if (!lista.length) return "";
 
-  const lineas = lista.map((n, i) => `${i + 1}. ${n.titular}\n${SITIO}/api/noticia?id=${n.id}`);
+  const lineas = lista.map((n, i) => `${i + 1}. ${n.titular}\n${SITIO}/api/noticia?id=${n.id}&utm_source=whatsapp`);
   return (
     `📰 LO MÁS IMPORTANTE DEL ATLETI HOY\n\n` +
     lineas.join("\n\n") +
