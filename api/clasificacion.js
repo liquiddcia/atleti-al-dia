@@ -100,6 +100,8 @@ async function calcularPartidoVivo() {
     visitante: dibujarEquipo(m.awayTeam),
     golesLocal: gl,
     golesVisitante: gv,
+    minuto: m.minute != null ? m.minute : null,
+    extra: m.injuryTime != null ? m.injuryTime : null,
     goles,
   };
 }
