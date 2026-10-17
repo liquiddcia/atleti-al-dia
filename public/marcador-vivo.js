@@ -54,10 +54,32 @@
     return d;
   }
 
+  // Parte y minuto del partido: si la fuente da el minuto se usa tal cual; si no, se calcula
+  // desde la hora de inicio (45' + descanso de unos 15') y se marca con "≈".
+  function parteYMinuto(p) {
+    var parte, texto;
+    if (p.minuto != null) {
+      parte = p.minuto > 45 ? "2ª parte" : "1ª parte";
+      texto = p.extra ? p.minuto + "+" + p.extra + "'" : p.minuto + "'";
+      return parte + " · " + texto;
+    }
+    var t = (Date.now() - new Date(p.inicio).getTime()) / 60000;
+    if (isNaN(t) || t < 0) return "";
+    if (t < 47) {
+      var m1 = Math.max(1, Math.ceil(t));
+      return "1ª parte · ≈" + (m1 > 45 ? "45+" : m1 + "'");
+    }
+    var m2 = Math.max(46, 45 + Math.floor(t - 62) + 1);
+    return "2ª parte · ≈" + (m2 > 90 ? "90+" : m2 + "'");
+  }
+
   function pintar(p) {
     if (!p) { caja.style.display = "none"; caja.textContent = ""; return; }
     var etiqueta, clase = "";
-    if (p.estado === "IN_PLAY" || p.estado === "LIVE") etiqueta = "🔴 En directo";
+    if (p.estado === "IN_PLAY" || p.estado === "LIVE") {
+      var detalle = parteYMinuto(p);
+      etiqueta = "🔴 En directo" + (detalle ? " · " + detalle : "");
+    }
     else if (p.estado === "PAUSED") etiqueta = "⏸ Descanso";
     else if (p.estado === "FINISHED") { etiqueta = "Final"; clase = " fin"; }
     else {
