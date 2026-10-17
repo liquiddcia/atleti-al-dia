@@ -307,7 +307,7 @@
         const r = await fetch("/api/clasificacion");
         const datos = await r.json();
         const tabla = (datos.calendario && datos.calendario.tabla) || [];
-        const limite = Date.now() - 3 * 60 * 60 * 1000; // un partido en juego sigue contando
+                const limite = Date.now(); // el partido en juego lo enseña la franja del marcador
         const proximos = tabla
           .filter(p => p.estado !== "FINISHED" && p.estado !== "POSTPONED" && p.estado !== "CANCELLED" && new Date(p.fecha).getTime() > limite)
           .sort((a, b) => new Date(a.fecha) - new Date(b.fecha));
