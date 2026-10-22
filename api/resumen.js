@@ -12,12 +12,12 @@ const MAX_NOTICIAS = 6;
 function construirMensaje(noticias) {
   const lineas = noticias.map(
     (n, i) =>
-      `${i + 1}. ${n.titular}\n${SITIO}/api/noticia?id=${n.id}`
+      `${i + 1}. ${n.titular}\n${SITIO}/api/noticia?id=${n.id}&utm_source=whatsapp`
   );
   return (
     `📰 LO MÁS IMPORTANTE DEL ATLETI HOY\n\n` +
     lineas.join("\n\n") +
-    `\n\n🔴⚪ Todas las noticias en ${SITIO}\n📲 Telegram: t.me/diariocolchonero\n📲 WhatsApp: https://whatsapp.com/channel/0029VbDayGCF1YlZa2aj5j0J`
+    `\n\n🔴⚪ Todas las noticias en ${SITIO}/?utm_source=whatsapp\n📲 Telegram: t.me/diariocolchonero\n📲 WhatsApp: https://whatsapp.com/channel/0029VbDayGCF1YlZa2aj5j0J`
   );
 }
 
