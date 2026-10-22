@@ -1,0 +1,39 @@
+name: Voz de prueba del oso
+
+on:
+  workflow_dispatch:
+
+jobs:
+  voz:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Instalar edge-tts y ffmpeg
+        run: |
+          pip install edge-tts
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg
+
+      - name: Generar las voces
+        run: |
+          mkdir -p salida
+          cat > texto.txt <<'EOF'
+          Última hora en el Metropolitano. El Atlético de Madrid confirma que Cuti Romero ha superado las pruebas médicas y queda a las órdenes del cuerpo técnico. Los aficionados colchoneros respiran tranquilos antes del próximo partido. Esto es Diario Colchonero.
+          EOF
+          for voz in es-ES-AlvaroNeural es-MX-JorgeNeural; do
+            edge-tts --voice "$voz" --file texto.txt --write-media "base_$voz.mp3"
+            for nivel in ligera:0.92 media:0.85 grave:0.78; do
+              nombre="${nivel%%:*}"
+              r="${nivel##*:}"
+              ffmpeg -y -loglevel error -i "base_$voz.mp3" \
+                -af "asetrate=24000*$r,aresample=44100,atempo=1/$r,bass=g=6:f=120,acompressor" \
+                "salida/${voz}_${nombre}.mp3"
+            done
+            cp "base_$voz.mp3" "salida/${voz}_original.mp3"
+          done
+          ls -la salida
+
+      - name: Guardar los audios
+        uses: actions/upload-artifact@v4
+        with:
+          name: voces-oso
+          path: salida/
