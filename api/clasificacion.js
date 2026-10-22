@@ -95,7 +95,7 @@ async function calcularPartidoVivo() {
     id: m.id,
     estado: m.status,
     inicio: m.utcDate,
-    competicion: (m.competition && m.competition.name) || "",
+    competicion: ({ PD: "LaLiga", CL: "Champions League", CDR: "Copa del Rey", SC: "Supercopa" })[m.competition && m.competition.code] || (m.competition && m.competition.name) || "",
     local: dibujarEquipo(m.homeTeam),
     visitante: dibujarEquipo(m.awayTeam),
     golesLocal: gl,
