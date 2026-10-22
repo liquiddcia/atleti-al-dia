@@ -178,6 +178,7 @@ module.exports = async function handler(req, res) {
     const contexto = await partidosYaJugados();
 
     let articulosLeidos = 0;
+    const descartadasIA = []; // titulares que la IA descarta al reescribir (para revisarlas)
     const reescritas = await Promise.all(
       gruposFinales.map(async (grupo) => {
         // Lee los artículos originales (si se puede) para que la IA tenga nombres y datos completos
@@ -192,7 +193,7 @@ module.exports = async function handler(req, res) {
           ? textos.map((t, i) => (t ? `--- Texto ${i + 1} (${grupo[i].fuente}) ---\n${t.slice(0, 3000)}` : "")).filter(Boolean).join("\n\n")
           : textos[0];
         const resultado = await reescribirNoticia({ ...item, resumenOriginal, recientes, contexto, textoArticulo, varias });
-        if (!resultado || resultado.descartar) return null;
+        if (!resultado || resultado.descartar) { descartadasIA.push(item.titulo); return null; }
         const nombresFuentes = [...new Set(grupo.map((it) => it.fuente))].join(", ");
         return {
           categoria: corregirCategoria(
@@ -247,6 +248,8 @@ module.exports = async function handler(req, res) {
       nuevosTrasFiltro: nuevos.length,
       gruposUnidos: gruposFinales.filter((g) => g.length > 1).length,
       repetidasDescartadas: repetidas.length,
+      titularesRepetidos: repetidas.map((i) => nuevos[i] && nuevos[i].titulo),
+      titularesDescartadosIA: descartadasIA,
       articulosLeidos,
       errorConsulta: errorExistentes ? errorExistentes.message : null,
     });
