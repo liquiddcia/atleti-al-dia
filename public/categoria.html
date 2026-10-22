@@ -338,7 +338,7 @@
 
     // ---------- Compartir ----------
     function compartir(n){
-      const url = `${location.origin}/api/noticia?id=${n.id}`;
+      const url = `${location.origin}/api/noticia?id=${n.id}&utm_source=compartir`;
       if(navigator.share){
         navigator.share({ title: n.titular, text: n.titular + " — Diario Colchonero", url }).catch(() => {});
       } else if(navigator.clipboard){
