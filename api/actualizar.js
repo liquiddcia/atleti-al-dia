@@ -3,6 +3,7 @@ const supabase = require("../lib/supabase");
 const fuentes = require("../lib/fuentes");
 const { reescribirNoticia } = require("../lib/reescribir");
 const { leerArticulo } = require("../lib/leerarticulo");
+const { agruparNoticias } = require("../lib/agrupar");
 const { actualizarClasificaciones } = require("../lib/clasificacion");
 const { publicarEnTelegram } = require("../lib/telegram");
 const { avisarBorradores } = require("../lib/borradores");
@@ -41,7 +42,8 @@ async function partidosYaJugados() {
     return "";
   }
 }
-const MAX_NOTICIAS = 6;
+const MAX_NOTICIAS = 6; // máximo de noticias publicadas por tanda (ya agrupadas)
+const MAX_CANDIDATAS = 12; // máximo de noticias nuevas que se estudian para agrupar
 // Modo revisión: las noticias nuevas quedan como borradores hasta que las apruebas en /admin.html
 // (o se publican solas pasada 1 hora). Para volver a publicar directo: MODO_REVISION=0 en Vercel.
 const MODO_REVISION = process.env.MODO_REVISION !== "0";
@@ -136,7 +138,11 @@ module.exports = async function handler(req, res) {
       console.error("Error consultando duplicados:", errorExistentes);
     }
 
-    const yaGuardados = new Set((existentes || []).map((n) => n.titulo_original));
+    // Una noticia unida guarda varias claves separadas por "||" (una por cada original)
+    const yaGuardados = new Set();
+    (existentes || []).forEach((n) => {
+      String(n.titulo_original || "").split("||").forEach((k) => yaGuardados.add(k));
+    });
 
     // Titulares de las últimas noticias, para no repetir el mismo tema
     const { data: recientesBD } = await supabase
@@ -157,29 +163,48 @@ module.exports = async function handler(req, res) {
         aceptados.push(it.titulo);
         return true;
       })
+      .slice(0, MAX_CANDIDATAS);
+
+    // Agrupa las que cuentan lo mismo (misma persona en el mismo acto, misma entrevista...)
+    // para publicar UNA sola noticia, y quita las que solo repiten algo ya publicado.
+    const { grupos, repetidas } = await agruparNoticias(nuevos, recientes);
+    const sinRepetidas = new Set(repetidas);
+    const gruposFinales = grupos
+      .map((g) => g.filter((i) => !sinRepetidas.has(i)).map((i) => nuevos[i]))
+      .filter((g) => g.length > 0)
       .slice(0, MAX_NOTICIAS);
 
     const contexto = await partidosYaJugados();
 
     let articulosLeidos = 0;
     const reescritas = await Promise.all(
-      nuevos.map(async (item) => {
-        // Lee el artículo original (si se puede) para que la IA tenga nombres y datos completos
-        const textoArticulo = await leerArticulo(item.enlace);
-        if (textoArticulo) articulosLeidos++;
-        const resultado = await reescribirNoticia({ ...item, recientes, contexto, textoArticulo });
+      gruposFinales.map(async (grupo) => {
+        // Lee los artículos originales (si se puede) para que la IA tenga nombres y datos completos
+        const textos = await Promise.all(grupo.map((it) => leerArticulo(it.enlace)));
+        textos.forEach((t) => { if (t) articulosLeidos++; });
+        const item = grupo[0];
+        const varias = grupo.length > 1;
+        const resumenOriginal = varias
+          ? grupo.map((it) => `[${it.fuente}] ${it.titulo}: ${it.resumenOriginal}`).join("\n")
+          : item.resumenOriginal;
+        const textoArticulo = varias
+          ? textos.map((t, i) => (t ? `--- Texto ${i + 1} (${grupo[i].fuente}) ---\n${t.slice(0, 3000)}` : "")).filter(Boolean).join("\n\n")
+          : textos[0];
+        const resultado = await reescribirNoticia({ ...item, resumenOriginal, recientes, contexto, textoArticulo, varias });
         if (!resultado || resultado.descartar) return null;
+        const nombresFuentes = [...new Set(grupo.map((it) => it.fuente))].join(", ");
         return {
           categoria: corregirCategoria(
-            `${item.titulo} ${item.resumenOriginal} ${resultado.titular} ${resultado.resumen}`,
+            `${grupo.map((it) => `${it.titulo} ${it.resumenOriginal}`).join(" ")} ${resultado.titular} ${resultado.resumen}`,
             resultado.categoria
           ),
           titular: resultado.titular,
           resumen: resultado.resumen,
           cuerpo: resultado.cuerpo,
-          fuentes: item.fuente,
+          fuentes: nombresFuentes,
           enlace_original: item.enlace,
-          titulo_original: item.titulo.toLowerCase().slice(0, 40),
+          // una clave por cada original, para no volver a procesar ninguno
+          titulo_original: grupo.map((it) => it.titulo.toLowerCase().slice(0, 40)).join("||"),
           publicado_en: item.publicado
             ? new Date(item.publicado).toISOString()
             : new Date().toISOString(),
@@ -219,6 +244,8 @@ module.exports = async function handler(req, res) {
       encontrados: unicos.length,
       yaGuardadosEnBD: yaGuardados.size,
       nuevosTrasFiltro: nuevos.length,
+      gruposUnidos: gruposFinales.filter((g) => g.length > 1).length,
+      repetidasDescartadas: repetidas.length,
       articulosLeidos,
       errorConsulta: errorExistentes ? errorExistentes.message : null,
     });
