@@ -6,21 +6,29 @@ on:
 jobs:
   voz:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - name: Instalar edge-tts y ffmpeg
+        timeout-minutes: 4
+        env:
+          DEBIAN_FRONTEND: noninteractive
         run: |
           pip install edge-tts
-          sudo apt-get update -qq
-          sudo apt-get install -y -qq ffmpeg
+          if ! command -v ffmpeg >/dev/null; then
+            sudo apt-get install -y -qq ffmpeg
+          fi
+          ffmpeg -version | head -1
 
       - name: Generar las voces
+        timeout-minutes: 5
         run: |
           mkdir -p salida
           cat > texto.txt <<'EOF'
           Última hora en el Metropolitano. El Atlético de Madrid confirma que Cuti Romero ha superado las pruebas médicas y queda a las órdenes del cuerpo técnico. Los aficionados colchoneros respiran tranquilos antes del próximo partido. Esto es Diario Colchonero.
           EOF
+          export PATH="$HOME/.local/bin:$PATH"
           for voz in es-ES-AlvaroNeural es-MX-JorgeNeural; do
-            edge-tts --voice "$voz" --file texto.txt --write-media "base_$voz.mp3"
+            timeout 60 edge-tts --voice "$voz" --file texto.txt --write-media "base_$voz.mp3"
             for nivel in ligera:0.92 media:0.85 grave:0.78; do
               nombre="${nivel%%:*}"
               r="${nivel##*:}"
