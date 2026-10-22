@@ -144,12 +144,13 @@ module.exports = async function handler(req, res) {
       String(n.titulo_original || "").split("||").forEach((k) => yaGuardados.add(k));
     });
 
-    // Titulares de las últimas noticias, para no repetir el mismo tema
+    // Titulares de los últimos 7 días (no solo de hoy), para no repetir el mismo tema
     const { data: recientesBD } = await supabase
       .from("noticias")
       .select("titular")
+      .gte("publicado_en", new Date(Date.now() - 7 * 86400000).toISOString())
       .order("id", { ascending: false })
-      .limit(40);
+      .limit(100);
     const recientes = (recientesBD || []).map((n) => n.titular);
 
     const aceptados = [];
