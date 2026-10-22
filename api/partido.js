@@ -78,7 +78,7 @@ function mensajePrevia(m) {
     `⚽ <b>¡El Atleti juega en menos de una hora!</b>\n\n` +
     `${esc(nombre(m.homeTeam))} - ${esc(nombre(m.awayTeam))}\n` +
     `🕒 ${hora}h (hora de España)${comp ? ` · ${esc(comp)}` : ""}\n\n` +
-    `🔴⚪ Previa y noticias: <a href="${SITIO}">diariocolchonero.com</a>`
+    `🔴⚪ Previa y noticias: <a href="${SITIO}/?utm_source=telegram">diariocolchonero.com</a>`
   );
 }
 
@@ -95,7 +95,7 @@ function mensajeFinal(m) {
     `${icono} <b>FINAL${comp ? ` · ${esc(comp)}` : ""}</b>\n\n` +
     `${esc(nombre(m.homeTeam))} <b>${gl} - ${gv}</b> ${esc(nombre(m.awayTeam))}\n` +
     `${titulo}\n\n` +
-    `📰 Todas las noticias: <a href="${SITIO}">diariocolchonero.com</a>`
+    `📰 Todas las noticias: <a href="${SITIO}/?utm_source=telegram">diariocolchonero.com</a>`
   );
 }
 
@@ -135,7 +135,7 @@ function mensajeDescanso(m, goles) {
     `⏸ <b>DESCANSO${comp ? ` · ${esc(comp)}` : ""}</b>\n\n` +
     `${esc(nombre(m.homeTeam))} ${marcador} ${esc(nombre(m.awayTeam))}` +
     lineaGoles +
-    `\n\n📰 Sigue el partido y las noticias: <a href="${SITIO}">diariocolchonero.com</a>`
+    `\n\n📰 Sigue el partido y las noticias: <a href="${SITIO}/?utm_source=telegram">diariocolchonero.com</a>`
   );
 }
 
