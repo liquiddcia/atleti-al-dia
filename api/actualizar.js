@@ -16,10 +16,11 @@ function esMuyAntigua(publicado) {
   return !isNaN(t) && Date.now() - t > MAX_HORAS_ANTIGUEDAD * 3600 * 1000;
 }
 
-// Partidos del Atlético ya terminados en los últimos días, para que la IA no publique
-// previas de partidos que ya se han jugado.
-async function partidosYaJugados() {
-  if (!process.env.FOOTBALL_DATA_API_KEY) return "";
+// Partidos del Atlético de los últimos días y de mañana. Devuelve el contexto para la IA:
+// los ya terminados (con resultado, para no publicar previas de partidos jugados) y los que
+// todavía NO han terminado (para no publicar resultados de partidos que no han acabado).
+async function partidosContexto() {
+  if (!process.env.FOOTBALL_DATA_API_KEY) return { contexto: "", pendientes: [] };
   try {
     const dia = (d) => d.toISOString().slice(0, 10);
     const ahora = Date.now();
@@ -27,9 +28,10 @@ async function partidosYaJugados() {
       `https://api.football-data.org/v4/teams/78/matches?dateFrom=${dia(new Date(ahora - 5 * 86400000))}&dateTo=${dia(new Date(ahora + 86400000))}`,
       { headers: { "X-Auth-Token": process.env.FOOTBALL_DATA_API_KEY } }
     );
-    if (!r.ok) return "";
+    if (!r.ok) return { contexto: "", pendientes: [] };
     const d = await r.json();
-    return (d.matches || [])
+    const partidos = d.matches || [];
+    const jugados = partidos
       .filter((m) => m.status === "FINISHED" && m.score && m.score.fullTime && m.score.fullTime.home != null)
       .map((m) => {
         const fecha = new Date(m.utcDate).toLocaleDateString("es-ES", { weekday: "long", day: "numeric", month: "long", timeZone: "Europe/Madrid" });
@@ -37,13 +39,40 @@ async function partidosYaJugados() {
         return `- ${fecha}: ${m.homeTeam.shortName || m.homeTeam.name} ${m.score.fullTime.home}-${m.score.fullTime.away} ${m.awayTeam.shortName || m.awayTeam.name}${comp ? ` (${comp})` : ""}`;
       })
       .join("\n");
+    const pendientes = partidos
+      .filter((m) => !["FINISHED", "POSTPONED", "CANCELLED", "SUSPENDED"].includes(m.status))
+      .map((m) => {
+        const rival = m.homeTeam.id === 78 ? m.awayTeam : m.homeTeam;
+        const hora = new Date(m.utcDate).toLocaleString("es-ES", { weekday: "long", day: "numeric", month: "long", hour: "2-digit", minute: "2-digit", timeZone: "Europe/Madrid" });
+        const enJuego = m.status === "IN_PLAY" || m.status === "PAUSED";
+        return {
+          rival: (rival.shortName || rival.name || "").toLowerCase(),
+          texto: `- ${m.homeTeam.shortName || m.homeTeam.name} - ${m.awayTeam.shortName || m.awayTeam.name}, ${hora} (hora de España)${enJuego ? ", EN JUEGO" : ", todavía sin empezar"}`,
+        };
+      });
+    let contexto = jugados;
+    if (pendientes.length) {
+      contexto += (contexto ? "\n\n" : "") +
+        "ATENCIÓN, partidos que TODAVÍA NO HAN TERMINADO (si la noticia cuenta su resultado, un empate, goles o cómo acabó, es falsa o antigua: responde {\"descartar\": true}):\n" +
+        pendientes.map((p) => p.texto).join("\n");
+    }
+    return { contexto, pendientes };
   } catch (e) {
-    console.error("Error pidiendo partidos jugados:", e.message);
-    return "";
+    console.error("Error pidiendo partidos:", e.message);
+    return { contexto: "", pendientes: [] };
   }
 }
-const MAX_NOTICIAS = 6; // máximo de noticias publicadas por tanda (ya agrupadas)
-const MAX_CANDIDATAS = 12; // máximo de noticias nuevas que se estudian para agrupar
+
+// Palabras que indican que una noticia cuenta cómo acabó un partido
+const PALABRAS_RESULTADO = /empatan|empat[oó]|sin goles|ganan|gan[oó] el|se impone|vence a|vencen|derrota al|golean|pitido final|final del partido|victoria rojiblanca/i;
+const MAX_NOTICIAS = 4; // máximo de noticias publicadas por tanda (ya agrupadas)
+const MAX_CANDIDATAS = 10; // máximo de noticias nuevas que se estudian para agrupar
+const TIEMPO_MAX_GRUPO = 15000; // ms que se da a cada noticia; cron-job.org corta a los 30 s
+
+// Si una noticia tarda demasiado, se deja para la siguiente ejecución (no se guarda ni se pierde)
+function conTiempo(promesa, ms) {
+  return Promise.race([promesa, new Promise((resolve) => setTimeout(() => resolve("TIEMPO"), ms))]);
+}
 // Modo revisión: las noticias nuevas quedan como borradores hasta que las apruebas en /admin.html
 // (o se publican solas pasada 1 hora). Para volver a publicar directo: MODO_REVISION=0 en Vercel.
 const MODO_REVISION = process.env.MODO_REVISION !== "0";
@@ -175,12 +204,12 @@ module.exports = async function handler(req, res) {
       .filter((g) => g.length > 0)
       .slice(0, MAX_NOTICIAS);
 
-    const contexto = await partidosYaJugados();
+    const { contexto, pendientes } = await partidosContexto();
 
     let articulosLeidos = 0;
     const descartadasIA = []; // titulares que la IA descarta al reescribir (para revisarlas)
     const reescritas = await Promise.all(
-      gruposFinales.map(async (grupo) => {
+      gruposFinales.map((grupo) => conTiempo((async () => {
         // Lee los artículos originales (si se puede) para que la IA tenga nombres y datos completos
         const textos = await Promise.all(grupo.map((it) => leerArticulo(it.enlace)));
         textos.forEach((t) => { if (t) articulosLeidos++; });
@@ -194,6 +223,11 @@ module.exports = async function handler(req, res) {
           : textos[0];
         const resultado = await reescribirNoticia({ ...item, resumenOriginal, recientes, contexto, textoArticulo, varias });
         if (!resultado || resultado.descartar) { descartadasIA.push(item.titulo); return null; }
+        // Filtro de seguridad: si habla del rival de un partido que no ha terminado y cuenta un
+        // resultado (empate, victoria, "sin goles"...), se descarta aunque la IA lo haya dejado pasar.
+        const textoNoticia = `${resultado.titular} ${resultado.resumen}`.toLowerCase();
+        const resultadoFalso = pendientes.some((p) => p.rival && textoNoticia.includes(p.rival) && PALABRAS_RESULTADO.test(textoNoticia));
+        if (resultadoFalso) { descartadasIA.push("[resultado de partido sin terminar] " + resultado.titular); return null; }
         const nombresFuentes = [...new Set(grupo.map((it) => it.fuente))].join(", ");
         return {
           categoria: corregirCategoria(
@@ -211,10 +245,11 @@ module.exports = async function handler(req, res) {
             ? new Date(item.publicado).toISOString()
             : new Date().toISOString(),
         };
-      })
+      })(), TIEMPO_MAX_GRUPO))
     );
 
-    const filas = reescritas.filter(Boolean);
+    const gruposSinTiempo = reescritas.filter((x) => x === "TIEMPO").length;
+    const filas = reescritas.filter((x) => x && x !== "TIEMPO");
 
     let enviadasTelegram = 0;
     let borradores = 0;
@@ -250,6 +285,8 @@ module.exports = async function handler(req, res) {
       repetidasDescartadas: repetidas.length,
       titularesRepetidos: repetidas.map((i) => nuevos[i] && nuevos[i].titulo),
       titularesDescartadosIA: descartadasIA,
+      partidosSinTerminar: pendientes.length,
+      gruposSinTiempo,
       articulosLeidos,
       errorConsulta: errorExistentes ? errorExistentes.message : null,
     });
