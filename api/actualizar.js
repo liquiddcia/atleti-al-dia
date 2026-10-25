@@ -9,7 +9,7 @@ const { publicarEnTelegram } = require("../lib/telegram");
 const { avisarBorradores } = require("../lib/borradores");
 
 const parser = new Parser();
-const MAX_HORAS_ANTIGUEDAD = 48; // no se publican noticias cuyo medio las publicó hace más de 48 horas
+const MAX_HORAS_ANTIGUEDAD = 24; // no se publican noticias cuyo medio las publicó hace más de 24 horas
 
 function esMuyAntigua(publicado) {
   const t = publicado ? new Date(publicado).getTime() : NaN;
