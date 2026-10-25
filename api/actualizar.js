@@ -67,7 +67,7 @@ async function partidosContexto() {
 const PALABRAS_RESULTADO = /empatan|empat[oó]|sin goles|ganan|gan[oó] el|se impone|vence a|vencen|derrota al|golean|pitido final|final del partido|victoria rojiblanca/i;
 const MAX_NOTICIAS = 4; // máximo de noticias publicadas por tanda (ya agrupadas)
 const MAX_CANDIDATAS = 10; // máximo de noticias nuevas que se estudian para agrupar
-const TIEMPO_MAX_GRUPO = 15000; // ms que se da a cada noticia; cron-job.org corta a los 30 s
+const TIEMPO_MAX_GRUPO = 12000; // ms que se da a cada noticia; cron-job.org corta a los 30 s
 
 // Si una noticia tarda demasiado, se deja para la siguiente ejecución (no se guarda ni se pierde)
 function conTiempo(promesa, ms) {
