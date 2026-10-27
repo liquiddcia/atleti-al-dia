@@ -2,6 +2,13 @@ name: Vídeo noticia - Al Atlético le salen las cuentas
 
 on:
   workflow_dispatch:
+  # GitHub solo permite lanzar a mano workflows que ya estén en main;
+  # mientras tanto se lanza al empujar cambios del vídeo a esta rama.
+  push:
+    branches: [claude/upbeat-meitner-6q6qho]
+    paths:
+      - .github/workflows/video-noticia.yml
+      - scripts/video_noticia.py
 
 jobs:
   video:
