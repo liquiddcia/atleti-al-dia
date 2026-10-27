@@ -1,20 +1,69 @@
-name: Vídeo noticia - Al Atlético le salen las cuentas
+name: Vídeo noticia
 
 on:
   workflow_dispatch:
-  # GitHub solo permite lanzar a mano workflows que ya estén en main;
-  # mientras tanto se lanza al empujar cambios del vídeo a esta rama.
+    inputs:
+      video:
+        description: "Nombre del json de la carpeta videos/, sin .json (por ejemplo: cuti)"
+        required: true
+        default: cuti
+  # Al subir o cambiar un videos/*.json se generan los vídeos de los json cambiados.
   push:
-    branches: [claude/upbeat-meitner-6q6qho]
     paths:
-      - .github/workflows/video-noticia.yml
-      - scripts/video_noticia.py
-      - assets/musica/**
+      - videos/*.json
 
 jobs:
+  preparar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    outputs:
+      videos: ${{ steps.lista.outputs.videos }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Elegir qué vídeos generar
+        id: lista
+        env:
+          EVENTO: ${{ github.event_name }}
+          ENTRADA: ${{ inputs.video }}
+          ANTES: ${{ github.event.before }}
+          DESPUES: ${{ github.sha }}
+        run: |
+          if [ "$EVENTO" = "workflow_dispatch" ]; then
+            nombres="${ENTRADA%.json}"
+          else
+            # En una rama nueva no hay commit anterior: se mira solo el último commit.
+            if [ -z "$ANTES" ] || [ "$ANTES" = "0000000000000000000000000000000000000000" ] \
+               || ! git cat-file -e "$ANTES" 2>/dev/null; then
+              ANTES="$DESPUES~1"
+            fi
+            nombres=$(git diff --name-only --diff-filter=AM "$ANTES" "$DESPUES" -- 'videos/*.json' \
+                      | xargs -r -n1 basename | sed 's/\.json$//')
+          fi
+          videos="[]"
+          for n in $nombres; do
+            if ! [[ "$n" =~ ^[A-Za-z0-9_-]+$ ]]; then
+              echo "::error::Nombre no válido: $n"; exit 1
+            fi
+            if [ ! -f "videos/$n.json" ]; then
+              echo "::error::No existe videos/$n.json"; exit 1
+            fi
+            videos=$(echo "$videos" | jq -c --arg n "$n" '. + [$n]')
+          done
+          echo "Vídeos a generar: $videos"
+          echo "videos=$videos" >> "$GITHUB_OUTPUT"
+
   video:
+    needs: preparar
+    if: needs.preparar.outputs.videos != '[]'
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        video: ${{ fromJSON(needs.preparar.outputs.videos) }}
     steps:
       - uses: actions/checkout@v4
 
@@ -30,15 +79,19 @@ jobs:
 
       - name: Generar el vídeo
         timeout-minutes: 12
-        run: python3 scripts/video_noticia.py salida/atleti-cuentas.mp4
+        env:
+          VIDEO: ${{ matrix.video }}
+        run: python3 scripts/video_noticia.py "videos/$VIDEO.json" "salida/$VIDEO.mp4"
 
       - name: Comprobar el resultado
+        env:
+          VIDEO: ${{ matrix.video }}
         run: |
-          "$FF" -hide_banner -i salida/atleti-cuentas.mp4 2>&1 | grep -E "Duration|Stream" || true
-          ls -la salida/atleti-cuentas.mp4
+          "$FF" -hide_banner -i "salida/$VIDEO.mp4" 2>&1 | grep -E "Duration|Stream" || true
+          ls -la "salida/$VIDEO.mp4"
 
       - name: Subir el vídeo
         uses: actions/upload-artifact@v4
         with:
-          name: video-atleti-cuentas
-          path: salida/atleti-cuentas.mp4
+          name: video-${{ matrix.video }}
+          path: salida/${{ matrix.video }}.mp4

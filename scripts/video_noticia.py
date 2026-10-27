@@ -1,11 +1,12 @@
-"""Genera el vídeo vertical de la noticia "Al Atlético le salen las cuentas".
+"""Genera un vídeo vertical de noticia a partir de un archivo videos/<nombre>.json.
 
 Voz con edge-tts (es-ES-AlvaroNeural) y efecto grave, subtítulos sincronizados
-frase a frase, titular rojo arriba y gráfico de barras con zoom lento en el centro.
-Debajo suena un fondo generado aquí mismo (ambiente de estadio y música animada)
-que baja solo cuando habla el narrador.
-Uso: python3 scripts/video_noticia.py salida/video.mp4
+frase a frase, titular rojo arriba e imagen central (barras o lista) con zoom lento.
+Debajo suena un fondo (ambiente de estadio y música) que baja solo cuando habla el
+narrador. El formato del json está explicado en videos/LEEME.md.
+Uso: python3 scripts/video_noticia.py videos/<nombre>.json [salida/<nombre>.mp4]
 """
+import json
 import os
 import subprocess
 import sys
@@ -33,23 +34,6 @@ ACORDES = [  # Do - Sol - La m - Fa: progresión mayor, optimista
     (220.00, 261.63, 329.63), (174.61, 220.00, 261.63),
 ]
 
-TITULAR = "AL ATLÉTICO LE SALEN LAS CUENTAS"
-FRASES = [
-    "Al Atlético le salen las cuentas.",
-    "El equipo de Simeone suma veinticinco de treinta puntos en diez jornadas.",
-    "Iguala la 2012-13 y la 2020-21, el año del último título.",
-    "Solo la 2013-14, con veintisiete, y la 1995-96, con veintiséis, arrancaron mejor.",
-    "Y las dos terminaron con la Liga en las vitrinas rojiblancas.",
-    "Los números ilusionan. ¿Será este el año? Esto es Diario Colchonero.",
-]
-ARRANQUES = [  # (temporada, puntos de 30)
-    ("2013-14", 27),
-    ("1995-96", 26),
-    ("2012-13", 25),
-    ("2020-21", 25),
-    ("2026-27", 25),
-]
-
 RAIZ = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
 LOGO = os.path.join(RAIZ, "public", "imagenes", "logo-canal.jpg")
 # Si aquí hay una canción (mp3, m4a, wav u ogg), se usa como música de fondo en lugar
@@ -60,6 +44,10 @@ AZUL_FONDO = (12, 22, 48)
 AZUL_BARRA = (60, 90, 160)
 BLANCO = (255, 255, 255)
 GRIS = (170, 180, 200)
+GRIS_CLARO = (205, 212, 225)
+COLORES = {"verde": (46, 204, 113), "ambar": (245, 166, 35), "rojo": ROJO, "gris": GRIS}
+# Zona de la pantalla para la imagen central: debajo del titular y encima de los subtítulos
+Y_SUBTITULOS, ALTO_SUBTITULOS = 1490, 400
 
 
 def fuente(tamano, negrita=True):
@@ -85,11 +73,11 @@ def partir(texto, fnt, ancho_max, draw):
     return lineas
 
 
-def generar_audio(carpeta):
+def generar_audio(carpeta, frases):
     """Una pista por frase; devuelve la ruta del wav completo y los tramos (inicio, fin)."""
     muestras, tramos, t = [], [], INTRO + 0.3
     params = None
-    for i, frase in enumerate(FRASES):
+    for i, frase in enumerate(frases):
         mp3 = os.path.join(carpeta, f"frase{i}.mp3")
         wav = os.path.join(carpeta, f"frase{i}.wav")
         subprocess.run(["edge-tts", "--voice", VOZ, "--text", frase, "--write-media", mp3],
@@ -246,7 +234,8 @@ def cortinilla():
     return img
 
 
-def fondo_fijo():
+def fondo_fijo(titular, titulo_imagen):
+    """Marca, titular rojo y título de la imagen; devuelve la imagen y dónde acaba."""
     img = degradado()
     d = ImageDraw.Draw(img)
     # Marca: logo del oso en círculo con borde rojo y el nombre al lado
@@ -262,52 +251,138 @@ def fondo_fijo():
     img.paste(logo, (x_logo + borde, y_logo + borde), mascara)
     d.text((x_logo + lado + 2 * borde + 26, y_logo + borde + lado / 2), texto,
            font=fnt_marca, fill=BLANCO, anchor="lm")
-    # Titular rojo
-    fnt = fuente(84)
-    lineas = partir(TITULAR, fnt, ANCHO - 140, d)
-    alto_linea = 100
+    # Titular rojo, con las líneas tal cual vienen en el json y el tamaño que quepa
+    lineas = titular if isinstance(titular, list) else partir(titular, fuente(84), ANCHO - 140, d)
+    tamano = 100
+    while tamano > 50 and max(d.textlength(l, font=fuente(tamano)) for l in lineas) > ANCHO - 120:
+        tamano -= 2
+    fnt = fuente(tamano)
+    alto_linea = int(tamano * 1.18)
     caja_alto = alto_linea * len(lineas) + 70
     d.rectangle([0, 150, ANCHO, 150 + caja_alto], fill=ROJO)
     for i, linea in enumerate(lineas):
         d.text((ANCHO / 2, 150 + 35 + alto_linea * i + alto_linea / 2), linea,
                font=fnt, fill=BLANCO, anchor="mm")
-    d.text((ANCHO / 2, 150 + caja_alto + 50), "MEJORES ARRANQUES EN LIGA · 10 JORNADAS",
-           font=fuente(36), fill=GRIS, anchor="mm")
-    return img
+    y = 150 + caja_alto
+    if titulo_imagen:
+        d.text((ANCHO / 2, y + 50), titulo_imagen, font=fuente(36), fill=GRIS, anchor="mm")
+        y += 80
+    return img, y
 
 
-def grafico():
-    # Margen transparente para que el panel no se recorte al hacer zoom.
-    w, h, m = 940, 780, 60
-    img = Image.new("RGBA", (w + 2 * m, h + 2 * m), (0, 0, 0, 0))
+# Margen transparente alrededor del panel para que no se recorte al hacer zoom.
+PANEL_ANCHO, MARGEN = 940, 60
+
+
+def panel(alto):
+    img = Image.new("RGBA", (PANEL_ANCHO + 2 * MARGEN, alto + 2 * MARGEN), (0, 0, 0, 0))
     d = ImageDraw.Draw(img)
-    d.rounded_rectangle([m, m, m + w - 1, m + h - 1], radius=36, fill=(255, 255, 255, 18))
+    d.rounded_rectangle([MARGEN, MARGEN, MARGEN + PANEL_ANCHO - 1, MARGEN + alto - 1],
+                        radius=36, fill=(255, 255, 255, 18))
+    return img, d
+
+
+def pie_rojo(d, texto, y):
+    """Franja roja al pie del panel; devuelve la altura que ocupa."""
+    fnt = fuente(36)
+    lineas = partir(texto, fnt, PANEL_ANCHO - 140, d)
+    alto = 46 * len(lineas) + 40
+    x0, x1 = MARGEN + 40, MARGEN + PANEL_ANCHO - 40
+    d.rounded_rectangle([x0, y, x1, y + alto], radius=18, fill=ROJO)
+    for i, linea in enumerate(lineas):
+        d.text(((x0 + x1) / 2, y + 20 + 46 * i + 23), linea, font=fnt, fill=BLANCO, anchor="mm")
+    return alto
+
+
+def imagen_barras(datos):
+    barras, maximo = datos["barras"], datos.get("maximo") or max(b["valor"] for b in datos["barras"])
+    formato = datos.get("formato", "{valor}")
+    alto, hueco = 96, 40
+    h = 140 + len(barras) * (alto + hueco) - hueco
+    pie = datos.get("pie")
+    if pie:
+        h += 110
+    img, d = panel(h)
     fnt_t, fnt_v = fuente(44), fuente(52)
-    x0, x_max, alto, hueco = m + 220, m + w - 160, 96, 40
-    y = m + 70
-    for temporada, puntos in ARRANQUES:
-        actual = temporada == "2026-27"
-        largo = (x_max - x0) * puntos / 30
-        d.text((x0 - 25, y + alto / 2), temporada, font=fnt_t,
-               fill=BLANCO if actual else GRIS, anchor="rm")
+    x0, x_max = MARGEN + 220, MARGEN + PANEL_ANCHO - 160
+    y = MARGEN + 70
+    for barra in barras:
+        destacada = barra.get("destacada", False)
+        largo = (x_max - x0) * barra["valor"] / maximo
+        d.text((x0 - 25, y + alto / 2), barra["etiqueta"], font=fnt_t,
+               fill=BLANCO if destacada else GRIS, anchor="rm")
         d.rounded_rectangle([x0, y, x0 + largo, y + alto], radius=14,
-                            fill=ROJO if actual else AZUL_BARRA)
-        d.text((x0 + largo + 20, y + alto / 2), f"{puntos}/30", font=fnt_v,
+                            fill=ROJO if destacada else AZUL_BARRA)
+        d.text((x0 + largo + 20, y + alto / 2), formato.format(valor=barra["valor"]), font=fnt_v,
                fill=BLANCO, anchor="lm")
         y += alto + hueco
+    if pie:
+        pie_rojo(d, pie, y - hueco + 40)
     return img
 
 
-def subtitulos(tramos):
+def imagen_lista(datos):
+    """Filas con un punto de color a la izquierda, nombre en blanco y estado debajo."""
+    fnt_n, fnt_e = fuente(44), fuente(36, negrita=False)
+    x_texto = MARGEN + 110
+    ancho_texto = PANEL_ANCHO - 110 - 50
+    medida = ImageDraw.Draw(Image.new("RGB", (1, 1)))
+    filas = []
+    for fila in datos["filas"]:
+        nombre = partir(fila["nombre"], fnt_n, ancho_texto, medida)
+        estado = partir(fila["estado"], fnt_e, ancho_texto, medida)
+        filas.append((fila, nombre, estado, 54 * len(nombre) + 8 + 46 * len(estado)))
+    hueco = 56
+    h = 100 + sum(f[3] for f in filas) + hueco * (len(filas) - 1)
+    pie = datos.get("pie")
+    if pie:
+        h += 50 + 46 * len(partir(pie, fuente(36), PANEL_ANCHO - 140, medida)) + 40
+    img, d = panel(h)
+    y = MARGEN + 50
+    for i, (fila, nombre, estado, alto) in enumerate(filas):
+        if i:
+            linea_y = y - hueco / 2
+            d.line([(MARGEN + 50, linea_y), (MARGEN + PANEL_ANCHO - 50, linea_y)],
+                   fill=(255, 255, 255, 30), width=2)
+        color = COLORES.get(fila.get("color", "gris"), GRIS)
+        cy = y + 27
+        d.ellipse([MARGEN + 50, cy - 17, MARGEN + 84, cy + 17], fill=color)
+        for j, linea in enumerate(nombre):
+            d.text((x_texto, y + 54 * j + 27), linea, font=fnt_n, fill=BLANCO, anchor="lm")
+        ye = y + 54 * len(nombre) + 8
+        for j, linea in enumerate(estado):
+            d.text((x_texto, ye + 46 * j + 23), linea, font=fnt_e, fill=GRIS_CLARO, anchor="lm")
+        y += alto + hueco
+    if pie:
+        pie_rojo(d, pie, y - hueco + 50)
+    return img
+
+
+def imagen_central(datos, alto_disponible):
+    img = {"barras": imagen_barras, "lista": imagen_lista}[datos["tipo"]](datos)
+    # Que el panel quepa también al final del zoom; si no, se reduce entero.
+    alto_panel = (img.height - 2 * MARGEN) * ZOOM_FINAL + 2 * MARGEN
+    if alto_panel > alto_disponible:
+        k = alto_disponible / alto_panel
+        img = img.resize((round(img.width * k), round(img.height * k)), Image.LANCZOS)
+    return img
+
+
+def subtitulos(textos, tramos):
     capas = []
-    fnt = fuente(58)
-    for frase in FRASES:
-        capa = Image.new("RGBA", (ANCHO, 380), (0, 0, 0, 0))
+    for frase in textos:
+        capa = Image.new("RGBA", (ANCHO, ALTO_SUBTITULOS), (0, 0, 0, 0))
         d = ImageDraw.Draw(capa)
-        lineas = partir(frase, fnt, ANCHO - 160, d)
-        alto_linea = 74
+        tamano = 58  # las frases largas bajan de tamaño para no pasar de 4 líneas
+        while True:
+            fnt = fuente(tamano)
+            lineas = partir(frase, fnt, ANCHO - 160, d)
+            if len(lineas) <= 4 or tamano <= 44:
+                break
+            tamano -= 2
+        alto_linea = int(tamano * 1.28)
         total = alto_linea * len(lineas)
-        y0 = (380 - total) / 2
+        y0 = (ALTO_SUBTITULOS - total) / 2
         ancho = max(d.textlength(l, font=fnt) for l in lineas)
         d.rounded_rectangle([(ANCHO - ancho) / 2 - 36, y0 - 24, (ANCHO + ancho) / 2 + 36,
                              y0 + total + 24], radius=22, fill=(0, 0, 0, 190))
@@ -318,20 +393,39 @@ def subtitulos(tramos):
     return list(zip(tramos, capas))
 
 
-def main(salida):
+def cargar_noticia(ruta):
+    with open(ruta, encoding="utf-8") as f:
+        noticia = json.load(f)
+    frases = []
+    for frase in noticia["frases"]:
+        if isinstance(frase, str):  # una frase suelta vale para voz y subtítulo
+            frase = {"hablado": frase}
+        hablado = frase.get("hablado") or frase["subtitulo"]
+        frases.append({"hablado": hablado, "subtitulo": frase.get("subtitulo") or hablado})
+    noticia["frases"] = frases
+    return noticia
+
+
+def main(ruta_json, salida):
+    noticia = cargar_noticia(ruta_json)
+    habladas = [f["hablado"] for f in noticia["frases"]]
+    textos = [f["subtitulo"] for f in noticia["frases"]]
     carpeta = os.path.dirname(os.path.abspath(salida))
     os.makedirs(carpeta, exist_ok=True)
-    voz, tramos, duracion = generar_audio(carpeta)
+    voz, tramos, duracion = generar_audio(carpeta, habladas)
     audio = mezclar(carpeta, voz, generar_fondo(carpeta, duracion))
     print(f"Duración: {duracion:.2f} s", flush=True)
-    for (a, b), frase in zip(tramos, FRASES):
+    for (a, b), frase in zip(tramos, textos):
         print(f"  {a:6.2f} → {b:6.2f}  {frase}")
 
-    base = fondo_fijo()
-    graf = grafico()
+    datos = noticia["imagen"]
+    base, y_libre = fondo_fijo(noticia["titular"], datos.get("titulo"))
+    # Hueco entre el titular y los subtítulos, sin contar el margen transparente.
+    hueco_arriba, hueco_abajo = y_libre + 10, Y_SUBTITULOS + 20
+    graf = imagen_central(datos, hueco_abajo - hueco_arriba + 2 * MARGEN)
     gw, gh = graf.size
-    gx, gy = (ANCHO - gw) // 2, 600
-    subs = subtitulos(tramos)
+    gx, gy = (ANCHO - gw) // 2, int((hueco_arriba + hueco_abajo - gh) / 2)
+    subs = subtitulos(textos, tramos)
     logo = cortinilla()
     negro = Image.new("RGB", (ANCHO, ALTO), (0, 0, 0))
     fin_noticia = duracion - OUTRO
@@ -365,7 +459,7 @@ def main(salida):
         frame.paste(g, (gx, gy), g)
         for i, ((a, b), capa) in enumerate(subs):
             if a <= t and (t < b + PAUSA or i == len(subs) - 1):
-                frame.paste(capa, (0, 1500), capa)
+                frame.paste(capa, (0, Y_SUBTITULOS), capa)
                 break
         proc.stdin.write(frame.tobytes())
     proc.stdin.close()
@@ -375,4 +469,7 @@ def main(salida):
 
 
 if __name__ == "__main__":
-    main(sys.argv[1] if len(sys.argv) > 1 else "salida/atleti-cuentas.mp4")
+    if len(sys.argv) < 2:
+        sys.exit("Uso: python3 scripts/video_noticia.py videos/<nombre>.json [salida.mp4]")
+    nombre = os.path.splitext(os.path.basename(sys.argv[1]))[0]
+    main(sys.argv[1], sys.argv[2] if len(sys.argv) > 2 else f"salida/{nombre}.mp4")
