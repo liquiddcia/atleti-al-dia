@@ -50,7 +50,11 @@ ARRANQUES = [  # (temporada, puntos de 30)
     ("2026-27", 25),
 ]
 
-LOGO = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "public", "imagenes", "logo-canal.jpg")
+RAIZ = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
+LOGO = os.path.join(RAIZ, "public", "imagenes", "logo-canal.jpg")
+# Si aquí hay una canción (mp3, m4a, wav u ogg), se usa como música de fondo en lugar
+# de la sintetizada. Pensado para temas de la biblioteca de audio de YouTube.
+MUSICA_DIR = os.path.join(RAIZ, "assets", "musica")
 ROJO = (203, 53, 36)
 AZUL_FONDO = (12, 22, 48)
 AZUL_BARRA = (60, 90, 160)
@@ -125,8 +129,26 @@ def envolvente(t, puntos):
     return np.interp(t, xs, ys)
 
 
+def buscar_musica():
+    if not os.path.isdir(MUSICA_DIR):
+        return None
+    temas = sorted(f for f in os.listdir(MUSICA_DIR)
+                   if f.lower().endswith((".mp3", ".m4a", ".wav", ".ogg")))
+    return os.path.join(MUSICA_DIR, temas[0]) if temas else None
+
+
+def cargar_musica(ruta, duracion):
+    """Decodifica la canción en mono, repitiéndola si es más corta que el vídeo."""
+    crudo = subprocess.run([FF, "-loglevel", "error", "-stream_loop", "-1", "-i", ruta,
+                            "-t", f"{duracion:.3f}", "-ac", "1", "-ar", str(SR),
+                            "-f", "s16le", "-"], check=True, capture_output=True).stdout
+    x = np.frombuffer(crudo, "<i2").astype(np.float64) / 32768
+    x = np.pad(x, (0, max(int(duracion * SR) - len(x), 0)))[:int(duracion * SR)]
+    return x / (np.max(np.abs(x)) or 1)
+
+
 def generar_fondo(carpeta, duracion):
-    """Ambiente de estadio y música animada en tono mayor, todo sintetizado."""
+    """Ambiente de estadio y música animada: la canción de assets/musica o una sintetizada."""
     rng = np.random.default_rng(1903)
     n = int(duracion * SR)
     t = np.arange(n) / SR
@@ -165,7 +187,15 @@ def generar_fondo(carpeta, duracion):
                 musica[a + g:a + g + m] += 0.16 * np.sin(2 * np.pi * acorde[0] / 2 * tg) * np.exp(-tg * 5)
             fase = 2 * np.pi * (50 * tg + 70 * (1 - np.exp(-tg * 30)) / 30)
             musica[a + g:a + g + m] += 0.30 * np.sin(fase) * np.exp(-tg * 14)
-    musica *= envolvente(t, [(0, 0), (INTRO, 1), (duracion - 1.5, 1), (duracion, 0)])
+    cancion = buscar_musica()
+    if cancion:
+        print(f"Música de fondo: {os.path.basename(cancion)}", flush=True)
+        # La canción manda; la grada queda solo como ambiente suave.
+        musica = 0.9 * cargar_musica(cancion, duracion)
+        grada *= 0.5
+        musica *= envolvente(t, [(0, 0), (0.6, 1), (duracion - 1.5, 1), (duracion, 0)])
+    else:
+        musica *= envolvente(t, [(0, 0), (INTRO, 1), (duracion - 1.5, 1), (duracion, 0)])
 
     fondo = grada + musica
     fondo = 0.5 * fondo / np.max(np.abs(fondo))
