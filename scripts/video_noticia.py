@@ -2,6 +2,8 @@
 
 Voz con edge-tts (es-ES-AlvaroNeural) y efecto grave, subtítulos sincronizados
 frase a frase, titular rojo arriba y gráfico de barras con zoom lento en el centro.
+Debajo suena un fondo generado aquí mismo (ambiente de estadio y música animada)
+que baja solo cuando habla el narrador.
 Uso: python3 scripts/video_noticia.py salida/video.mp4
 """
 import os
@@ -10,6 +12,7 @@ import sys
 import wave
 
 import imageio_ffmpeg
+import numpy as np
 from PIL import Image, ImageDraw, ImageFilter, ImageFont
 
 FF = os.environ.get("FF") or imageio_ffmpeg.get_ffmpeg_exe()
@@ -23,6 +26,12 @@ PAUSA = 0.3  # silencio entre frases (s)
 ZOOM_FINAL = 1.10  # el gráfico pasa de 1.00 a 1.10 de forma lineal, sin volver atrás
 INTRO, OUTRO = 1.5, 2.0  # cortinillas con el logo solo (s)
 FUNDIDO = 0.4  # fundido desde/hacia negro en las cortinillas (s)
+SR = 44100
+BPM = 100
+ACORDES = [  # Do - Sol - La m - Fa: progresión mayor, optimista
+    (261.63, 329.63, 392.00), (196.00, 246.94, 293.66),
+    (220.00, 261.63, 329.63), (174.61, 220.00, 261.63),
+]
 
 TITULAR = "AL ATLÉTICO LE SALEN LAS CUENTAS"
 FRASES = [
@@ -100,6 +109,85 @@ def generar_audio(carpeta):
         w.writeframes(silencio(0.8 + OUTRO))
     duracion = t - PAUSA + 0.8 + OUTRO
     return total, tramos, duracion
+
+
+def ruido_banda(n, rng, f_baja, f_alta):
+    espectro = np.fft.rfft(rng.standard_normal(n))
+    f = np.fft.rfftfreq(n, 1 / SR)
+    espectro[(f < f_baja) | (f > f_alta)] = 0
+    x = np.fft.irfft(espectro, n)
+    return x / np.max(np.abs(x))
+
+
+def envolvente(t, puntos):
+    """Interpola linealmente una curva de volumen dada como [(segundo, nivel), ...]."""
+    xs, ys = zip(*puntos)
+    return np.interp(t, xs, ys)
+
+
+def generar_fondo(carpeta, duracion):
+    """Ambiente de estadio y música animada en tono mayor, todo sintetizado."""
+    rng = np.random.default_rng(1903)
+    n = int(duracion * SR)
+    t = np.arange(n) / SR
+    fin = duracion - OUTRO
+
+    # Grada: murmullo continuo que respira, con rugidos en las cortinillas.
+    murmullo = ruido_banda(n, rng, 250, 1800)
+    respira = 0.75 + 0.25 * np.sin(2 * np.pi * 0.13 * t) * np.sin(2 * np.pi * 0.07 * t + 1)
+    rugido = ruido_banda(n, rng, 400, 3500)
+    grada = 0.10 * murmullo * respira + 0.30 * rugido * envolvente(
+        t, [(0, 0), (0.3, 1), (INTRO + 0.4, 0.15), (INTRO + 1.2, 0),
+            (fin - 0.3, 0), (fin + 0.4, 1), (duracion, 0.6)])
+
+    # Música: acordes suaves, bajo y bombo a 100 bpm.
+    pulso = 60 / BPM
+    compas = 4 * pulso
+    musica = np.zeros(n)
+    for i in range(int(duracion / compas) + 1):
+        a, b = int(i * compas * SR), min(int((i + 1) * compas * SR), n)
+        if a >= n:
+            break
+        tt = np.arange(b - a) / SR
+        acorde = ACORDES[i % len(ACORDES)]
+        ataque = np.minimum(tt / 0.25, 1) * np.minimum((compas - tt) / 0.3, 1)
+        pad = sum(np.sin(2 * np.pi * f * tt) + 0.3 * np.sin(2 * np.pi * 2.003 * f * tt)
+                  for f in acorde)
+        musica[a:b] += 0.05 * pad * ataque
+        for golpe in range(4):
+            g = int(golpe * pulso * SR)
+            m = min(int(0.5 * SR), b - a - g)
+            if m <= 0:
+                continue
+            tg = np.arange(m) / SR
+            # bajo en los tiempos 1 y 3, bombo en todos
+            if golpe % 2 == 0:
+                musica[a + g:a + g + m] += 0.16 * np.sin(2 * np.pi * acorde[0] / 2 * tg) * np.exp(-tg * 5)
+            fase = 2 * np.pi * (50 * tg + 70 * (1 - np.exp(-tg * 30)) / 30)
+            musica[a + g:a + g + m] += 0.30 * np.sin(fase) * np.exp(-tg * 14)
+    musica *= envolvente(t, [(0, 0), (INTRO, 1), (duracion - 1.5, 1), (duracion, 0)])
+
+    fondo = grada + musica
+    fondo = 0.5 * fondo / np.max(np.abs(fondo))
+    ruta = os.path.join(carpeta, "fondo.wav")
+    with wave.open(ruta, "wb") as w:
+        w.setnchannels(1)
+        w.setsampwidth(2)
+        w.setframerate(SR)
+        w.writeframes((fondo * 32767).astype("<i2").tobytes())
+    return ruta
+
+
+def mezclar(carpeta, voz, fondo):
+    """El fondo se agacha cuando suena la voz (sidechain) y se suma por debajo."""
+    ruta = os.path.join(carpeta, "mezcla.wav")
+    subprocess.run([
+        FF, "-y", "-loglevel", "error", "-i", voz, "-i", fondo, "-filter_complex",
+        "[0]asplit[v][clave];[1]anull[f];"
+        "[f][clave]sidechaincompress=threshold=0.05:ratio=3:attack=15:release=350[fd];"
+        "[v][fd]amix=inputs=2:normalize=0,alimiter=limit=0.95",
+        "-ac", "1", "-ar", str(SR), ruta], check=True)
+    return ruta
 
 
 def degradado():
@@ -204,6 +292,7 @@ def main(salida):
     carpeta = os.path.dirname(os.path.abspath(salida))
     os.makedirs(carpeta, exist_ok=True)
     voz, tramos, duracion = generar_audio(carpeta)
+    audio = mezclar(carpeta, voz, generar_fondo(carpeta, duracion))
     print(f"Duración: {duracion:.2f} s", flush=True)
     for (a, b), frase in zip(tramos, FRASES):
         print(f"  {a:6.2f} → {b:6.2f}  {frase}")
@@ -220,7 +309,7 @@ def main(salida):
     proc = subprocess.Popen([
         FF, "-y", "-loglevel", "error",
         "-f", "rawvideo", "-pix_fmt", "rgb24", "-s", f"{ANCHO}x{ALTO}", "-r", str(FPS), "-i", "-",
-        "-i", voz,
+        "-i", audio,
         "-c:v", "libx264", "-preset", "medium", "-crf", "20", "-pix_fmt", "yuv420p",
         "-c:a", "aac", "-b:a", "160k", "-shortest", "-movflags", "+faststart", salida,
     ], stdin=subprocess.PIPE)

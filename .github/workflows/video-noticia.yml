@@ -17,11 +17,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Instalar edge-tts, Pillow y ffmpeg
+      - name: Instalar edge-tts, Pillow, NumPy y ffmpeg
         timeout-minutes: 4
         run: |
           # ffmpeg desde imageio-ffmpeg: apt-get se queda colgado en el runner
-          pip install edge-tts imageio-ffmpeg pillow
+          pip install edge-tts imageio-ffmpeg pillow numpy
           FF=$(python3 -c "import imageio_ffmpeg; print(imageio_ffmpeg.get_ffmpeg_exe())")
           echo "FF=$FF" >> "$GITHUB_ENV"
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
