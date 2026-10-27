@@ -36,6 +36,7 @@ ARRANQUES = [  # (temporada, puntos de 30)
     ("2026-27", 25),
 ]
 
+LOGO = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "public", "imagenes", "logo-canal.jpg")
 ROJO = (203, 53, 36)
 AZUL_FONDO = (12, 22, 48)
 AZUL_BARRA = (60, 90, 160)
@@ -102,6 +103,19 @@ def fondo_fijo():
     for y in range(ALTO):  # degradado vertical suave
         k = y / ALTO
         d.line([(0, y), (ANCHO, y)], fill=(int(12 + 10 * k), int(22 + 8 * k), int(48 - 20 * k)))
+    # Marca: logo del oso en círculo con borde rojo y el nombre al lado
+    lado, borde, y_logo = 116, 6, 17
+    logo = Image.open(LOGO).convert("RGB").resize((lado, lado), Image.LANCZOS)
+    mascara = Image.new("L", (lado, lado), 0)
+    ImageDraw.Draw(mascara).ellipse([0, 0, lado - 1, lado - 1], fill=255)
+    fnt_marca = fuente(46)
+    texto = "DIARIO COLCHONERO"
+    ancho_marca = lado + 2 * borde + 26 + d.textlength(texto, font=fnt_marca)
+    x_logo = int((ANCHO - ancho_marca) / 2)
+    d.ellipse([x_logo, y_logo, x_logo + lado + 2 * borde, y_logo + lado + 2 * borde], fill=ROJO)
+    img.paste(logo, (x_logo + borde, y_logo + borde), mascara)
+    d.text((x_logo + lado + 2 * borde + 26, y_logo + borde + lado / 2), texto,
+           font=fnt_marca, fill=BLANCO, anchor="lm")
     # Titular rojo
     fnt = fuente(84)
     lineas = partir(TITULAR, fnt, ANCHO - 140, d)
