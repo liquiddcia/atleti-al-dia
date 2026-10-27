@@ -10,7 +10,7 @@ import sys
 import wave
 
 import imageio_ffmpeg
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw, ImageFilter, ImageFont
 
 FF = os.environ.get("FF") or imageio_ffmpeg.get_ffmpeg_exe()
 VOZ = "es-ES-AlvaroNeural"
@@ -18,6 +18,8 @@ FILTRO_VOZ = "asetrate=24000*0.92,aresample=44100,atempo=1/0.92,bass=g=6:f=120,a
 ANCHO, ALTO, FPS = 1080, 1920, 30
 PAUSA = 0.3  # silencio entre frases (s)
 ZOOM_FINAL = 1.10  # el gráfico pasa de 1.00 a 1.10 de forma lineal, sin volver atrás
+INTRO, OUTRO = 1.5, 2.0  # cortinillas con el logo solo (s)
+FUNDIDO = 0.4  # fundido desde/hacia negro en las cortinillas (s)
 
 TITULAR = "AL ATLÉTICO LE SALEN LAS CUENTAS"
 FRASES = [
@@ -69,7 +71,7 @@ def partir(texto, fnt, ancho_max, draw):
 
 def generar_audio(carpeta):
     """Una pista por frase; devuelve la ruta del wav completo y los tramos (inicio, fin)."""
-    muestras, tramos, t = [], [], 0.4
+    muestras, tramos, t = [], [], INTRO + 0.3
     params = None
     for i, frase in enumerate(FRASES):
         mp3 = os.path.join(carpeta, f"frase{i}.mp3")
@@ -89,20 +91,40 @@ def generar_audio(carpeta):
     total = os.path.join(carpeta, "voz.wav")
     with wave.open(total, "wb") as w:
         w.setparams(params)
-        w.writeframes(silencio(0.4))
+        w.writeframes(silencio(INTRO + 0.3))
         for datos in muestras:
             w.writeframes(datos + silencio(PAUSA))
-        w.writeframes(silencio(0.8))
-    duracion = t - PAUSA + 0.8 + 0.4
+        w.writeframes(silencio(0.8 + OUTRO))
+    duracion = t - PAUSA + 0.8 + OUTRO
     return total, tramos, duracion
 
 
-def fondo_fijo():
+def degradado():
     img = Image.new("RGB", (ANCHO, ALTO), AZUL_FONDO)
     d = ImageDraw.Draw(img)
     for y in range(ALTO):  # degradado vertical suave
         k = y / ALTO
         d.line([(0, y), (ANCHO, y)], fill=(int(12 + 10 * k), int(22 + 8 * k), int(48 - 20 * k)))
+    return img
+
+
+def cortinilla():
+    """Pantalla con el logo solo, para el principio y el final."""
+    img = degradado()
+    lado, borde = 560, 18
+    logo = Image.open(LOGO).convert("RGB").resize((lado, lado), Image.LANCZOS)
+    logo = logo.filter(ImageFilter.UnsharpMask(radius=2, percent=80, threshold=2))
+    mascara = Image.new("L", (lado, lado), 0)
+    ImageDraw.Draw(mascara).ellipse([0, 0, lado - 1, lado - 1], fill=255)
+    x, y = (ANCHO - lado) // 2 - borde, (ALTO - lado) // 2 - borde
+    ImageDraw.Draw(img).ellipse([x, y, x + lado + 2 * borde, y + lado + 2 * borde], fill=ROJO)
+    img.paste(logo, (x + borde, y + borde), mascara)
+    return img
+
+
+def fondo_fijo():
+    img = degradado()
+    d = ImageDraw.Draw(img)
     # Marca: logo del oso en círculo con borde rojo y el nombre al lado
     lado, borde, y_logo = 116, 6, 17
     logo = Image.open(LOGO).convert("RGB").resize((lado, lado), Image.LANCZOS)
@@ -185,6 +207,9 @@ def main(salida):
     gw, gh = graf.size
     gx, gy = (ANCHO - gw) // 2, 600
     subs = subtitulos(tramos)
+    logo = cortinilla()
+    negro = Image.new("RGB", (ANCHO, ALTO), (0, 0, 0))
+    fin_noticia = duracion - OUTRO
 
     proc = subprocess.Popen([
         FF, "-y", "-loglevel", "error",
@@ -197,8 +222,16 @@ def main(salida):
     n = int(round(duracion * FPS))
     for f in range(n):
         t = f / FPS
+        if t < INTRO or t >= fin_noticia:
+            frame = logo
+            if t < FUNDIDO:
+                frame = Image.blend(negro, logo, t / FUNDIDO)
+            elif t > duracion - FUNDIDO:
+                frame = Image.blend(negro, logo, max(duracion - t, 0) / FUNDIDO)
+            proc.stdin.write(frame.tobytes())
+            continue
         # Zoom lineal y monótono con coordenadas en coma flotante: sin saltos ni rebote.
-        z = 1 + (ZOOM_FINAL - 1) * (f / max(n - 1, 1))
+        z = 1 + (ZOOM_FINAL - 1) * ((t - INTRO) / (fin_noticia - INTRO))
         cx, cy = gw / 2, gh / 2
         g = graf.transform((gw, gh), Image.AFFINE,
                            (1 / z, 0, cx - cx / z, 0, 1 / z, cy - cy / z),
