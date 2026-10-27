@@ -9,6 +9,7 @@ on:
     paths:
       - .github/workflows/video-noticia.yml
       - scripts/video_noticia.py
+      - assets/musica/**
 
 jobs:
   video:
