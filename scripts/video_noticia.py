@@ -15,6 +15,9 @@ from PIL import Image, ImageDraw, ImageFilter, ImageFont
 FF = os.environ.get("FF") or imageio_ffmpeg.get_ffmpeg_exe()
 VOZ = "es-ES-AlvaroNeural"
 FILTRO_VOZ = "asetrate=24000*0.92,aresample=44100,atempo=1/0.92,bass=g=6:f=120,acompressor"
+# edge-tts deja casi medio segundo de silencio al principio y al final de cada frase
+RECORTE = ("silenceremove=start_periods=1:start_threshold=-45dB,areverse,"
+           "silenceremove=start_periods=1:start_threshold=-45dB,areverse")
 ANCHO, ALTO, FPS = 1080, 1920, 30
 PAUSA = 0.3  # silencio entre frases (s)
 ZOOM_FINAL = 1.10  # el gráfico pasa de 1.00 a 1.10 de forma lineal, sin volver atrás
@@ -78,7 +81,7 @@ def generar_audio(carpeta):
         wav = os.path.join(carpeta, f"frase{i}.wav")
         subprocess.run(["edge-tts", "--voice", VOZ, "--text", frase, "--write-media", mp3],
                        check=True, timeout=90)
-        subprocess.run([FF, "-y", "-loglevel", "error", "-i", mp3, "-af", FILTRO_VOZ,
+        subprocess.run([FF, "-y", "-loglevel", "error", "-i", mp3, "-af", f"{FILTRO_VOZ},{RECORTE}",
                         "-ac", "1", "-ar", "44100", "-sample_fmt", "s16", wav], check=True)
         with wave.open(wav) as w:
             params = w.getparams()
@@ -109,16 +112,19 @@ def degradado():
 
 
 def cortinilla():
-    """Pantalla con el logo solo, para el principio y el final."""
+    """Pantalla con el logo y el nombre, para el principio y el final."""
     img = degradado()
     lado, borde = 560, 18
     logo = Image.open(LOGO).convert("RGB").resize((lado, lado), Image.LANCZOS)
     logo = logo.filter(ImageFilter.UnsharpMask(radius=2, percent=80, threshold=2))
     mascara = Image.new("L", (lado, lado), 0)
     ImageDraw.Draw(mascara).ellipse([0, 0, lado - 1, lado - 1], fill=255)
-    x, y = (ANCHO - lado) // 2 - borde, (ALTO - lado) // 2 - borde
-    ImageDraw.Draw(img).ellipse([x, y, x + lado + 2 * borde, y + lado + 2 * borde], fill=ROJO)
+    x, y = (ANCHO - lado) // 2 - borde, (ALTO - lado) // 2 - borde - 90
+    d = ImageDraw.Draw(img)
+    d.ellipse([x, y, x + lado + 2 * borde, y + lado + 2 * borde], fill=ROJO)
     img.paste(logo, (x + borde, y + borde), mascara)
+    d.text((ANCHO / 2, y + lado + 2 * borde + 110), "DIARIO COLCHONERO", font=fuente(70),
+           fill=BLANCO, anchor="mm")
     return img
 
 
