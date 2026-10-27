@@ -16,15 +16,15 @@ FF = os.environ.get("FF") or imageio_ffmpeg.get_ffmpeg_exe()
 VOZ = "es-ES-AlvaroNeural"
 FILTRO_VOZ = "asetrate=24000*0.85,aresample=44100,atempo=1/0.85,bass=g=6:f=120,acompressor"
 ANCHO, ALTO, FPS = 1080, 1920, 30
-PAUSA = 0.5  # silencio entre frases (s)
+PAUSA = 0.3  # silencio entre frases (s)
 ZOOM_FINAL = 1.10  # el gráfico pasa de 1.00 a 1.10 de forma lineal, sin volver atrás
 
 TITULAR = "AL ATLÉTICO LE SALEN LAS CUENTAS"
 FRASES = [
     "Al Atlético le salen las cuentas.",
-    "El equipo de Simeone suma veinticinco puntos de treinta posibles tras diez jornadas de Liga.",
-    "Iguala los arranques de la 2012-13 y de la 2020-21, el año del último título.",
-    "Solo la 2013-14, con veintisiete puntos, y la 1995-96, con veintiséis, empezaron mejor.",
+    "El equipo de Simeone suma veinticinco de treinta puntos en diez jornadas.",
+    "Iguala la 2012-13 y la 2020-21, el año del último título.",
+    "Solo la 2013-14, con veintisiete, y la 1995-96, con veintiséis, arrancaron mejor.",
     "Y las dos terminaron con la Liga en las vitrinas rojiblancas.",
     "Los números ilusionan. ¿Será este el año? Esto es Atleti al día.",
 ]
