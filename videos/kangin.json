@@ -1,0 +1,40 @@
+{
+  "titular": ["KANG-IN LEE MANDA", "EN LAS ESTADÍSTICAS"],
+  "frases": [
+    {
+      "hablado": "Kang In Li se ha consolidado como uno de los jugadores más influyentes del Atlético.",
+      "subtitulo": "Kang-in Lee se ha consolidado como uno de los jugadores más influyentes del Atlético."
+    },
+    {
+      "hablado": "Tras diez jornadas de Liga, es el líder del equipo en tiros a puerta, con dieciséis.",
+      "subtitulo": "Tras 10 jornadas de Liga, es el líder del equipo en tiros a puerta, con 16."
+    },
+    {
+      "hablado": "También encabeza los duelos ganados, con treinta y ocho, junto a Giuliano, y nadie supera sus dieciséis regates completados.",
+      "subtitulo": "También encabeza los duelos ganados, con 38, junto a Giuliano, y nadie supera sus 16 regates completados."
+    },
+    {
+      "hablado": "Además, con once faltas recibidas, es el segundo más castigado, solo por detrás de Giuliano, con trece.",
+      "subtitulo": "Además, con 11 faltas recibidas, es el segundo más castigado, solo por detrás de Giuliano, con 13."
+    },
+    {
+      "hablado": "Llegó del PSG con dos Champions y ya marcó en su debut oficial ante el Málaga.",
+      "subtitulo": "Llegó del PSG con dos Champions y ya marcó en su debut oficial ante el Málaga."
+    },
+    {
+      "hablado": "Creatividad, desequilibrio y compromiso defensivo: justo lo que valora Simeone. Esto es Diario Colchonero.",
+      "subtitulo": "Creatividad, desequilibrio y compromiso defensivo: justo lo que valora Simeone. Esto es Diario Colchonero."
+    }
+  ],
+  "imagen": {
+    "tipo": "lista",
+    "titulo": "KANG-IN LEE · 10 JORNADAS DE LIGA",
+    "filas": [
+      {"nombre": "Tiros a puerta: 16", "estado": "1º del equipo", "color": "verde"},
+      {"nombre": "Duelos ganados: 38", "estado": "1º, empatado con Giuliano", "color": "verde"},
+      {"nombre": "Regates completados: 16", "estado": "Nadie le supera", "color": "verde"},
+      {"nombre": "Faltas recibidas: 11", "estado": "2º, por detrás de Giuliano (13)", "color": "ambar"}
+    ],
+    "pie": "Gol en su debut ante el Málaga"
+  }
+}
