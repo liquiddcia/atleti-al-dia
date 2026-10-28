@@ -35,6 +35,8 @@
   .msg{ padding:10px 12px; border-radius:8px; margin-bottom:12px; font-size:14px; }
   .msg.ok{ background:#e3f4e6; color:#1b5e20; } .msg.err{ background:#fde7e7; color:#b00020; }
   .vacio{ text-align:center; color:#666; padding:30px 10px; }
+  .prev{ max-width:100%; max-height:180px; border-radius:8px; margin-top:8px; display:none; }
+  input[type=file]{ width:100%; font-size:15px; }
 </style>
 </head>
 <body>
@@ -55,6 +57,19 @@
     <button class="b-wa" id="copiar-resumen">📋 Copiar resumen del día para WhatsApp</button>
     <button class="b-rank" id="ver-ranking">📊 Ver las noticias más leídas</button>
     <div id="ranking" class="caja" style="display:none"></div>
+    <div class="caja" id="caja-imagen">
+      <strong>🖼 Poner imagen a una noticia</strong>
+      <label for="img-id">Número de la noticia</label>
+      <input type="text" id="img-id" inputmode="numeric" placeholder="Por ejemplo 607">
+      <label for="img-archivo">Foto (de la galería)</label>
+      <input type="file" id="img-archivo" accept="image/*">
+      <img id="img-prev" class="prev" alt="">
+      <div class="ayuda">Se ajusta y se sube sola. Puede tardar unos minutos en verse en la web.</div>
+      <div class="fila">
+        <button class="b-pub" id="img-subir">Subir imagen</button>
+        <button class="b-des" id="img-quitar">Quitar imagen</button>
+      </div>
+    </div>
     <p class="meta" id="resumen-panel"></p>
     <button class="b-todas" id="publicar-todas" style="display:none">Publicar todas</button>
     <div id="lista"></div>
@@ -122,7 +137,7 @@
     campo(t, "textarea", "resumen", "Resumen", n.resumen);
     campo(t, "textarea", "cuerpo", "Texto de la noticia (un párrafo por línea)", n.cuerpo);
     campo(t, "input", "imagen_url", "Imagen (opcional)", n.imagen_url,
-      "Sube la foto a public/imagenes en GitHub y pon /imagenes/nombre.jpg, o pega una dirección https://…");
+      "Mejor usa la caja «Poner imagen a una noticia» de arriba. También puedes pegar una dirección https://…");
     campo(t, "input", "video_url", "Vídeo de YouTube (opcional)", n.video_url, "Pega el enlace del vídeo.");
 
     if(n.enlace_original){
@@ -230,6 +245,52 @@
         caja.appendChild(ul);
       }
       caja.style.display = "block";
+    }).catch(function(err){ aviso(err.message, "err"); }).then(function(){ b.disabled = false; });
+  };
+
+  // ---------- Poner imagen a una noticia ----------
+  var imgDatos = "";
+  function reducirImagen(archivo){
+    return new Promise(function(resolve, reject){
+      var url = URL.createObjectURL(archivo);
+      var im = new Image();
+      im.onload = function(){
+        var max = 1400, w = im.naturalWidth, h = im.naturalHeight;
+        if(w > max){ h = Math.round(h * max / w); w = max; }
+        var c = document.createElement("canvas"); c.width = w; c.height = h;
+        c.getContext("2d").drawImage(im, 0, 0, w, h);
+        URL.revokeObjectURL(url);
+        resolve(c.toDataURL("image/jpeg", 0.82));
+      };
+      im.onerror = function(){ URL.revokeObjectURL(url); reject(new Error("No se pudo leer la imagen")); };
+      im.src = url;
+    });
+  }
+  $("img-archivo").onchange = function(){
+    var f = this.files && this.files[0];
+    imgDatos = ""; $("img-prev").style.display = "none";
+    if(!f) return;
+    reducirImagen(f).then(function(d){
+      imgDatos = d; $("img-prev").src = d; $("img-prev").style.display = "block";
+    }).catch(function(err){ aviso(err.message, "err"); });
+  };
+  $("img-subir").onclick = function(){
+    var id = parseInt($("img-id").value, 10);
+    if(!id){ aviso("Escribe el número de la noticia.", "err"); return; }
+    if(!imgDatos){ aviso("Elige primero una foto.", "err"); return; }
+    var b = $("img-subir"); b.disabled = true;
+    llamar("POST", { accion: "subirImagen", id: id, imagen: imgDatos }).then(function(){
+      aviso("Imagen puesta en la noticia " + id + ". Puede tardar unos minutos en verse en la web.", "ok");
+      $("img-archivo").value = ""; imgDatos = ""; $("img-prev").style.display = "none";
+    }).catch(function(err){ aviso(err.message, "err"); }).then(function(){ b.disabled = false; });
+  };
+  $("img-quitar").onclick = function(){
+    var id = parseInt($("img-id").value, 10);
+    if(!id){ aviso("Escribe el número de la noticia.", "err"); return; }
+    if(!confirm("¿Quitar la imagen de la noticia " + id + "? Volverá la imagen general de su categoría.")) return;
+    var b = $("img-quitar"); b.disabled = true;
+    llamar("POST", { accion: "quitarImagen", id: id }).then(function(){
+      aviso("Imagen quitada de la noticia " + id + ".", "ok");
     }).catch(function(err){ aviso(err.message, "err"); }).then(function(){ b.disabled = false; });
   };
 
