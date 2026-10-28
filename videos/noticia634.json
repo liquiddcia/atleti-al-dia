@@ -1,0 +1,35 @@
+{
+  "titular": ["EL CUTI APURA", "PARA EL LEVANTE"],
+  "frases": [
+    {
+      "hablado": "El Cuti Romero sigue avanzando en su recuperación y apura para llegar al partido ante el Levante.",
+      "subtitulo": "El Cuti Romero sigue avanzando en su recuperación y apura para llegar al partido ante el Levante."
+    },
+    {
+      "hablado": "El central argentino volvió a trabajar con el grupo en el Metropolitano y completó parte de la sesión del martes.",
+      "subtitulo": "El central argentino volvió a trabajar con el grupo en el Metropolitano y completó parte de la sesión del martes."
+    },
+    {
+      "hablado": "Su vuelta es gradual: estar o no el sábado dependerá de sus sensaciones el jueves y el viernes.",
+      "subtitulo": "Su vuelta es gradual: estar o no el sábado dependerá de sus sensaciones el jueves y el viernes."
+    },
+    {
+      "hablado": "Si no hay contratiempos, podría jugar un partido clave: ganar permitiría al Atlético superar momentáneamente al Barcelona.",
+      "subtitulo": "Si no hay contratiempos, podría jugar un partido clave: ganar permitiría al Atlético superar momentáneamente al Barcelona."
+    },
+    {
+      "hablado": "Koke y Cardoso, en cambio, siguen al margen del grupo y apuran para los duelos ante Bayern y Barcelona en el Metropolitano.",
+      "subtitulo": "Koke y Cardoso, en cambio, siguen al margen del grupo y apuran para los duelos ante Bayern y Barcelona en el Metropolitano."
+    },
+    {
+      "hablado": "Para esos partidos se espera ya al Cuti completamente disponible. Esto es Diario Colchonero.",
+      "subtitulo": "Para esos partidos se espera ya al Cuti completamente disponible. Esto es Diario Colchonero."
+    }
+  ],
+  "imagen": {
+    "tipo": "foto",
+    "titulo": "ENTRENAMIENTO · METROPOLITANO",
+    "ruta": "videos/imagenes/noticia634.jpg",
+    "pie": "Sábado 31 · 14:00 · Levante - Atlético"
+  }
+}
