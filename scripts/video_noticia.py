@@ -14,7 +14,7 @@ import wave
 
 import imageio_ffmpeg
 import numpy as np
-from PIL import Image, ImageDraw, ImageFilter, ImageFont
+from PIL import Image, ImageDraw, ImageFilter, ImageFont, ImageOps
 
 FF = os.environ.get("FF") or imageio_ffmpeg.get_ffmpeg_exe()
 VOZ = "es-ES-AlvaroNeural"
@@ -358,8 +358,43 @@ def imagen_lista(datos):
     return img
 
 
+def imagen_foto(datos):
+    """Foto de la noticia con esquinas redondeadas dentro del panel."""
+    fuente_img = Image.open(datos["ruta"]).convert("RGB")
+    ancho = PANEL_ANCHO - 60
+    # Entre apaisada 8:3 (las de categoría) y cuadrada; si es más alta, se recorta al centro.
+    proporcion = min(max(fuente_img.height / fuente_img.width, 0.375), 1.0)
+    alto = round(ancho * proporcion)
+    foto = ImageOps.fit(fuente_img, (ancho, alto), Image.LANCZOS)
+    mascara = Image.new("L", (ancho, alto), 0)
+    ImageDraw.Draw(mascara).rounded_rectangle([0, 0, ancho - 1, alto - 1], radius=26, fill=255)
+    pie = datos.get("pie")
+    medida = ImageDraw.Draw(Image.new("RGB", (1, 1)))
+    # Texto opcional bajo la foto (por ejemplo, el resumen de la noticia), como mucho 5 líneas
+    fnt_t = fuente(38, negrita=False)
+    lineas = partir(datos["texto"], fnt_t, PANEL_ANCHO - 100, medida) if datos.get("texto") else []
+    if len(lineas) > 5:
+        lineas = lineas[:5]
+        lineas[-1] = lineas[-1].rstrip(" ,.;:") + "…"
+    h = 60 + alto + (30 + 52 * len(lineas) if lineas else 0)
+    if pie:
+        h += 30 + 46 * len(partir(pie, fuente(36), PANEL_ANCHO - 140, medida)) + 40
+    img, d = panel(h)
+    img.paste(foto, (MARGEN + 30, MARGEN + 30), mascara)
+    y = MARGEN + 30 + alto
+    if lineas:
+        y += 30
+        for i, linea in enumerate(lineas):
+            d.text((MARGEN + 50, y + 52 * i + 26), linea, font=fnt_t, fill=GRIS_CLARO, anchor="lm")
+        y += 52 * len(lineas)
+    if pie:
+        pie_rojo(d, pie, y + 30)
+    return img
+
+
 def imagen_central(datos, alto_disponible):
-    img = {"barras": imagen_barras, "lista": imagen_lista}[datos["tipo"]](datos)
+    tipos = {"barras": imagen_barras, "lista": imagen_lista, "foto": imagen_foto}
+    img = tipos[datos["tipo"]](datos)
     # Que el panel quepa también al final del zoom; si no, se reduce entero.
     alto_panel = (img.height - 2 * MARGEN) * ZOOM_FINAL + 2 * MARGEN
     if alto_panel > alto_disponible:

@@ -1,0 +1,103 @@
+name: Vídeos del día
+
+# Un vídeo por cada una de las 3 noticias más importantes de las últimas 24 h que aún no
+# tienen vídeo, enviado por Telegram al chat privado. A las 15:30 y a las 23:30 (Madrid).
+on:
+  schedule:
+    # GitHub usa UTC y Madrid cambia de hora: se programan las dos posibilidades
+    # (UTC+2 en verano, UTC+1 en invierno) y el primer paso deja seguir solo la que toca.
+    - cron: "30 13,14,21,22 * * *"
+  # TEMPORAL: solo para probarlo antes de que esté en main (workflow_dispatch exige main)
+  push:
+    branches: [claude/upbeat-meitner-6q6qho]
+    paths:
+      - .github/workflows/video-diario.yml
+  workflow_dispatch:
+    inputs:
+      cantidad:
+        description: "Cuántas noticias convertir en vídeo"
+        required: false
+        default: "3"
+      sin_enviar:
+        description: "Generar sin enviar por Telegram ni marcar como hecho (prueba)"
+        type: boolean
+        default: false
+
+concurrency:
+  group: video-diario
+  cancel-in-progress: false
+
+jobs:
+  videos:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: ¿Toca ahora? (hora de Madrid)
+        id: hora
+        env:
+          EVENTO: ${{ github.event_name }}
+          HORAS: "15:30 23:30"
+        run: |
+          ahora=$(( 10#$(TZ=Europe/Madrid date +%H) * 60 + 10#$(TZ=Europe/Madrid date +%M) ))
+          toca=true
+          if [ "$EVENTO" = "schedule" ]; then
+            toca=false
+            for h in $HORAS; do
+              objetivo=$(( 10#${h%:*} * 60 + 10#${h#*:} ))
+              diferencia=$(( ahora - objetivo ))
+              # margen para los retrasos del cron de GitHub; la otra hora UTC cae a 60 min
+              if [ $diferencia -ge -15 ] && [ $diferencia -lt 55 ]; then toca=true; fi
+            done
+          fi
+          echo "Hora en Madrid: $(TZ=Europe/Madrid date +%H:%M) · toca: $toca"
+          echo "toca=$toca" >> "$GITHUB_OUTPUT"
+
+      - name: Comprobar secretos
+        if: steps.hora.outputs.toca == 'true'
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_RESUMEN_CHAT_ID: ${{ secrets.TELEGRAM_RESUMEN_CHAT_ID }}
+        run: |
+          faltan=0
+          for s in SUPABASE_URL SUPABASE_SERVICE_KEY ANTHROPIC_API_KEY TELEGRAM_BOT_TOKEN TELEGRAM_RESUMEN_CHAT_ID; do
+            if [ -z "${!s}" ]; then echo "::error::Falta el secreto $s"; faltan=1; fi
+          done
+          exit $faltan
+
+      - uses: actions/checkout@v4
+        if: steps.hora.outputs.toca == 'true'
+
+      - name: Instalar edge-tts, Pillow, NumPy y ffmpeg
+        if: steps.hora.outputs.toca == 'true'
+        timeout-minutes: 4
+        run: |
+          # ffmpeg desde imageio-ffmpeg: apt-get se queda colgado en el runner
+          pip install edge-tts imageio-ffmpeg pillow numpy
+          FF=$(python3 -c "import imageio_ffmpeg; print(imageio_ffmpeg.get_ffmpeg_exe())")
+          echo "FF=$FF" >> "$GITHUB_ENV"
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      - name: Generar y enviar los vídeos
+        if: steps.hora.outputs.toca == 'true'
+        timeout-minutes: 35
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_RESUMEN_CHAT_ID: ${{ secrets.TELEGRAM_RESUMEN_CHAT_ID }}
+          CANTIDAD: ${{ inputs.cantidad || '3' }}
+          SIN_ENVIAR: ${{ inputs.sin_enviar || 'false' }}
+        run: python3 scripts/videos_automaticos.py diario
+
+      - name: Guardar los vídeos
+        if: always() && steps.hora.outputs.toca == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: videos-diario-${{ github.run_number }}
+          path: salida/auto/*.mp4
+          if-no-files-found: ignore
+          retention-days: 14
