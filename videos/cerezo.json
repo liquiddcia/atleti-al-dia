@@ -1,0 +1,34 @@
+{
+  "titular": ["«NO PENSAMOS EN UN", "FUTURO SIN SIMEONE»"],
+  "frases": [
+    {
+      "hablado": "El presidente del Atlético, Enrique Cerezo, lo tiene claro: no pensamos en un futuro sin Simeone.",
+      "subtitulo": "El presidente del Atlético, Enrique Cerezo, lo tiene claro: «No pensamos en un futuro sin Simeone»."
+    },
+    {
+      "hablado": "Lo dijo en una entrevista a un medio internacional, mientras Julián Álvarez recupera el cariño de la afición tras un verano turbulento.",
+      "subtitulo": "Lo dijo en una entrevista a un medio internacional, mientras Julián Álvarez recupera el cariño de la afición tras un verano turbulento."
+    },
+    {
+      "hablado": "El argentino marcó el gol de la victoria ante el Deportivo, después de pedir perdón por haber querido salir del club.",
+      "subtitulo": "El argentino marcó el gol de la victoria ante el Deportivo, después de pedir perdón por haber querido salir del club."
+    },
+    {
+      "hablado": "Pero para Simeone, recuperar los aplausos es solo una parte: necesita a Julián en su mejor versión.",
+      "subtitulo": "Pero para Simeone, recuperar los aplausos es solo una parte: necesita a Julián en su mejor versión."
+    },
+    {
+      "hablado": "Su gol ante el Stuttgart apunta a una recuperación de confianza que el técnico quiere ver sostenida en el tiempo.",
+      "subtitulo": "Su gol ante el Stuttgart apunta a una recuperación de confianza que el técnico quiere ver sostenida en el tiempo."
+    },
+    {
+      "hablado": "Con Sorloth apretando en ataque, el reto es claro: más remate y más gol. Esto es Diario Colchonero.",
+      "subtitulo": "Con Sorloth apretando en ataque, el reto es claro: más remate y más gol. Esto es Diario Colchonero."
+    }
+  ],
+  "imagen": {
+    "tipo": "foto",
+    "titulo": "ENRIQUE CEREZO · PRESIDENTE",
+    "ruta": "videos/imagenes/cerezo.jpg"
+  }
+}
