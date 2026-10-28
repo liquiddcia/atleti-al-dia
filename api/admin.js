@@ -6,6 +6,8 @@
 //   POST { accion: "publicar",  id, campos? }  -> guarda (si hay cambios) y publica un borrador
 //   POST { accion: "descartar", id }           -> descarta un borrador (queda oculto para siempre)
 //   POST { accion: "publicarTodas" }           -> publica todos los borradores
+//   POST { accion: "subirImagen", id, imagen } -> sube una foto (data URL) y la pone como imagen de la noticia
+//   POST { accion: "quitarImagen", id }        -> quita la imagen propia (vuelve a la general de su categoría)
 //   GET ?resumen=1                        -> devuelve el texto del resumen del día, listo para pegar en WhatsApp
 //   GET ?ranking=1                        -> devuelve las noticias más leídas (vistas) y más votadas
 
@@ -14,6 +16,7 @@ const { publicarBorradores, HORAS_AUTOPUBLICAR } = require("../lib/borradores");
 
 const SITIO = "https://diariocolchonero.com";
 const MAX_RESUMEN = 6;
+const BUCKET_IMAGENES = "noticias"; // bucket público de Supabase Storage
 
 // Mismo resumen que se envía a las 21:00 por Telegram: el resultado del partido primero
 // (si lo hay) y después las noticias más votadas de las últimas 24 horas.
@@ -111,6 +114,32 @@ module.exports = async function handler(req, res) {
     const cuerpo = typeof req.body === "string" ? JSON.parse(req.body || "{}") : req.body || {};
     const accion = cuerpo.accion;
     const id = parseInt(cuerpo.id, 10);
+
+    if (accion === "subirImagen") {
+      if (!id) return res.status(400).json({ error: "Falta el número de noticia" });
+      const m = /^data:image\/(jpeg|png|webp);base64,(.+)$/.exec(String(cuerpo.imagen || ""));
+      if (!m) return res.status(400).json({ error: "Imagen no válida" });
+      const buffer = Buffer.from(m[2], "base64");
+      if (buffer.length > 3 * 1024 * 1024) return res.status(413).json({ error: "La imagen es demasiado grande" });
+      const { data: existe } = await supabase.from("noticias").select("id").eq("id", id).limit(1);
+      if (!existe || !existe.length) return res.status(404).json({ error: "No existe la noticia " + id });
+      const ruta = `${id}-${Date.now()}.${m[1] === "jpeg" ? "jpg" : m[1]}`;
+      const { error: errorSubida } = await supabase.storage
+        .from(BUCKET_IMAGENES)
+        .upload(ruta, buffer, { contentType: `image/${m[1]}`, cacheControl: "31536000" });
+      if (errorSubida) throw new Error("No se pudo subir la imagen (¿existe el bucket «" + BUCKET_IMAGENES + "» y es público?): " + errorSubida.message);
+      const { data: publica } = supabase.storage.from(BUCKET_IMAGENES).getPublicUrl(ruta);
+      const { error } = await supabase.from("noticias").update({ imagen_url: publica.publicUrl }).eq("id", id);
+      if (error) throw error;
+      return res.status(200).json({ ok: true, url: publica.publicUrl });
+    }
+
+    if (accion === "quitarImagen") {
+      if (!id) return res.status(400).json({ error: "Falta el número de noticia" });
+      const { error } = await supabase.from("noticias").update({ imagen_url: null }).eq("id", id);
+      if (error) throw error;
+      return res.status(200).json({ ok: true });
+    }
 
     if (accion === "guardar") {
       if (!id) return res.status(400).json({ error: "Falta id" });
