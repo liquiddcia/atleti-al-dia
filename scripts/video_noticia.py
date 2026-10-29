@@ -362,8 +362,9 @@ def imagen_foto(datos):
     """Foto de la noticia con esquinas redondeadas dentro del panel."""
     fuente_img = Image.open(datos["ruta"]).convert("RGB")
     ancho = PANEL_ANCHO - 60
-    # Entre apaisada 8:3 (las de categoría) y cuadrada; si es más alta, se recorta al centro.
-    proporcion = min(max(fuente_img.height / fuente_img.width, 0.375), 1.0)
+    # Entre apaisada 8:3 (las de categoría) y cuadrada; si es más alta, se recorta al centro,
+    # salvo que el json permita más ("proporcion_max", por ejemplo 1.8 para carteles verticales).
+    proporcion = min(max(fuente_img.height / fuente_img.width, 0.375), datos.get("proporcion_max", 1.0))
     alto = round(ancho * proporcion)
     foto = ImageOps.fit(fuente_img, (ancho, alto), Image.LANCZOS)
     mascara = Image.new("L", (ancho, alto), 0)

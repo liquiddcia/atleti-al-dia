@@ -221,6 +221,38 @@ def pedir_guion(prompt, minimo=5, maximo=6, puntos=False):
 
 # ---------------------------------------------------------------- imagen
 
+def _normalizar(texto):
+    import unicodedata
+    sin_tildes = unicodedata.normalize("NFD", str(texto or "").lower())
+    return "".join(c for c in sin_tildes if unicodedata.category(c) != "Mn")
+
+
+def cartel_jugador(n):
+    """Cartel de videos/imagenes/jugadores si la noticia trata de uno de esos jugadores.
+
+    Se mira primero el titular y, si no nombra a ninguno, el resumen; si nombra a varios,
+    gana el que sale antes."""
+    carpeta = os.path.join(RAIZ, "videos", "imagenes", "jugadores")
+    try:
+        with open(os.path.join(carpeta, "jugadores.json"), encoding="utf-8") as f:
+            jugadores = json.load(f)["jugadores"]
+    except (OSError, ValueError, KeyError):
+        return None
+    for campo in ("titular", "resumen"):
+        texto = _normalizar(n.get(campo))
+        encontrados = []
+        for j in jugadores:
+            for nombre in j["nombres"]:
+                m = re.search(rf"\b{re.escape(_normalizar(nombre))}\b", texto)
+                if m:
+                    encontrados.append((m.start(), j["archivo"]))
+        for _, archivo in sorted(encontrados):
+            ruta = os.path.join(carpeta, archivo)
+            if os.path.isfile(ruta):
+                return ruta
+    return None
+
+
 def imagen_para(n, carpeta):
     """La imagen_url de la noticia si se puede descargar; si no, la de su categoría."""
     url = (n.get("imagen_url") or "").strip()
@@ -308,9 +340,14 @@ def diario():
             titular, frases, _ = guion_noticia(n)
             for f in frases:
                 print(f"  · {f['subtitulo']}", flush=True)
-            imagen = {"tipo": "foto", "ruta": imagen_para(n, SALIDA), "texto": n.get("resumen"),
-                      "titulo": f"{ETIQUETAS.get(n.get('categoria'), 'ATLÉTICO')} · "
-                                f"{fecha_larga(n.get('publicado_en'))}"}
+            cartel = cartel_jugador(n)
+            if cartel:  # cartel vertical del jugador, entero y sin texto debajo
+                print(f"  Cartel de jugador: {os.path.basename(cartel)}", flush=True)
+                imagen = {"tipo": "foto", "ruta": cartel, "proporcion_max": 1.8}
+            else:
+                imagen = {"tipo": "foto", "ruta": imagen_para(n, SALIDA), "texto": n.get("resumen")}
+            imagen["titulo"] = (f"{ETIQUETAS.get(n.get('categoria'), 'ATLÉTICO')} · "
+                                f"{fecha_larga(n.get('publicado_en'))}")
             video = renderizar(f"noticia-{n['id']}", titular, frases, imagen)
             if enviar_telegram(video, n["titular"]) and hay_columna:
                 marcar_hecha(n["id"])

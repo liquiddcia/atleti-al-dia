@@ -1,0 +1,8 @@
+{
+  "_ayuda": "Carteles de jugadores. Si el titular (o, si no, el resumen) de una noticia nombra a uno, el vídeo automático usa su cartel como imagen central. Para añadir otro: copia su imagen en esta carpeta y añade una entrada con los nombres por los que se le conoce.",
+  "jugadores": [
+    {"archivo": "llorente.jpg", "nombres": ["Marcos Llorente", "Llorente"]},
+    {"archivo": "simeone.jpg", "nombres": ["Diego Simeone", "Simeone", "Cholo"]},
+    {"archivo": "julian-alvarez.jpg", "nombres": ["Julián Álvarez", "Julián", "Álvarez"]}
+  ]
+}
