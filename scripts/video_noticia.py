@@ -47,7 +47,13 @@ GRIS = (170, 180, 200)
 GRIS_CLARO = (205, 212, 225)
 COLORES = {"verde": (46, 204, 113), "ambar": (245, 166, 35), "rojo": ROJO, "gris": GRIS}
 # Zona de la pantalla para la imagen central: debajo del titular y encima de los subtítulos
-Y_SUBTITULOS, ALTO_SUBTITULOS = 1490, 400
+# Zona segura de los Shorts: YouTube tapa arriba la barra de búsqueda y abajo el título,
+# el canal y la descripción. Todo lo importante va entre Y_MARCA e Y_LIMITE.
+Y_MARCA, Y_LIMITE = 210, 1480
+# Subtítulos: desactivados por defecto (en los Shorts los tapa el título de YouTube); con
+# "subtitulos": true en el json vuelven a salir, justo encima del límite seguro.
+ALTO_SUBTITULOS = 400
+Y_SUBTITULOS = Y_LIMITE - ALTO_SUBTITULOS
 
 
 def fuente(tamano, negrita=True):
@@ -239,7 +245,7 @@ def fondo_fijo(titular, titulo_imagen):
     img = degradado()
     d = ImageDraw.Draw(img)
     # Marca: logo del oso en círculo con borde rojo y el nombre al lado
-    lado, borde, y_logo = 116, 6, 17
+    lado, borde, y_logo = 116, 6, Y_MARCA
     logo = Image.open(LOGO).convert("RGB").resize((lado, lado), Image.LANCZOS)
     mascara = Image.new("L", (lado, lado), 0)
     ImageDraw.Draw(mascara).ellipse([0, 0, lado - 1, lado - 1], fill=255)
@@ -259,11 +265,12 @@ def fondo_fijo(titular, titulo_imagen):
     fnt = fuente(tamano)
     alto_linea = int(tamano * 1.18)
     caja_alto = alto_linea * len(lineas) + 70
-    d.rectangle([0, 150, ANCHO, 150 + caja_alto], fill=ROJO)
+    y_titular = y_logo + lado + 2 * borde + 22
+    d.rectangle([0, y_titular, ANCHO, y_titular + caja_alto], fill=ROJO)
     for i, linea in enumerate(lineas):
-        d.text((ANCHO / 2, 150 + 35 + alto_linea * i + alto_linea / 2), linea,
+        d.text((ANCHO / 2, y_titular + 35 + alto_linea * i + alto_linea / 2), linea,
                font=fnt, fill=BLANCO, anchor="mm")
-    y = 150 + caja_alto
+    y = y_titular + caja_alto
     if titulo_imagen:
         d.text((ANCHO / 2, y + 50), titulo_imagen, font=fuente(36), fill=GRIS, anchor="mm")
         y += 80
@@ -271,7 +278,7 @@ def fondo_fijo(titular, titulo_imagen):
 
 
 # Margen transparente alrededor del panel para que no se recorte al hacer zoom.
-PANEL_ANCHO, MARGEN = 940, 60
+PANEL_ANCHO, MARGEN = 880, 60  # algo estrecho: a la derecha van los botones de YouTube
 
 
 def panel(alto):
@@ -457,11 +464,13 @@ def main(ruta_json, salida):
     datos = noticia["imagen"]
     base, y_libre = fondo_fijo(noticia["titular"], datos.get("titulo"))
     # Hueco entre el titular y los subtítulos, sin contar el margen transparente.
-    hueco_arriba, hueco_abajo = y_libre + 10, Y_SUBTITULOS + 20
+    con_subtitulos = bool(noticia.get("subtitulos", False))
+    hueco_arriba = y_libre + 10
+    hueco_abajo = Y_SUBTITULOS + 20 if con_subtitulos else Y_LIMITE
     graf = imagen_central(datos, hueco_abajo - hueco_arriba + 2 * MARGEN)
     gw, gh = graf.size
     gx, gy = (ANCHO - gw) // 2, int((hueco_arriba + hueco_abajo - gh) / 2)
-    subs = subtitulos(textos, tramos)
+    subs = subtitulos(textos, tramos) if con_subtitulos else []
     logo = cortinilla()
     negro = Image.new("RGB", (ANCHO, ALTO), (0, 0, 0))
     fin_noticia = duracion - OUTRO
