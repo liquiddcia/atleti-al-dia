@@ -7,7 +7,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Instalar
-        run: pip install edge-tts imageio-ffmpeg pillow
+        run: pip install edge-tts imageio-ffmpeg pillow numpy
       - name: Crear imagenes y video
         run: |
           mkdir w && cd w
@@ -277,12 +277,72 @@ jobs:
               tts(txt, raw)
               run([FF,"-y","-i",raw,"-af","aresample=44100,bass=g=3:f=120,acompressor=threshold=0.1:ratio=2.5:attack=20:release=250,apad=pad_dur=0.3",fx])
               d = dur(fx); n = int(d*25)+1
-              fc = f"[0:v]scale=2400:1350,zoompan=z='1+0.12*on/{n}':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d=1:s=1920x1080:fps=25,format=yuv420p[v]"
+              # Movimiento variado: alterna acercarse y alejarse, con un ligero desplazamiento lateral
+              z = f"1+0.12*on/{n}" if i % 2 == 0 else f"1.12-0.12*on/{n}"
+              dx = ("+" if i % 4 < 2 else "-") + f"(iw/zoom/2)*0.06*(on/{n}-0.5)"
+              fc = f"[0:v]scale=2400:1350,zoompan=z='{z}':x='iw/2-(iw/zoom/2){dx}':y='ih/2-(ih/zoom/2)':d=1:s=1920x1080:fps=25,format=yuv420p[v]"
               run([FF,"-y","-loop","1","-framerate","25","-i",img,"-i",fx,"-filter_complex",fc,"-map","[v]","-map","1:a","-t",f"{d:.2f}","-c:v","libx264","-crf","27","-preset","veryfast","-c:a","aac","-b:a","160k",seg])
               partes.append(seg); print("segmento", i, round(d,1), "s", flush=True)
           with open(f"{OUT}/lista.txt","w") as f:
               for p in partes: f.write("file '"+os.path.basename(p)+"'\n")
-          run([FF,"-y","-f","concat","-safe","0","-i",f"{OUT}/lista.txt","-c","copy",f"{OUT}/previa_levante_atletico.mp4"])
+          run([FF,"-y","-f","concat","-safe","0","-i",f"{OUT}/lista.txt","-c","copy",f"{OUT}/voz.mp4"])
+          # Música de fondo y un "whoosh" en cada cambio de imagen
+          import numpy as np, wave, glob
+          SR = 44100
+          total = dur(f"{OUT}/voz.mp4"); N = int(total * SR); t = np.arange(N) / SR
+          rng = np.random.default_rng(31)
+          def env(x, a, d): return np.minimum(x / a, 1) * np.exp(-x * d)
+          cancion = sorted(glob.glob("../assets/musica/*.mp3") + glob.glob("../assets/musica/*.m4a"))
+          if cancion:
+              crudo = subprocess.run([FF, "-loglevel", "error", "-stream_loop", "-1", "-i", cancion[0], "-t", f"{total:.2f}", "-ac", "1", "-ar", str(SR), "-f", "s16le", "-"], capture_output=True, check=True).stdout
+              musica = np.frombuffer(crudo, "<i2").astype(float) / 32768; musica = np.pad(musica, (0, max(N - len(musica), 0)))[:N]
+          else:
+              # Base animada sintetizada: 112 bpm, La m - Fa - Do - Sol
+              bpm = 112; beat = 60 / bpm; compas = 4 * beat
+              acordes = [(220.0, 261.63, 329.63), (174.61, 220.0, 261.63), (261.63, 329.63, 392.0), (196.0, 246.94, 293.66)]
+              musica = np.zeros(N)
+              def suma(pos, señal):
+                  a = int(pos * SR); b = min(a + len(señal), N)
+                  if a < N: musica[a:b] += señal[:b - a]
+              L = lambda s: np.arange(int(s * SR)) / SR
+              kick = np.sin(2 * np.pi * (45 * L(0.35) + 90 * (1 - np.exp(-L(0.35) * 35)) / 35)) * env(L(0.35), 0.002, 9)
+              ruido = rng.standard_normal(int(0.25 * SR))
+              palma = (ruido - np.convolve(ruido, np.ones(8) / 8, "same")) * env(L(0.25), 0.002, 22) * 0.6
+              hat = np.diff(rng.standard_normal(int(0.06 * SR) + 1)) * env(L(0.06), 0.001, 70) * 0.18
+              for c in range(int(total / compas) + 1):
+                  t0 = c * compas; ac = acordes[c % 4]; fuerte = (c // 8) % 2 == 1  # cada 8 compases sube la intensidad
+                  tt = L(compas)
+                  pad = sum(np.sin(2 * np.pi * f * tt) + 0.35 * np.sin(4 * np.pi * f * tt) + 0.15 * np.sin(6 * np.pi * f * tt) for f in ac)
+                  suma(t0, 0.035 * pad * np.minimum(tt / 0.4, 1) * np.minimum((compas - tt) / 0.3, 1))
+                  for b in range(4):
+                      suma(t0 + b * beat, 0.55 * kick)
+                      if b in (1, 3): suma(t0 + b * beat, 0.5 * palma)
+                      for h in ((0.5,) if not fuerte else (0, 0.25, 0.5, 0.75)):  # platillos a contratiempo; más en la parte fuerte
+                          suma(t0 + (b + h) * beat, hat)
+                      for o in (0, 0.5):  # bajo en corcheas
+                          lb = L(beat * 0.45); suma(t0 + (b + o) * beat, 0.22 * np.sin(2 * np.pi * ac[0] / 2 * lb) * env(lb, 0.005, 6))
+                  if fuerte:  # arpegio por encima
+                      for k in range(8):
+                          la = L(beat * 0.4); f = ac[k % 3] * 2; suma(t0 + k * beat / 2, 0.05 * np.sin(2 * np.pi * f * la) * env(la, 0.005, 9))
+          musica *= np.minimum(t / 2, 1) * np.minimum((total - t) / 3, 1)
+          musica = 0.22 * musica / (np.max(np.abs(musica)) or 1)
+          # Whoosh: ruido que sube y baja de tono al cambiar de imagen
+          cortes = []; acum = 0.0
+          for p in partes[:-1]:
+              acum += dur(p); cortes.append(acum)
+          lw = int(0.6 * SR); xw = np.arange(lw) / lw
+          ruido = rng.standard_normal(lw); filtrado = np.zeros(lw); y = 0.0
+          for k in range(lw):
+              alfa = 0.02 + 0.25 * np.sin(np.pi * xw[k]); y += alfa * (ruido[k] - y); filtrado[k] = y
+          whoosh = filtrado / np.max(np.abs(filtrado)) * np.sin(np.pi * xw) ** 2 * 0.18
+          for c in cortes:
+              a = max(int((c - 0.3) * SR), 0); b = min(a + lw, N); musica[a:b] += whoosh[:b - a]
+          with wave.open(f"{OUT}/musica.wav", "wb") as w:
+              w.setnchannels(1); w.setsampwidth(2); w.setframerate(SR); w.writeframes((np.clip(musica, -1, 1) * 32767).astype("<i2").tobytes())
+          # Mezcla: la música se agacha cuando habla el narrador
+          run([FF, "-y", "-i", f"{OUT}/voz.mp4", "-i", f"{OUT}/musica.wav", "-filter_complex",
+               "[0:a]asplit[v][clave];[1:a][clave]sidechaincompress=threshold=0.04:ratio=3:attack=30:release=400[m];[v][m]amix=inputs=2:normalize=0,alimiter=limit=0.95[a]",
+               "-map", "0:v", "-map", "[a]", "-c:v", "copy", "-c:a", "aac", "-b:a", "160k", f"{OUT}/previa_levante_atletico.mp4"])
           print("OK", dur(f"{OUT}/previa_levante_atletico.mp4"))
           PYEOF
           python previa.py
