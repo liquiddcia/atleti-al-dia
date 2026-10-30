@@ -1,0 +1,276 @@
+name: Video previa Levante
+on: workflow_dispatch
+jobs:
+  video:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - name: Instalar
+        run: pip install edge-tts imageio-ffmpeg pillow
+      - name: Crear imagenes y video
+        run: |
+          mkdir w && cd w
+          cat > previa.py <<'PYEOF'
+          from PIL import Image, ImageDraw, ImageFont
+          import glob
+          def find(n): return [f for f in glob.glob('/usr/share/fonts/**/*.ttf',recursive=True) if f.endswith('/'+n)][0]
+          FB, FR = find('LiberationSans-Bold.ttf'), find('LiberationSans-Regular.ttf')
+          B=lambda s:ImageFont.truetype(FB,s); R=lambda s:ImageFont.truetype(FR,s)
+          W,H=1920,1080
+          RED=(203,53,43); WHITE=(255,255,255); GREY=(190,190,205); CARD=(36,28,48); GREEN=(46,160,90); AMB=(235,170,40)
+          import urllib.request, urllib.parse, json, io
+          UA={'User-Agent':'DiarioColchonero/1.0 (diariocolchonero.com)'}
+          def _get(u):
+              return urllib.request.urlopen(urllib.request.Request(u,headers=UA),timeout=30).read()
+          def _commons(q):
+              try:
+                  u='https://commons.wikimedia.org/w/api.php?'+urllib.parse.urlencode({'action':'query','generator':'search','gsrsearch':q,'gsrnamespace':6,'gsrlimit':5,'prop':'imageinfo','iiprop':'url','iiurlwidth':500,'format':'json'})
+                  pg=sorted(json.loads(_get(u))['query']['pages'].values(),key=lambda p:p.get('index',9))
+                  for p in pg:
+                      t=p['title'].lower()
+                      if 'logo' in t or 'escudo' in t or 'crest' in t or 'badge' in t:
+                          return Image.open(io.BytesIO(_get(p['imageinfo'][0]['thumburl']))).convert('RGBA')
+              except Exception as e: print('escudo no descargado',q,e)
+              return None
+          def _respaldo(ini,c1,c2):
+              s=400; im=Image.new('RGBA',(s,s),(0,0,0,0)); d=ImageDraw.Draw(im)
+              pts=[(40,30),(360,30),(360,200),(200,380),(40,200)]
+              d.polygon(pts,fill=c1,outline=WHITE); d.line(pts+[pts[0]],fill=WHITE,width=10)
+              d.polygon([(200,30),(360,30),(360,200),(200,380)],fill=c2)
+              d.text((200,190),ini,font=B(130),fill=WHITE,anchor="mm",stroke_width=5,stroke_fill=(20,20,20))
+              return im
+          ESC={}
+          for k,q,ini,c1,c2 in [('atm','Atlético de Madrid escudo logo','ATM',RED,(20,40,110)),('lev','Levante UD escudo logo','LUD',(30,70,160),(190,30,40))]:
+              ESC[k]=_commons(q) or _respaldo(ini,c1,c2)
+          def pegar(im,k,cx,cy,size):
+              e=ESC[k].copy(); e.thumbnail((size,size)); im.paste(e,(int(cx-e.width/2),int(cy-e.height/2)),e)
+          def base(titulo, sub=None, n=None, esc=('atm','lev')):
+              im=Image.new('RGB',(W,H)); d=ImageDraw.Draw(im)
+              for y in range(H): d.line([(0,y),(W,y)],fill=(int(16+26*y/H),12,int(28+10*y/H)))
+              d.rectangle([0,0,26,H],fill=RED)
+              d.text((90,70),titulo,font=B(76),fill=WHITE)
+              if sub: d.text((92,168),sub,font=R(38),fill=GREY)
+              d.rectangle([0,H-64,W,H],fill=RED)
+              d.text((90,H-34),"DIARIO COLCHONERO · diariocolchonero.com",font=B(28),fill=WHITE,anchor="lm")
+              d.text((W-90,H-34),"Levante – Atlético · J11 · 31 oct · 14:00",font=R(28),fill=WHITE,anchor="rm")
+              for i,k in enumerate(reversed(esc)): pegar(im,k,W-130-i*150,110,120)
+              return im,d
+          def card(d,x,y,w,h,big,small,color=WHITE):
+              d.rounded_rectangle([x,y,x+w,y+h],24,fill=CARD)
+              d.text((x+w//2,y+h*0.42),big,font=B(int(h*0.36)),fill=color,anchor="mm")
+              d.text((x+w//2,y+h*0.80),small,font=R(30),fill=GREY,anchor="mm")
+          def pitch(d,x0,y0,w,h):
+              d.rounded_rectangle([x0,y0,x0+w,y0+h],18,fill=(24,92,56),outline=(220,230,225),width=4)
+              d.line([(x0,y0+h//2),(x0+w,y0+h//2)],fill=(220,230,225),width=3)
+              r=90; d.ellipse([x0+w//2-r,y0+h//2-r,x0+w//2+r,y0+h//2+r],outline=(220,230,225),width=3)
+              for yy,s in ((y0,1),(y0+h,-1)):
+                  d.rectangle([x0+w*0.28,min(yy,yy+s*140),x0+w*0.72,max(yy,yy+s*140)],outline=(220,230,225),width=3)
+          def jug(d,x,y,nombre,color=RED,nota=None):
+              d.ellipse([x-30,y-30,x+30,y+30],fill=color,outline=WHITE,width=4)
+              d.text((x,y+52),nombre,font=B(30),fill=WHITE,anchor="mm")
+              if nota: d.text((x,y+84),nota,font=R(24),fill=AMB,anchor="mm")
+          def once(d,x0,y0,w,h,filas,color):
+              # filas: de portería (abajo) a delantera (arriba): lista de listas de (nombre,nota)
+              n=len(filas)
+              for i,f in enumerate(filas):
+                  y=y0+h-95-i*(h-210)/(n-1)
+                  for j,item in enumerate(f):
+                      nom,nota=(item if isinstance(item,tuple) else (item,None))
+                      x=x0+w*(j+1)/(len(f)+1)
+                      jug(d,x,y,nom,color,nota)
+          out=[]
+          def save(im,name): im.save(name); out.append(name)
+
+          # 1 portada
+          im,d=base("PREVIA LEVANTE – ATLÉTICO","LaLiga 2026/27 · Jornada 11")
+          pegar(im,'lev',560,370,260); pegar(im,'atm',1360,370,260); d.text((W//2,370),"VS",font=B(110),fill=RED,anchor="mm")
+          d.text((W//2,590),"SÁBADO 31 DE OCTUBRE · 14:00",font=B(80),fill=WHITE,anchor="mm")
+          d.text((W//2,670),"Ciutat de València",font=R(50),fill=GREY,anchor="mm")
+          card(d,360,740,360,230,"6","victorias seguidas",RED); card(d,780,740,360,230,"2.º","a 2 puntos del líder",WHITE); card(d,1200,740,360,230,"25/30","puntos en 10 jornadas",WHITE)
+          save(im,"01_portada.png")
+          # 2 momento
+          im,d=base("CÓMO LLEGA EL ATLÉTICO","Seis victorias seguidas en Liga")
+          xs=[130,720,1310]
+          card(d,xs[0],290,480,300,"25","puntos · 2.º clasificado",RED); card(d,xs[1],290,480,300,"6","victorias consecutivas",WHITE); card(d,xs[2],290,480,300,"-2","puntos del liderato",WHITE)
+          card(d,xs[0],640,480,300,"5","porterías a cero (de 10)",WHITE); card(d,xs[1],640,480,300,"8","goles encajados",WHITE); card(d,xs[2],640,480,300,"3 de 4","veces que llegó a 25 pts y fue campeón",WHITE)
+          save(im,"02_momento.png")
+          # 3 defensa
+          im,d=base("LA DEFENSA, CLAVE DE LA RACHA","Datos de la temporada",esc=('atm',))
+          filas=[("Goles encajados","8","Solo el Celta (7) ha encajado menos"),("Porterías a cero","5","La cifra más alta, compartida"),("Disparos a puerta recibidos","33","Solo un equipo ha recibido menos"),("Goles encajados en 1.ª parte","1","La cifra más baja de la Liga")]
+          for i,(a,b,c) in enumerate(filas):
+              y=290+i*165
+              d.rounded_rectangle([130,y,1790,y+135],24,fill=CARD)
+              d.text((190,y+45),a,font=B(44),fill=WHITE,anchor="lm"); d.text((190,y+97),c,font=R(30),fill=GREY,anchor="lm")
+              d.text((1700,y+68),b,font=B(84),fill=RED,anchor="rm")
+          save(im,"03_defensa.png")
+          # 4 Ciutat
+          im,d=base("UN CAMPO INCÓMODO","Ciutat de València")
+          d.rounded_rectangle([130,300,1790,560],24,fill=CARD)
+          d.text((W//2,390),"Sin ganar en Liga allí desde",font=R(54),fill=GREY,anchor="mm")
+          d.text((W//2,490),"JUNIO DE 2020",font=B(110),fill=RED,anchor="mm")
+          d.rounded_rectangle([130,610,1790,860],24,fill=CARD)
+          d.text((W//2,690),"Último partido allí (temporada pasada)",font=R(54),fill=GREY,anchor="mm")
+          d.text((W//2,790),"0 – 0",font=B(110),fill=WHITE,anchor="mm")
+          save(im,"04_ciutat.png")
+          # 5 enfermeria
+          im,d=base("PARTE DE BAJAS: ATLÉTICO","Última hora antes de la convocatoria",esc=('atm',))
+          fil=[("Koke","Lesión muscular · bíceps femoral","BAJA PROBABLE",RED),("Johnny Cardoso","Lesión muscular de bajo grado","BAJA PROBABLE",RED),("Cuti Romero","Vuelve tras lesión muscular · gestión de cargas","DUDA",AMB),("Hjulmand","Disponible (sancionado el martes en Champions)","DISPONIBLE",GREEN)]
+          for i,(a,b,c,col) in enumerate(fil):
+              y=290+i*165
+              d.rounded_rectangle([130,y,1790,y+135],24,fill=CARD)
+              d.text((190,y+45),a,font=B(48),fill=WHITE,anchor="lm"); d.text((190,y+97),b,font=R(30),fill=GREY,anchor="lm")
+              d.rounded_rectangle([1370,y+30,1740,y+105],20,fill=col); d.text((1555,y+68),c,font=B(32),fill=WHITE if col!=AMB else (30,20,10),anchor="mm")
+          save(im,"05_bajas_atleti.png")
+          # 6 once atleti
+          im,d=base("ONCE PROBABLE DEL ATLÉTICO","Según las pruebas de Simeone · 4-4-2",esc=('atm',))
+          pitch(d,560,230,800,760)
+          once(d,560,230,800,760,[["Oblak"],["Pubill",("Cuti","si llega"),"Hancko","Grimaldo"],["Giuliano","Barrios","Llorente","Baena"],["J. David","Julián"]],RED)
+          d.text((200,450),"Alternativas",font=B(40),fill=WHITE); 
+          for k,t in enumerate(["Hjulmand","Kang-in Lee","Lookman","Sørloth"]): d.text((200,510+k*52),"· "+t,font=R(38),fill=GREY)
+          save(im,"06_once_atleti.png")
+          # 7 Levante
+          im,d=base("CÓMO LLEGA EL LEVANTE","Entrenador: Luís Castro",esc=('lev',))
+          card(d,130,290,480,300,"14.º","10 puntos (2G · 4E · 4P)",WHITE); card(d,720,290,480,300,"1 de 7","victorias en los últimos 7 de Liga",RED); card(d,1310,290,480,300,"10","goles encajados como local",WHITE)
+          card(d,130,640,480,300,"16","tarjetas amarillas (2.º menos)",WHITE); card(d,720,640,480,300,"9","fueras de juego (el que menos)",WHITE); card(d,1310,640,480,300,"2-1","derrota en Anoeta (Real Sociedad)",WHITE)
+          save(im,"07_levante.png")
+          # 8 once levante
+          im,d=base("POSIBLE ONCE DEL LEVANTE","Según la prensa · 4-2-2-2 · puede cambiar",esc=('lev',))
+          pitch(d,560,230,800,760)
+          once(d,560,230,800,760,[["Ryan"],["N. Pérez","Ndukwe",("Mandi","si Dela no llega"),"M. Sánchez"],["Requena","Olasagasti"],["Thiago","Brugué"],["I. Romero","Ratkov"]],(60,110,200))
+          d.text((200,450),"Bajas",font=B(40),fill=WHITE)
+          for k,t in enumerate(["Bardeli (lesión)","Dela (duda)"]): d.text((200,510+k*52),"· "+t,font=R(38),fill=GREY)
+          save(im,"08_once_levante.png")
+          # 9 historial
+          im,d=base("HISTORIAL RECIENTE","Últimos 7 enfrentamientos")
+          x=160; tot=1600; seg=[("Levante",2,(60,110,200)),("Empates",3,(120,120,140)),("Atlético",2,RED)]
+          for n,v,c in seg:
+              w=tot*v/7; d.rectangle([x,420,x+w-6,640],fill=c)
+              d.text((x+w/2-3,500),str(v),font=B(120),fill=WHITE,anchor="mm"); d.text((x+w/2-3,600),n,font=B(40),fill=WHITE,anchor="mm"); x+=w
+          pegar(im,"lev",230,330,130); pegar(im,"atm",1690,330,130)
+          d.text((W//2,780),"El Levante solo ha perdido dos de los últimos siete",font=R(48),fill=GREY,anchor="mm")
+          save(im,"09_historial.png")
+          # 10 probabilidades
+          im,d=base("PROBABILIDADES","Modelo Opta")
+          x=160; tot=1600
+          for n,v,c in [("Levante",20,(60,110,200)),("Empate",24,(120,120,140)),("Atlético",56,RED)]:
+              w=tot*v/100; d.rectangle([x,420,x+w-6,640],fill=c)
+              d.text((x+w/2-3,500),f"{v}%",font=B(110),fill=WHITE,anchor="mm"); d.text((x+w/2-3,600),n,font=B(40),fill=WHITE,anchor="mm"); x+=w
+          pegar(im,"lev",230,330,130); pegar(im,"atm",1690,330,130)
+          d.text((W//2,780),"Una de cada cinco veces, según el modelo, gana el Levante",font=R(48),fill=GREY,anchor="mm")
+          save(im,"10_probabilidades.png")
+          # 11 claves
+          im,d=base("LAS CLAVES DEL PARTIDO")
+          cl=[("1","Paciencia","El Levante se meterá atrás"),("2","Primera parte","Solo 1 gol encajado en toda la temporada"),("3","Gestión de cargas","Cuti, y la Champions y el Barça detrás"),("4","Julián","Marcó en la jornada pasada")]
+          for i,(n,a,b) in enumerate(cl):
+              y=270+i*180
+              d.rounded_rectangle([130,y,1790,y+150],24,fill=CARD)
+              d.ellipse([170,y+25,270,y+125],fill=RED); d.text((220,y+75),n,font=B(64),fill=WHITE,anchor="mm")
+              d.text((320,y+52),a,font=B(54),fill=WHITE,anchor="lm"); d.text((320,y+108),b,font=R(36),fill=GREY,anchor="lm")
+          save(im,"11_claves.png")
+          # 12 cierre
+          im,d=base("DÓNDE VERLO","Sábado 31 de octubre · 14:00")
+          for i,(a,b) in enumerate([("Movistar Plus+ LaLiga","dial 54"),("Orange TV","dial 110")]):
+              d.rounded_rectangle([260,330+i*220,1660,500+i*220],24,fill=CARD)
+              d.text((340,415+i*220),a,font=B(64),fill=WHITE,anchor="lm"); d.text((1580,415+i*220),b,font=B(64),fill=RED,anchor="rm")
+          d.text((W//2,830),"Crónica y resumen en Diario Colchonero",font=R(50),fill=GREY,anchor="mm")
+          save(im,"12_donde_verlo.png")
+          # hoja de contacto
+          cs=Image.new('RGB',(1920,1620),(10,10,14))
+          for i,n in enumerate(out):
+              t=Image.open(n).resize((640,360)); cs.paste(t,((i%3)*640,(i//3)*405))
+          cs.save("contacto.png"); print(len(out))
+          PYEOF
+          cat > montar.py <<'PYEOF'
+          import os, re, subprocess, asyncio
+          FF = os.environ.get("FF", "ffmpeg")
+          FAKE = os.environ.get("FAKE") == "1"
+          OUT = "salida"; os.makedirs(OUT, exist_ok=True)
+          SEG = [
+          ("01_portada.png", """Buenos días, colchoneros. Bienvenidos a la previa del Levante contra el Atlético de Madrid.
+          Este sábado, a las dos de la tarde, el equipo de Simeone visita el Ciutat de València con una misión muy clara: seguir ganando.
+          Seis victorias seguidas en Liga, el equipo a solo dos puntos del liderato y una semana de máxima exigencia por delante, con el Bayern y el Barcelona esperando.
+          Pero antes de hablar de fútbol, un momento de recuerdo. El partido arrancará con un minuto de silencio por las víctimas del accidente de tren de Urda. Y además coincide con el segundo aniversario de la DANA. Un día para acordarnos de todas las familias que han sufrido. Todo nuestro cariño para ellas.
+          Hoy vamos a repasar cómo llegan los dos equipos, las bajas, los onces probables, el historial entre ambos y las claves del partido. Quédate hasta el final."""),
+          ("02_momento.png", """Empecemos por el momento del equipo. El Atlético llega a Valencia segundo en la clasificación, con veinticinco puntos, dos menos que el Barcelona, y con seis victorias consecutivas en Liga.
+          La última, la del Deportivo de La Coruña, por uno a cero. Un partido poco brillante, que costó más de lo esperado. Julián Álvarez marcó el gol y Oblak evitó que el encuentro se complicara.
+          En total, veinticinco puntos de treinta en las diez primeras jornadas. Solo ha cedido dos puntos ante el Villarreal y tres en San Mamés. Ese arranque iguala el tercer mejor de toda la historia del club, el mismo que firmó el equipo en la temporada dos mil doce, dos mil trece, la primera completa de Simeone, y en la dos mil veinte, dos mil veintiuno, la de la segunda Liga del Cholo.
+          Y hay un dato que invita a soñar. En tres de las cuatro ocasiones en que el Atlético llegó o superó los veinticinco puntos en las diez primeras jornadas, terminó ganando LaLiga.
+          Pero ojo con una cosa. Las dos derrotas que lleva el club esta temporada, en todas las competiciones, han llegado fuera de casa. Y el Ciutat de València es justo el tipo de escenario en el que se puede tropezar. Aunque también es verdad que este curso el equipo está ofreciendo mejores registros lejos del Metropolitano."""),
+          ("03_defensa.png", """Ahora hablemos de lo que está sosteniendo toda esta racha: la defensa.
+          El Atlético ha encajado ocho goles en diez partidos. Solo el Celta ha recibido menos, siete. Y Oblak ha dejado la portería a cero en cinco de esos diez encuentros, la cifra más alta de toda la competición, compartida con otro equipo.
+          Hay más datos. El equipo ha ganado sin encajar en cada uno de sus cuatro partidos contra rivales que empezaban la jornada en la mitad inferior de la tabla. Cuando el rival es de abajo, el Atlético no suele regalar nada.
+          Solo un equipo de LaLiga ha recibido menos disparos a puerta que el Atlético: treinta y tres en lo que va de temporada.
+          Y otro número que llama la atención: el Atlético ha encajado un solo gol en la primera parte de un partido en toda la temporada. Es la cifra más baja de la Liga. El equipo sale concentrado y casi nunca se complica la vida en los primeros cuarenta y cinco minutos.
+          Con ese dato, el plan del Levante tendrá que ser muy distinto. Porque ir por detrás en el marcador contra este Atlético es muy cuesta arriba."""),
+          ("04_ciutat.png", """Este estadio, además, no es cómodo para el Atlético. Hay un dato que lo dice todo: el equipo no gana en el Ciutat de València en Liga desde junio de dos mil veinte.
+          El último partido allí, la temporada pasada, terminó cero a cero.
+          Es decir, que el Atlético llega con la mejor racha, pero se enfrenta a un campo que se le ha resistido durante años. Por eso Simeone repite siempre lo mismo: partido a partido, sin mirar al siguiente.
+          Y esa frase hoy tiene todo el sentido. Porque la semana que viene llegan el Bayern en la Champions y el Barcelona en Liga. Pero primero hay que ganar este."""),
+          ("05_bajas_atleti.png", """Vamos con la enfermería, que tiene dos ausencias casi seguras y una gran duda.
+          Las ausencias son Koke y Johnny Cardoso. Koke se recupera de una lesión muscular en el bíceps femoral del muslo izquierdo. Cardoso, de una lesión muscular de bajo grado que sufrió contra el Stuttgart. Los dos siguen con trabajo individual y, salvo sorpresa, no estarán en Valencia.
+          La gran duda es Cuti Romero. El central argentino ha ido progresando a lo largo de la semana: primero hizo solo una parte del entrenamiento con sus compañeros y después ya trabajó con el grupo. Tiene opciones de entrar en la convocatoria y de jugar minutos.
+          La decisión de Simeone será de gestión de cargas. ¿Lo pone de inicio recién salido de la lesión o lo reserva pensando en el Bayern y el Barcelona? Hay informaciones que lo sitúan directo al once, y otras que dejan abierta la competencia con Pubill. Habrá que esperar a la lista.
+          Una buena noticia: Hjulmand está plenamente disponible para el sábado, aunque no podrá jugar el martes ante el Bayern por su expulsión en Europa. Y el Atlético no tiene sancionados en Liga."""),
+          ("06_once_atleti.png", """Hablemos del once. Según lo que ha probado Simeone esta semana, la alineación más repetida sería esta.
+          En la portería, Jan Oblak.
+          En defensa, línea de cuatro: Pubill, Cuti Romero si llega, Hancko y Grimaldo.
+          En el centro del campo, Giuliano Simeone, Pablo Barrios, Marcos Llorente y Álex Baena.
+          Y arriba, Jonathan David y Julián Álvarez.
+          Hay otras versiones. Con las bajas de Koke y Cardoso, Hjulmand gana opciones, sobre todo porque debe descansar en la Champions. Barrios también está bien colocado. Y en ataque, Kang-in Lee tiene opciones serias de repetir, con su capacidad de jugar por dentro o desde un costado. Giuliano gana enteros después de cambiar el partido desde el banquillo ante el Deportivo, y compite con Lookman. Sørloth ofrece un perfil distinto desde el banquillo.
+          Y a Julián, que marcó la jornada pasada y viene de dos goles y una asistencia en sus tres últimos partidos, le toca la referencia.
+          Un dato curioso sobre Grimaldo: los tres goles que lleva con el Atlético esta temporada han sido los primeros del partido, y dos desde el punto de penalti. Cuando el lateral marca, el Atlético se adelanta."""),
+          ("07_levante.png", """Del otro lado, un Levante entrenado por Luis Castro, en su segunda temporada al frente del equipo. Decimocuarto, con diez puntos: dos victorias, cuatro empates y cuatro derrotas.
+          Llega de perder dos a uno en Anoeta ante la Real Sociedad, después de haber tomado aire con un tres a uno al Athletic en el partido aplazado de la sexta jornada. Y viene de una semana alterada, porque se aplazó su eliminatoria de Copa contra el Tarancón.
+          Su racha es preocupante: una sola victoria en sus últimos siete partidos de Liga. Una victoria, tres empates y tres derrotas. Eso lo tiene peligrosamente cerca de la zona de descenso. Aunque tiene más puntos, diez, que en el mismo tramo de cualquiera de sus tres últimas campañas. Está compitiendo mejor de lo que dice su balance.
+          Y un dato clave: sus dos victorias de esta Liga han llegado en casa, en el Ciutat de València. Pero también ha encajado diez goles como local, una cifra descomunal.
+          Hay números que explican su estilo. Solo un equipo ha recibido menos tarjetas amarillas que el Levante, dieciséis. Y sus nueve fueras de juego son la cifra más baja de toda la división."""),
+          ("08_once_levante.png", """Vamos con las bajas. Enzo Bardeli sigue fuera por una lesión muscular en los isquiotibiales. Dela, Adrián de la Fuente, es duda por una sobrecarga. Y Brugué, que se retiró con molestias contra la Real Sociedad, ha vuelto a trabajar con normalidad y está disponible. El Levante no tiene sancionados.
+          En el once, Mathew Ryan tiene la portería asegurada. La defensa sería de cuatro, con Manu Sánchez por la izquierda y Ndukwe en el centro; si Dela no llega, Mandi le acompañaría. Por la derecha, Nacho Pérez parte con ventaja sobre Toljan. En el centro, Requena y Olasagasti, con la opción de Oriol Rey para formar un trivote. Y arriba, Iván Romero, Ratkov, Thiago Fernández y Brugué, según el dibujo que elija Castro.
+          Y atención a Manu Sánchez, el jugador que más entradas ha ganado de toda la Liga antes de esta jornada: veinticuatro, con al menos dos en cada uno de sus tres últimos partidos."""),
+          ("09_historial.png", """¿Y qué dice el historial? Aquí hay que ser humilde. El Levante ha tenido buenos resultados en este duelo últimamente. De sus siete últimos enfrentamientos con el Atlético, solo ha perdido dos. Ha ganado otros dos y ha empatado tres.
+          Es decir, que el Levante no es un rival al que el Atlético haya doblegado con facilidad. Por eso este partido, que sobre el papel parece sencillo, tiene trampa."""),
+          ("10_probabilidades.png", """Y para terminar con los números, las probabilidades que calcula Opta para este partido. El Atlético tiene un cincuenta y seis por ciento de opciones de ganar, el empate un veinticuatro y el Levante un veinte por ciento.
+          Es decir, el Atlético es favorito, pero no hay un resultado asegurado. Una de cada cinco veces, según el modelo, gana el Levante."""),
+          ("11_claves.png", """¿Cómo se ganará este partido? Estas son cuatro claves.
+          Primera: paciencia. El Levante se meterá atrás en su campo. El Atlético tendrá que mover el balón con calma y no precipitarse.
+          Segunda: la primera parte. El Atlético apenas encaja en los primeros cuarenta y cinco minutos. Si aguanta ahí, el Levante tendrá que arriesgar, y eso da espacios.
+          Tercera: la gestión de cargas. Con la Champions y el Barcelona a la vuelta de la esquina, Simeone tendrá que decidir qué hace con Cuti y con los jugadores de más desgaste.
+          Y cuarta: Julián. Cuando el argentino está inspirado, el Atlético tiene la ventaja que decide los partidos cerrados."""),
+          ("12_donde_verlo.png", """El partido se juega el sábado treinta y uno de octubre, a las dos de la tarde, en el Ciutat de València. Lo puedes ver en Movistar Plus LaLiga, dial cincuenta y cuatro, y en Orange TV, dial ciento diez.
+          Nosotros lo seguiremos en Diario Colchonero, con todas las noticias, la crónica y el resumen del partido.
+          Y tú, ¿cómo lo ves? ¿Ganará el Atlético en Valencia, o nos espera un partido complicado? Déjanoslo en comentarios.
+          Nos vemos en el próximo vídeo. ¡Aúpa Atleti!"""),
+          ]
+          def run(cmd): subprocess.run(cmd, check=True, capture_output=True)
+          def dur(p):
+              r = subprocess.run([FF, "-i", p], capture_output=True, text=True).stderr
+              m = re.search(r"Duration: (\d+):(\d+):([\d.]+)", r)
+              return int(m[1])*3600 + int(m[2])*60 + float(m[3])
+          def tts(t, p):
+              if FAKE:
+                  run([FF,"-y","-f","lavfi","-i",f"anullsrc=r=22050:cl=mono:d={len(t)/float(os.environ.get('RAPIDO','14'))}",p]); return
+              import edge_tts
+              asyncio.run(edge_tts.Communicate(t, "es-ES-AlvaroNeural").save(p))
+          partes = []
+          for i, (img, txt) in enumerate(SEG):
+              raw, fx, seg = f"{OUT}/r{i}.mp3", f"{OUT}/f{i}.wav", f"{OUT}/s{i:02d}.mp4"
+              tts(txt, raw)
+              run([FF,"-y","-i",raw,"-af","asetrate=24000*0.85,aresample=44100,atempo=1/0.85,bass=g=6:f=120,acompressor,apad=pad_dur=0.6",fx])
+              d = dur(fx); n = int(d*25)+1
+              fc = f"[0:v]scale=2400:1350,zoompan=z='1+0.12*on/{n}':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d=1:s=1920x1080:fps=25,format=yuv420p[v]"
+              run([FF,"-y","-loop","1","-framerate","25","-i",img,"-i",fx,"-filter_complex",fc,"-map","[v]","-map","1:a","-t",f"{d:.2f}","-c:v","libx264","-crf","27","-preset","veryfast","-c:a","aac","-b:a","160k",seg])
+              partes.append(seg); print("segmento", i, round(d,1), "s", flush=True)
+          with open(f"{OUT}/lista.txt","w") as f:
+              for p in partes: f.write("file '"+os.path.basename(p)+"'\n")
+          run([FF,"-y","-f","concat","-safe","0","-i",f"{OUT}/lista.txt","-c","copy",f"{OUT}/previa_levante_atletico.mp4"])
+          print("OK", dur(f"{OUT}/previa_levante_atletico.mp4"))
+          PYEOF
+          python previa.py
+          export FF=$(python -c "import imageio_ffmpeg;print(imageio_ffmpeg.get_ffmpeg_exe())")
+          python montar.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: previa-levante
+          path: |
+            w/salida/previa_levante_atletico.mp4
+            w/*.png
