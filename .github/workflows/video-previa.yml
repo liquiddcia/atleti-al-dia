@@ -267,13 +267,15 @@ jobs:
               if FAKE:
                   run([FF,"-y","-f","lavfi","-i",f"anullsrc=r=22050:cl=mono:d={len(t)/float(os.environ.get('RAPIDO','14'))}",p]); return
               import edge_tts
-              # Tono algo más grave con el propio edge-tts (sin estirar el audio, que la hacía robótica)
-              asyncio.run(edge_tts.Communicate(t, "es-ES-AlvaroNeural", rate="-4%", pitch="-6Hz").save(p))
+              # Tono algo más grave con el propio edge-tts (sin estirar el audio, que la hacía robótica).
+              # Cada bloque se lee seguido: los saltos de línea del guion metían parones largos.
+              t = " ".join(t.split())
+              asyncio.run(edge_tts.Communicate(t, "es-ES-AlvaroNeural", rate="+10%", pitch="-6Hz").save(p))
           partes = []
           for i, (img, txt) in enumerate(SEG):
               raw, fx, seg = f"{OUT}/r{i}.mp3", f"{OUT}/f{i}.wav", f"{OUT}/s{i:02d}.mp4"
               tts(txt, raw)
-              run([FF,"-y","-i",raw,"-af","aresample=44100,bass=g=3:f=120,acompressor=threshold=0.1:ratio=2.5:attack=20:release=250,apad=pad_dur=0.6",fx])
+              run([FF,"-y","-i",raw,"-af","aresample=44100,bass=g=3:f=120,acompressor=threshold=0.1:ratio=2.5:attack=20:release=250,apad=pad_dur=0.3",fx])
               d = dur(fx); n = int(d*25)+1
               fc = f"[0:v]scale=2400:1350,zoompan=z='1+0.12*on/{n}':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d=1:s=1920x1080:fps=25,format=yuv420p[v]"
               run([FF,"-y","-loop","1","-framerate","25","-i",img,"-i",fx,"-filter_complex",fc,"-map","[v]","-map","1:a","-t",f"{d:.2f}","-c:v","libx264","-crf","27","-preset","veryfast","-c:a","aac","-b:a","160k",seg])
