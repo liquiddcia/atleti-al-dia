@@ -5,6 +5,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 90
     steps:
+      - uses: actions/checkout@v4
       - name: Instalar
         run: pip install edge-tts imageio-ffmpeg pillow
       - name: Crear imagenes y video
@@ -39,9 +40,15 @@ jobs:
               d.polygon([(200,30),(360,30),(360,200),(200,380)],fill=c2)
               d.text((200,190),ini,font=B(130),fill=WHITE,anchor="mm",stroke_width=5,stroke_fill=(20,20,20))
               return im
+          import os
+          # Escudos guardados en el repositorio (limpios y con fondo transparente); si falta alguno,
+          # se busca en Wikimedia Commons y, si tampoco, se dibuja el de respaldo.
+          LOCAL={'atm':'../public/escudos/escudoB.png','lev':'../public/escudos/levante.png'}
+          def _local(k):
+              return Image.open(LOCAL[k]).convert('RGBA') if os.path.isfile(LOCAL[k]) else None
           ESC={}
           for k,q,ini,c1,c2 in [('atm','Atlético de Madrid escudo logo','ATM',RED,(20,40,110)),('lev','Levante UD escudo logo','LUD',(30,70,160),(190,30,40))]:
-              ESC[k]=_commons(q) or _respaldo(ini,c1,c2)
+              ESC[k]=_local(k) or _commons(q) or _respaldo(ini,c1,c2)
           def pegar(im,k,cx,cy,size):
               e=ESC[k].copy(); e.thumbnail((size,size)); im.paste(e,(int(cx-e.width/2),int(cy-e.height/2)),e)
           def base(titulo, sub=None, n=None, esc=('atm','lev')):
