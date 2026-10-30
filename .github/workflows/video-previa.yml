@@ -186,6 +186,14 @@ jobs:
           for i,n in enumerate(out):
               t=Image.open(n).resize((640,360)); cs.paste(t,((i%3)*640,(i//3)*405))
           cs.save("contacto.png"); print(len(out))
+          # Portada del canal para abrir y cerrar el vídeo: la imagen entera sobre un fondo
+          # hecho con ella misma ampliada y desenfocada.
+          from PIL import ImageFilter, ImageEnhance
+          canal=Image.open('../videos/imagenes/canal-diario-colchonero.jpg').convert('RGB')
+          fondo=canal.resize((int(canal.width*H/canal.height),H)).crop((0,0,W,H)).filter(ImageFilter.GaussianBlur(30))
+          fondo=ImageEnhance.Brightness(fondo).enhance(0.5)
+          c2=canal.copy(); c2.thumbnail((W,H)); fondo.paste(c2,((W-c2.width)//2,(H-c2.height)//2))
+          fondo.save("00_canal.png"); fondo.save("13_suscribete.png")
           PYEOF
           cat > montar.py <<'PYEOF'
           import os, re, subprocess, asyncio
@@ -193,6 +201,7 @@ jobs:
           FAKE = os.environ.get("FAKE") == "1"
           OUT = "salida"; os.makedirs(OUT, exist_ok=True)
           SEG = [
+          ("00_canal.png", """Esto es Diario Colchonero."""),
           ("01_portada.png", """Buenos días, colchoneros. Bienvenidos a la previa del Levante contra el Atlético de Madrid.
           Este sábado, a las dos de la tarde, el equipo de Simeone visita el Ciutat de València con una misión muy clara: seguir ganando.
           Seis victorias seguidas en Liga, el equipo a solo dos puntos del liderato y una semana de máxima exigencia por delante, con el Bayern y el Barcelona esperando.
@@ -247,6 +256,7 @@ jobs:
           Nosotros lo seguiremos en Diario Colchonero, con todas las noticias, la crónica y el resumen del partido.
           Y tú, ¿cómo lo ves? ¿Ganará el Atlético en Valencia, o nos espera un partido complicado? Déjanoslo en comentarios.
           Nos vemos en el próximo vídeo. ¡Aúpa Atleti!"""),
+          ("13_suscribete.png", """Suscríbete a nuestro canal de YouTube."""),
           ]
           def run(cmd): subprocess.run(cmd, check=True, capture_output=True)
           def dur(p):
@@ -257,12 +267,13 @@ jobs:
               if FAKE:
                   run([FF,"-y","-f","lavfi","-i",f"anullsrc=r=22050:cl=mono:d={len(t)/float(os.environ.get('RAPIDO','14'))}",p]); return
               import edge_tts
-              asyncio.run(edge_tts.Communicate(t, "es-ES-AlvaroNeural").save(p))
+              # Tono algo más grave con el propio edge-tts (sin estirar el audio, que la hacía robótica)
+              asyncio.run(edge_tts.Communicate(t, "es-ES-AlvaroNeural", rate="-4%", pitch="-6Hz").save(p))
           partes = []
           for i, (img, txt) in enumerate(SEG):
               raw, fx, seg = f"{OUT}/r{i}.mp3", f"{OUT}/f{i}.wav", f"{OUT}/s{i:02d}.mp4"
               tts(txt, raw)
-              run([FF,"-y","-i",raw,"-af","asetrate=24000*0.85,aresample=44100,atempo=1/0.85,bass=g=6:f=120,acompressor,apad=pad_dur=0.6",fx])
+              run([FF,"-y","-i",raw,"-af","aresample=44100,bass=g=3:f=120,acompressor=threshold=0.1:ratio=2.5:attack=20:release=250,apad=pad_dur=0.6",fx])
               d = dur(fx); n = int(d*25)+1
               fc = f"[0:v]scale=2400:1350,zoompan=z='1+0.12*on/{n}':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d=1:s=1920x1080:fps=25,format=yuv420p[v]"
               run([FF,"-y","-loop","1","-framerate","25","-i",img,"-i",fx,"-filter_complex",fc,"-map","[v]","-map","1:a","-t",f"{d:.2f}","-c:v","libx264","-crf","27","-preset","veryfast","-c:a","aac","-b:a","160k",seg])
