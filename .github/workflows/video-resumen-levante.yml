@@ -1,0 +1,215 @@
+name: Video resumen Levante
+on: workflow_dispatch
+jobs:
+  video:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - name: Instalar
+        run: pip install edge-tts imageio-ffmpeg pillow
+      - name: Crear imagenes y video
+        run: |
+          mkdir w && cd w
+          cat > resumen.py <<'PYEOF'
+          from PIL import Image, ImageDraw, ImageFont
+          import glob
+          def find(n): return [f for f in glob.glob('/usr/share/fonts/**/*.ttf',recursive=True) if f.endswith('/'+n)][0]
+          FB, FR = find('LiberationSans-Bold.ttf'), find('LiberationSans-Regular.ttf')
+          B=lambda s:ImageFont.truetype(FB,s); R=lambda s:ImageFont.truetype(FR,s)
+          W,H=1920,1080
+          RED=(203,53,43); WHITE=(255,255,255); GREY=(190,190,205); CARD=(36,28,48); GREEN=(46,160,90); AMB=(235,170,40)
+          import urllib.request, urllib.parse, json, io
+          UA={'User-Agent':'DiarioColchonero/1.0 (diariocolchonero.com)'}
+          def _get(u):
+              return urllib.request.urlopen(urllib.request.Request(u,headers=UA),timeout=30).read()
+          def _commons(q):
+              try:
+                  u='https://commons.wikimedia.org/w/api.php?'+urllib.parse.urlencode({'action':'query','generator':'search','gsrsearch':q,'gsrnamespace':6,'gsrlimit':5,'prop':'imageinfo','iiprop':'url','iiurlwidth':500,'format':'json'})
+                  pg=sorted(json.loads(_get(u))['query']['pages'].values(),key=lambda p:p.get('index',9))
+                  for p in pg:
+                      t=p['title'].lower()
+                      if 'logo' in t or 'escudo' in t or 'crest' in t or 'badge' in t:
+                          return Image.open(io.BytesIO(_get(p['imageinfo'][0]['thumburl']))).convert('RGBA')
+              except Exception as e: print('escudo no descargado',q,e)
+              return None
+          def _respaldo(ini,c1,c2):
+              s=400; im=Image.new('RGBA',(s,s),(0,0,0,0)); d=ImageDraw.Draw(im)
+              pts=[(40,30),(360,30),(360,200),(200,380),(40,200)]
+              d.polygon(pts,fill=c1,outline=WHITE); d.line(pts+[pts[0]],fill=WHITE,width=10)
+              d.polygon([(200,30),(360,30),(360,200),(200,380)],fill=c2)
+              d.text((200,190),ini,font=B(130),fill=WHITE,anchor="mm",stroke_width=5,stroke_fill=(20,20,20))
+              return im
+          ESC={}
+          for k,q,ini,c1,c2 in [('atm','Atlético de Madrid escudo logo','ATM',RED,(20,40,110)),('lev','Levante UD escudo logo','LUD',(30,70,160),(190,30,40))]:
+              ESC[k]=_commons(q) or _respaldo(ini,c1,c2)
+          def pegar(im,k,cx,cy,size):
+              e=ESC[k].copy(); e.thumbnail((size,size)); im.paste(e,(int(cx-e.width/2),int(cy-e.height/2)),e)
+          def base(titulo, sub=None, n=None, esc=('atm','lev')):
+              im=Image.new('RGB',(W,H)); d=ImageDraw.Draw(im)
+              for y in range(H): d.line([(0,y),(W,y)],fill=(int(16+26*y/H),12,int(28+10*y/H)))
+              d.rectangle([0,0,26,H],fill=RED)
+              d.text((90,70),titulo,font=B(76),fill=WHITE)
+              if sub: d.text((92,168),sub,font=R(38),fill=GREY)
+              d.rectangle([0,H-64,W,H],fill=RED)
+              d.text((90,H-34),"DIARIO COLCHONERO · diariocolchonero.com",font=B(28),fill=WHITE,anchor="lm")
+              d.text((W-90,H-34),"Levante 0-2 Atlético · J11 · 31 oct",font=R(28),fill=WHITE,anchor="rm")
+              for i,k in enumerate(reversed(esc)): pegar(im,k,W-130-i*150,110,120)
+              return im,d
+          def card(d,x,y,w,h,big,small,color=WHITE):
+              d.rounded_rectangle([x,y,x+w,y+h],24,fill=CARD)
+              d.text((x+w//2,y+h*0.42),big,font=B(int(h*0.36)),fill=color,anchor="mm")
+              d.text((x+w//2,y+h*0.80),small,font=R(30),fill=GREY,anchor="mm")
+          out=[]
+          def save(im,name): im.save(name); out.append(name)
+          LEV=(60,110,200)
+          def fila(d,y,t1,t2,col=RED,h=135):
+              d.rounded_rectangle([130,y,1790,y+h],24,fill=CARD)
+              d.rounded_rectangle([130,y,150,y+h],10,fill=col)
+              d.text((200,y+h*0.36),t1,font=B(46),fill=WHITE,anchor="lm"); d.text((200,y+h*0.74),t2,font=R(30),fill=GREY,anchor="lm")
+          def minuto(d,y,m,h=135,col=RED):
+              d.text((1700,y+h//2),m,font=B(70),fill=col,anchor="rm")
+          # 1 portada
+          im,d=base("VICTORIA EN VALENCIA","LaLiga 2026/27 · Jornada 11")
+          pegar(im,'lev',480,400,240); pegar(im,'atm',1440,400,240)
+          d.text((W//2,390),"0 – 2",font=B(190),fill=WHITE,anchor="mm")
+          d.text((W//2,600),"Grimaldo (36') · Giuliano (62')",font=B(56),fill=WHITE,anchor="mm")
+          card(d,360,700,360,250,"7","victorias seguidas",RED); card(d,780,700,360,250,"28","puntos · líder provisional",WHITE); card(d,1200,700,360,250,"0","goles encajados",WHITE)
+          save(im,"01_portada.png")
+          # 2 primera parte
+          im,d=base("LA PRIMERA PARTE","Un Levante valiente al inicio")
+          for i,(a,b,c,col) in enumerate([("Arranque del Levante","Gran jugada colectiva · Oblak vuela y la saca","SUSTO",AMB),("Hjulmand cree marcar","Gol anulado por fuera de juego (VAR)","VAR",AMB),("Llorente y Kang-in","Paradón de Ryan y disparo alto","CERCA",GREY),("Grimaldo adelanta al Atlético","Error de Olasagasti al despejar","36'",RED)]):
+              y=290+i*165; fila(d,y,a,b,col)
+              d.rounded_rectangle([1360,y+30,1740,y+105],20,fill=col); d.text((1550,y+68),c,font=B(34),fill=WHITE if col!=AMB else (30,20,10),anchor="mm")
+          save(im,"02_primera_parte.png")
+          # 3 gol Grimaldo
+          im,d=base("0-1 · GRIMALDO","Minuto 36")
+          d.rounded_rectangle([130,300,1790,600],24,fill=CARD)
+          d.text((W//2,390),"Pase de Baena tras el error de Olasagasti",font=R(54),fill=GREY,anchor="mm")
+          d.text((W//2,500),"ZURDA AL PALO CORTO",font=B(100),fill=RED,anchor="mm")
+          card(d,360,660,480,260,"4","goles de Grimaldo en la temporada",WHITE); card(d,1080,660,480,260,"0.13","xG del disparo",WHITE)
+          save(im,"03_gol_grimaldo.png")
+          # 4 segunda parte
+          im,d=base("SEGUNDA PARTE: CASI","El Atlético rozó el segundo varias veces")
+          for i,(a,b,c,col) in enumerate([("Gol anulado a Hancko","Fuera de juego tras una falta de Julián","VAR",AMB),("Larguero de Kang-in","Tras un pase de Barrios con giro de tobillo","LARGUERO",GREY),("Disparos de Grimaldo y Giuliano","A las manos de Ryan y cerca de la escuadra","CERCA",GREY),("Oblak, segunda parada clave","Con el pie, ante Etta Eyong","PARADÓN",GREEN)]):
+              y=290+i*165; fila(d,y,a,b,col)
+              d.rounded_rectangle([1360,y+30,1740,y+105],20,fill=col); d.text((1550,y+68),c,font=B(34),fill=WHITE if col!=AMB else (30,20,10),anchor="mm")
+          save(im,"04_segunda_parte.png")
+          # 5 gol Giuliano
+          im,d=base("0-2 · GIULIANO","Minuto 62")
+          card(d,130,300,480,300,"43","toques",RED); card(d,720,300,480,300,"19","pases",WHITE); card(d,1310,300,480,300,"57 s","de jugada colectiva",WHITE)
+          d.rounded_rectangle([130,660,1790,900],24,fill=CARD)
+          d.text((W//2,740),"Empieza en Oblak · conduce y asiste Baena",font=R(54),fill=GREY,anchor="mm")
+          d.text((W//2,830),"Giuliano se planta ante Ryan y define",font=B(60),fill=WHITE,anchor="mm")
+          save(im,"05_gol_giuliano.png")
+          # 6 estadisticas
+          im,d=base("LOS NÚMEROS DEL PARTIDO","Datos de Flashscore")
+          d.text((420,262),"LEVANTE",font=B(34),fill=LEV,anchor="mm"); d.text((1500,262),"ATLÉTICO",font=B(34),fill=RED,anchor="mm")
+          rows=[("Goles esperados (xG)",1.25,0.57,"{:.2f}"),("Posesión",46,54,"{}%"),("Remates totales",20,11,"{}"),("Remates a puerta",4,5,"{}"),("Remates fuera",8,3,"{}"),("Remates rechazados",8,3,"{}")]
+          for i,(n,a,b,f) in enumerate(rows):
+              y=310+i*115
+              d.text((W//2,y),n,font=B(34),fill=WHITE,anchor="mm")
+              d.text((140,y+45),f.format(a),font=B(46),fill=WHITE,anchor="lm"); d.text((W-140,y+45),f.format(b),font=B(46),fill=WHITE,anchor="rm")
+              tot=a+b; wl=620*a/tot; wr=620*b/tot
+              d.rectangle([W//2-wl-6,y+30,W//2-6,y+62],fill=LEV); d.rectangle([W//2+6,y+30,W//2+6+wr,y+62],fill=RED)
+          save(im,"06_estadisticas.png")
+          # 7 Grimaldo MVP
+          im,d=base("JUGADOR DEL PARTIDO","Álex Grimaldo",esc=('atm',))
+          card(d,130,300,480,300,"8.3","nota Flashscore",RED); card(d,720,300,480,300,"1","gol · zurda al palo corto",WHITE); card(d,1310,300,480,300,"4","goles en la temporada",WHITE)
+          d.rounded_rectangle([130,660,1790,880],24,fill=CARD)
+          d.text((W//2,740),"Un lateral con números de delantero",font=B(60),fill=WHITE,anchor="mm")
+          d.text((W//2,820),"Y clave también en defensa, incomodando a Brugué",font=R(40),fill=GREY,anchor="mm")
+          save(im,"07_grimaldo.png")
+          # 8 clasificacion
+          im,d=base("LÍDER PROVISIONAL","A falta del Barça–Alavés")
+          card(d,130,300,480,300,"28","puntos",RED); card(d,720,300,480,300,"7","victorias seguidas en Liga",WHITE); card(d,1310,300,480,300,"6","triunfos a domicilio",WHITE)
+          d.rounded_rectangle([130,660,1790,880],24,fill=CARD)
+          d.text((W//2,740),"Levante: 10 puntos",font=B(56),fill=WHITE,anchor="mm")
+          d.text((W//2,820),"1 victoria en sus últimos 8 partidos de Liga",font=R(40),fill=GREY,anchor="mm")
+          save(im,"08_clasificacion.png")
+          # 9 lo que viene
+          im,d=base("LA SEMANA DE LA VERDAD","Dos partidos en casa")
+          for i,(a,b,c) in enumerate([("Martes","Atlético – Bayern","Champions League"),("Después","Atlético – Barcelona","LaLiga · duelo de los dos primeros")]):
+              y=330+i*230
+              d.rounded_rectangle([130,y,1790,y+190],24,fill=CARD)
+              d.text((190,y+55),a,font=R(40),fill=GREY,anchor="lm"); d.text((190,y+125),b,font=B(70),fill=WHITE,anchor="lm"); d.text((1730,y+95),c,font=B(40),fill=RED,anchor="rm")
+          save(im,"09_lo_que_viene.png")
+          # 10 cierre
+          im,d=base("¡AÚPA ATLETI!","Noticias, crónicas y resúmenes")
+          d.text((W//2,470),"diariocolchonero.com",font=B(110),fill=WHITE,anchor="mm")
+          d.text((W//2,600),"Telegram: t.me/diariocolchonero",font=R(56),fill=GREY,anchor="mm")
+          save(im,"10_cierre.png")
+          cs=Image.new('RGB',(1920,1620),(10,10,14))
+          for i,n in enumerate(out):
+              t=Image.open(n).resize((640,360)); cs.paste(t,((i%3)*640,(i//3)*405))
+          cs.save("contacto.png"); print(len(out))
+          PYEOF
+          cat > montar.py <<'PYEOF'
+          import os, re, subprocess, asyncio
+          FF = os.environ.get("FF", "ffmpeg")
+          FAKE = os.environ.get("FAKE") == "1"
+          OUT = "salida"; os.makedirs(OUT, exist_ok=True)
+          SEG = [
+          ("01_portada.png", """Victoria del Atlético en Valencia. Dos a cero al Levante, con goles de Grimaldo y de Giuliano, y séptima victoria seguida en LaLiga.
+          El equipo de Simeone suma veintiocho puntos y se pone líder de forma provisional, a falta de que juegue el Barcelona.
+          Hoy repasamos cómo fue el partido, los goles, los números y lo que se viene esta semana. Empezamos."""),
+          ("02_primera_parte.png", """El partido empezó con un Levante atrevido. Los de Luis Castro salieron a morder, y en una gran jugada colectiva Oblak tuvo que volar para evitar el primer gol.
+          Poco a poco, el Atlético fue adelantando líneas y se hizo con la posesión. Hjulmand se coló en el área, recibió un gran pase de Baena y batió a Ryan, pero el VAR vio fuera de juego y el gol se anuló.
+          Después, Llorente puso a prueba al portero del Levante con un disparo raso, y Kang-in Lee mandó un tiro alto. El gol estaba cerca."""),
+          ("03_gol_grimaldo.png", """Y llegó en el minuto treinta y seis. Error de Olasagasti al despejar, pase en profundidad de Baena y Grimaldo, con la zurda, soltó un disparo al palo corto, a media altura, que Ryan no pudo evitar.
+          Es el cuarto gol de la temporada para el lateral, que está teniendo un arranque de curso sobresaliente. Un lateral con números de delantero.
+          El Levante respondió con un disparo de Brugué y un cabezazo de Iván Romero, pero sin demasiado peligro. El Atlético se fue al descanso por delante."""),
+          ("04_segunda_parte.png", """En la segunda parte, el Atlético buscaba el segundo y Simeone se desesperaba con los casi.
+          Primero, un gol anulado a Hancko, por fuera de juego, tras una falta de Julián Álvarez que Ryan había soltado. Después, un cohete de Kang-in Lee que se estrelló en el larguero, tras un pase de Barrios con un giro de tobillo imposible. Y más disparos de Grimaldo y de Giuliano, que se fueron cerca de la escuadra.
+          Era cuestión de tiempo."""),
+          ("05_gol_giuliano.png", """Y el segundo llegó en el minuto sesenta y dos, con una de esas jugadas corales. Empezó en Oblak, pasó por un buen puñado de jugadores y acabó con una conducción de Baena y un pase al desmarque para Giuliano. En total, cuarenta y tres toques, diecinueve pases y cincuenta y siete segundos.
+          Giuliano esquivó a Ryan y puso el cero a dos.
+          Así lo contó él después: vio espacio, intentó ganar la carrera al lateral, y Baena le dio un pase fantástico. Solo tuvo que controlar bien y empujarla.
+          Un golazo, y una jugada que ya empieza a ser una seña de identidad de este equipo."""),
+          ("06_estadisticas.png", """Vamos con los números, que cuentan una historia curiosa. El Levante tuvo más remates, veinte contra once, y más goles esperados, uno veinticinco contra cero cincuenta y siete. Pero el Atlético tuvo más disparos a puerta, cinco contra cuatro, y tuvo algo más de posesión, un cincuenta y cuatro por ciento.
+          La diferencia estuvo en la eficacia y en Oblak. El portero esloveno firmó otro gran partido, con la parada del primer tiempo y un paradón con el pie ante Etta Eyong, después de un error de entrega de Llorente, que ya le debe una cena a Hancko, decisivo también atrás.
+          Los cambios llegaron con la cabeza puesta en la semana: entraron Sørloth y Jonathan David, y más tarde Le Normand y Lookman."""),
+          ("07_grimaldo.png", """El jugador del partido, para Flashscore, fue Álex Grimaldo, con una nota de ocho coma tres. Marcó el gol que abrió el partido y fue importante también en defensa, incomodando a Brugué cuando la ventaja era mínima.
+          Cuatro goles en lo que va de temporada, y la sensación de que cada vez que aparece en el área, el Atlético se adelanta."""),
+          ("08_clasificacion.png", """Con esta victoria, el Atlético llega a veintiocho puntos y es líder provisional, a falta del partido del Barcelona contra el Alavés.
+          Son siete victorias seguidas en Liga, y seis de ellas fuera de casa. Y un dato importante: Valencia era un campo de pesadillas recurrentes para el equipo de Simeone.
+          El Levante se queda con diez puntos, con una sola victoria en sus últimos ocho partidos de Liga.
+          Antes del partido hubo un minuto de silencio por las víctimas del accidente ferroviario. Giuliano también tuvo unas palabras para ellas: su más sincero pésame y mucha fuerza para las familias."""),
+          ("09_lo_que_viene.png", """Y ahora, la semana de la verdad. El martes llega el Bayern de Múnich al Metropolitano, en Champions League. Después, el Barcelona, en un duelo de los dos primeros de LaLiga.
+          Giuliano lo tiene claro: cuando el Bayern vea el recibimiento, se dará cuenta de que el Atlético va a jugar con uno más. Un ambiente extraordinario, con la afición como jugador número doce."""),
+          ("10_cierre.png", """Hasta aquí el resumen del Levante contra el Atlético. Una victoria sólida, dos golazos y la portería a cero.
+          Si te ha gustado, suscríbete y déjanos en comentarios cómo has visto el partido. Y recuerda que en diariocolchonero.com tienes todas las noticias del Atleti.
+          Nos vemos en el próximo vídeo. ¡Aúpa Atleti!"""),
+          ]
+          def run(cmd): subprocess.run(cmd, check=True, capture_output=True)
+          def dur(p):
+              r = subprocess.run([FF, "-i", p], capture_output=True, text=True).stderr
+              m = re.search(r"Duration: (\d+):(\d+):([\d.]+)", r)
+              return int(m[1])*3600 + int(m[2])*60 + float(m[3])
+          def tts(t, p):
+              if FAKE:
+                  run([FF,"-y","-f","lavfi","-i",f"anullsrc=r=22050:cl=mono:d={len(t)/float(os.environ.get('RAPIDO','14'))}",p]); return
+              import edge_tts
+              asyncio.run(edge_tts.Communicate(t, "es-ES-AlvaroNeural").save(p))
+          partes = []
+          for i, (img, txt) in enumerate(SEG):
+              raw, fx, seg = f"{OUT}/r{i}.mp3", f"{OUT}/f{i}.wav", f"{OUT}/s{i:02d}.mp4"
+              tts(txt, raw)
+              run([FF,"-y","-i",raw,"-af","asetrate=24000*0.85,aresample=44100,atempo=1/0.85,bass=g=6:f=120,acompressor,apad=pad_dur=0.6",fx])
+              d = dur(fx); n = int(d*25)+1
+              fc = f"[0:v]scale=2400:1350,zoompan=z='1+0.12*on/{n}':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d=1:s=1920x1080:fps=25,format=yuv420p[v]"
+              run([FF,"-y","-loop","1","-framerate","25","-i",img,"-i",fx,"-filter_complex",fc,"-map","[v]","-map","1:a","-t",f"{d:.2f}","-c:v","libx264","-crf","27","-preset","veryfast","-c:a","aac","-b:a","160k",seg])
+              partes.append(seg); print("segmento", i, round(d,1), "s", flush=True)
+          with open(f"{OUT}/lista.txt","w") as f:
+              for p in partes: f.write("file '"+os.path.basename(p)+"'\n")
+          run([FF,"-y","-f","concat","-safe","0","-i",f"{OUT}/lista.txt","-c","copy",f"{OUT}/resumen_levante_atletico.mp4"])
+          print("OK", dur(f"{OUT}/resumen_levante_atletico.mp4"))
+          PYEOF
+          python resumen.py
+          export FF=$(python -c "import imageio_ffmpeg;print(imageio_ffmpeg.get_ffmpeg_exe())")
+          python montar.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: resumen-levante
+          path: |
+            w/salida/resumen_levante_atletico.mp4
+            w/*.png
