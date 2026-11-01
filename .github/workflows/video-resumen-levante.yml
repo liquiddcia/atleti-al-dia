@@ -80,7 +80,7 @@ jobs:
           pegar(im,'lev',480,400,240); pegar(im,'atm',1440,400,240)
           d.text((W//2,390),"0 – 2",font=B(190),fill=WHITE,anchor="mm")
           d.text((W//2,600),"Grimaldo (36') · Giuliano (62')",font=B(56),fill=WHITE,anchor="mm")
-          card(d,360,700,360,250,"7","victorias seguidas",RED); card(d,780,700,360,250,"28","puntos · líder provisional",WHITE); card(d,1200,700,360,250,"0","goles encajados",WHITE)
+          card(d,360,700,360,250,"7","victorias seguidas",RED); card(d,780,700,360,250,"28","puntos · 2.º a 2 del Barça",WHITE); card(d,1200,700,360,250,"0","goles encajados",WHITE)
           save(im,"01_portada.png")
           # 2 primera parte
           im,d=base("LA PRIMERA PARTE","Un Levante valiente al inicio")
@@ -127,7 +127,7 @@ jobs:
           d.text((W//2,820),"Y clave también en defensa, incomodando a Brugué",font=R(40),fill=GREY,anchor="mm")
           save(im,"07_grimaldo.png")
           # 8 clasificacion
-          im,d=base("LÍDER PROVISIONAL","A falta del Barça–Alavés")
+          im,d=base("SEGUNDO, A 2 DEL BARÇA","El Barcelona ganó 6-1 al Alavés")
           card(d,130,300,480,300,"28","puntos",RED); card(d,720,300,480,300,"7","victorias seguidas en Liga",WHITE); card(d,1310,300,480,300,"6","triunfos a domicilio",WHITE)
           d.rounded_rectangle([130,660,1790,880],24,fill=CARD)
           d.text((W//2,740),"Levante: 10 puntos",font=B(56),fill=WHITE,anchor="mm")
@@ -166,7 +166,7 @@ jobs:
           SEG = [
           ("00_canal.png", """Esto es Diario Colchonero."""),
           ("01_portada.png", """Victoria del Atlético en Valencia. Dos a cero al Levante, con goles de Grimaldo y de Giuliano, y séptima victoria seguida en LaLiga.
-          El equipo de Simeone suma veintiocho puntos y se pone líder de forma provisional, a falta de que juegue el Barcelona.
+          El equipo de Simeone suma veintiocho puntos y sigue segundo, a dos puntos del Barcelona, que después goleó seis a uno al Alavés.
           Hoy repasamos cómo fue el partido, los goles, los números y lo que se viene esta semana. Empezamos."""),
           ("02_primera_parte.png", """El partido empezó con un Levante atrevido. Los de Luis Castro salieron a morder, y en una gran jugada colectiva Oblak tuvo que volar para evitar el primer gol.
           Poco a poco, el Atlético fue adelantando líneas y se hizo con la posesión. Hjulmand se coló en el área, recibió un gran pase de Baena y batió a Ryan, pero el VAR vio fuera de juego y el gol se anuló.
@@ -186,11 +186,11 @@ jobs:
           Los cambios llegaron con la cabeza puesta en la semana: entraron Sørloth y Jonathan David, y más tarde Le Normand y Lookman."""),
           ("07_grimaldo.png", """El jugador del partido, para Flashscore, fue Álex Grimaldo, con una nota de ocho coma tres. Marcó el gol que abrió el partido y fue importante también en defensa, incomodando a Brugué cuando la ventaja era mínima.
           Cuatro goles en lo que va de temporada, y la sensación de que cada vez que aparece en el área, el Atlético se adelanta."""),
-          ("08_clasificacion.png", """Con esta victoria, el Atlético llega a veintiocho puntos y es líder provisional, a falta del partido del Barcelona contra el Alavés.
+          ("08_clasificacion.png", """Con esta victoria, el Atlético llega a veintiocho puntos, pero sigue segundo: el Barcelona goleó seis a uno al Alavés y mantiene la distancia de dos puntos.
           Son siete victorias seguidas en Liga, y seis de ellas fuera de casa. Y un dato importante: Valencia era un campo de pesadillas recurrentes para el equipo de Simeone.
           El Levante se queda con diez puntos, con una sola victoria en sus últimos ocho partidos de Liga.
           Antes del partido hubo un minuto de silencio por las víctimas del accidente ferroviario. Giuliano también tuvo unas palabras para ellas: su más sincero pésame y mucha fuerza para las familias."""),
-          ("09_lo_que_viene.png", """Y ahora, la semana de la verdad. El martes llega el Bayern de Múnich al Metropolitano, en Champions League. Después, el Barcelona, en un duelo de los dos primeros de LaLiga.
+          ("09_lo_que_viene.png", """Y ahora, la semana de la verdad. El martes llega el Bayern de Múnich al Metropolitano, en Champions League. Después, el Barcelona, en un duelo de los dos primeros de LaLiga, con el liderato en juego.
           Giuliano lo tiene claro: cuando el Bayern vea el recibimiento, se dará cuenta de que el Atlético va a jugar con uno más. Un ambiente extraordinario, con la afición como jugador número doce."""),
           ("10_cierre.png", """Hasta aquí el resumen del Levante contra el Atlético. Una victoria sólida, dos golazos y la portería a cero.
           Si te ha gustado, suscríbete y déjanos en comentarios cómo has visto el partido. Y recuerda que en diariocolchonero.com tienes todas las noticias del Atleti.
