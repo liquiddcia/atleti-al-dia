@@ -156,7 +156,9 @@ jobs:
           fondo=canal.resize((int(canal.width*H/canal.height),H)).crop((0,0,W,H)).filter(ImageFilter.GaussianBlur(30))
           fondo=ImageEnhance.Brightness(fondo).enhance(0.5)
           c2=canal.copy(); c2.thumbnail((W,H)); fondo.paste(c2,((W-c2.width)//2,(H-c2.height)//2))
-          fondo.save("00_canal.png"); fondo.save("11_suscribete.png")
+          fondo.save("11_suscribete.png")
+          # Imagen de apertura del vídeo (16:9, a pantalla completa)
+          Image.open('../videos/imagenes/portada-resumen-levante.jpg').convert('RGB').resize((W,H),Image.LANCZOS).save("00_portada.png")
           PYEOF
           cat > montar.py <<'PYEOF'
           import os, re, subprocess, asyncio
@@ -164,7 +166,7 @@ jobs:
           FAKE = os.environ.get("FAKE") == "1"
           OUT = "salida"; os.makedirs(OUT, exist_ok=True)
           SEG = [
-          ("00_canal.png", """Esto es Diario Colchonero."""),
+          ("00_portada.png", """Esto es Diario Colchonero."""),
           ("01_portada.png", """Victoria del Atlético en Valencia. Dos a cero al Levante, con goles de Grimaldo y de Giuliano, y séptima victoria seguida en LaLiga.
           El equipo de Simeone suma veintiocho puntos y sigue segundo, a dos puntos del Barcelona, que después goleó seis a uno al Alavés.
           Hoy repasamos cómo fue el partido, los goles, los números y lo que se viene esta semana. Empezamos."""),
