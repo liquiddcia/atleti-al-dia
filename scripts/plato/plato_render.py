@@ -4,35 +4,61 @@ import sys, os, math, subprocess, wave
 import numpy as np
 from PIL import Image, ImageDraw, ImageFilter
 AQUI = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, AQUI)
-from presentador import con_hombros, animar
+from functools import lru_cache
+import poses as PZ
 from estudio import extender, poner_en_pantalla, K, T
 
 W, H, FPS = 1920, 1080, 30
 PLANOS = {
     # silla (x0, x1, y_arriba) y línea de la mesa en px de la imagen original
-    "centro":   {"silla": (735, 910, 222), "mesa": 345, "ventana": (360, T - 30, 1284, T + 490)},
-    "pantalla": {"silla": (215, 370, 258), "mesa": 362, "ventana": (130, 110, 1672, 977),
+    "centro":   {"silla": (735, 910, 222), "mesa": 345, "apoyo": 400, "ventana": (360, T - 30, 1284, T + 490)},
+    "pantalla": {"silla": (215, 370, 258), "mesa": 362, "apoyo": 393, "ventana": (130, 110, 1672, 977),
                  "cerca": (1032, T + 13, 1672, T + 373),
                  "quad": [(1176, 75), (1609, 36), (1609, 350), (1176, 334)]},
 }
-HOMBRO_Y = 590      # fila del sprite donde empieza el traje en los bordes
-NIVELES = 9
+NIVELES = 7
+REF_OJOS = 8.5  # anchura de hombros / distancia entre ojos en las poses
 
-def sprites(base, plano):
-    x0, x1, arriba = PLANOS[plano]["silla"]
-    escala = (x1 - x0) * 1.30 / base.width * K
-    w, h = round(base.width * escala), round(base.height * escala)
-    res = {}
-    for b in range(NIVELES):
-        for p in (0.0, 0.6, 1.0):
-            im = animar(base, b / (NIVELES - 1), p).resize((w, h), Image.LANCZOS)
-            px = np.asarray(im).astype(np.float32)
-            px[..., 0] *= 1.03; px[..., 2] *= 0.98  # tono algo más cálido, como la luz del plató
-            im = Image.fromarray(np.clip(px, 0, 255).astype(np.uint8), "RGBA").filter(ImageFilter.GaussianBlur(0.5))
-            res[(b, p)] = im
-    cx = (x0 + x1) / 2 * K
-    top = (arriba + T) * K - HOMBRO_Y * escala
-    return res, (cx - w / 2, top)
+class Presentador:
+    """Sprites de cada pose ya escalados al plano, con boca y parpadeo, en caché."""
+    def __init__(self):
+        self.base = PZ.cargar()
+    def colocar(self, plano, pose):
+        x0, x1, _ = PLANOS[plano]["silla"]
+        lm = PZ.POSES[pose]
+        esc = (x1 - x0) * 1.3 / REF_OJOS / PZ.distancia_ojos(lm) * K
+        img = self.base[pose]
+        ojos_x = (lm["ojos"][0][0] + lm["ojos"][1][0]) / 2
+        x = (x0 + x1) / 2 * K - ojos_x * esc
+        y = (PLANOS[plano]["apoyo"] + T) * K - img.height * esc
+        return esc, x, y
+    @lru_cache(maxsize=120)
+    def sprite(self, plano, pose, b, p):
+        esc, _, _ = self.colocar(plano, pose)
+        img = PZ.animar(self.base[pose], PZ.POSES[pose], b / (NIVELES - 1), p)
+        w, h = round(img.width * esc), round(img.height * esc)
+        im = img.resize((w, h), Image.LANCZOS)
+        px = np.asarray(im).astype(np.float32); px[..., 0] *= 1.03; px[..., 2] *= 0.98
+        return Image.fromarray(np.clip(px, 0, 255).astype(np.uint8), "RGBA").filter(ImageFilter.GaussianBlur(0.5))
+    def sombra(self, plano, pose):
+        esc, x, y = self.colocar(plano, pose)
+        a = self.base[pose].getchannel("A")
+        w, h = round(a.width * esc), round(a.height * esc)
+        return a.resize((w, h)).filter(ImageFilter.GaussianBlur(10 * K / 3)).point(lambda v: v * 0.45)
+
+def plan_poses(tramos):
+    """Qué pose toca en cada momento: señala la pantalla al aparecer una imagen y va cambiando."""
+    plan = []
+    for i, (ini, fin, plano, slide) in enumerate(tramos):
+        if plano == "pantalla":
+            seq = ["senala", "explica", "manos", "explica"]
+        else:
+            seq = ["manos", "explica", "inclinado", "papeles"] if i == 0 else ["explica", "inclinado", "manos"]
+        t, k = ini, 0
+        while t < fin:
+            dur = 2.6 if seq[k % len(seq)] == "senala" else 3.8
+            plan.append((t, min(t + dur, fin), seq[k % len(seq)])); t += dur; k += 1
+    return plan
 
 def suave(t): return t * t * (3 - 2 * t)
 
@@ -62,9 +88,9 @@ def envolvente(wav_path, n_frames):
 
 def render(fondo_centro, fondo_pantalla, pres_png, tramos, voz_wav, salida_mp4, audio_final=None):
     """tramos: lista de (inicio_s, fin_s, plano, slide_png o None)."""
-    base = con_hombros(pres_png)
+    pres = Presentador()
     lienzos = {"centro": extender(fondo_centro), "pantalla": extender(fondo_pantalla)}
-    spr = {p: sprites(base, p) for p in ("centro", "pantalla")}
+    plan = plan_poses(tramos)
     con_slide = {}
     dur = tramos[-1][1]; n = int(round(dur * FPS))
     boca = envolvente(voz_wav, n)
@@ -97,14 +123,25 @@ def render(fondo_centro, fondo_pantalla, pres_png, tramos, voz_wav, salida_mp4, 
             v = ventana(amplia, cerca, suave(min(max(s, 0), 1)))
         box = tuple(int(round(c * K)) for c in v)
         frame = L.crop(box).convert("RGBA")
-        sp, (sx, sy) = spr[plano]
         b = int(round(boca[f] * (NIVELES - 1))); p = parpados[f]
-        im = sp[(b, p)]
-        dx = 1.5 * K * math.sin(2 * math.pi * 0.17 * t); dy = 2.0 * K * math.sin(2 * math.pi * 0.23 * t)
-        px, py = int(sx + dx - box[0]), int(sy + dy - box[1])
-        corte = int((P["mesa"] + T) * K - (sy + dy))  # filas visibles por encima de la mesa
-        if corte > 0 and -im.width < px < frame.width:
-            frame.alpha_composite(im.crop((0, 0, im.width, min(corte, im.height))), (px, py))
+        dx = 1.5 * K * math.sin(2 * math.pi * 0.17 * t); dy = 1.5 * K * math.sin(2 * math.pi * 0.23 * t)
+        j = max(i for i, x in enumerate(plan) if x[0] <= t)
+        actual = plan[j][2]; capas = [(actual, 1.0)]
+        FUND = 0.35
+        if j > 0 and t - plan[j][0] < FUND and plan[j - 1][2] != actual:  # fundido entre poses
+            a_ = (t - plan[j][0]) / FUND; capas = [(plan[j - 1][2], 1.0), (actual, a_)]
+        for pose, alfa in capas:
+            esc, sx, sy = pres.colocar(plano, pose)
+            im = pres.sprite(plano, pose, b, p)
+            px, py = int(sx + dx - box[0]), int(sy + dy - box[1])
+            if not (-im.width < px < frame.width and -im.height < py < frame.height):
+                continue
+            if alfa < 1:
+                im = im.copy(); im.putalpha(im.getchannel("A").point(lambda v: int(v * alfa)))
+            sh = pres.sombra(plano, pose)
+            capa_s = Image.new("RGBA", sh.size, (0, 0, 0, 0)); capa_s.putalpha(sh.point(lambda v: int(v * alfa)))
+            frame.alpha_composite(capa_s.crop((0, 0, sh.width, sh.height)), (px + int(6 * K / 3), py + int(10 * K / 3))) if px >= 0 and py >= 0 else None
+            frame.paste(im, (px, py), im)
         proc.stdin.write(frame.convert("RGB").resize((W, H), Image.BILINEAR).tobytes())
     proc.stdin.close(); proc.wait()
 
