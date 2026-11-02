@@ -365,9 +365,25 @@ def imagen_lista(datos):
     return img
 
 
+ANCHO_GRANDE = 940  # con el zoom final llega a ~1034 px: casi todo el ancho del vídeo
+
+
+def foto_grande(fuente_img):
+    """Foto a sangre, sin recuadro ni márgenes interiores, para que se vea lo más grande posible."""
+    alto = round(ANCHO_GRANDE * fuente_img.height / fuente_img.width)
+    foto = fuente_img.resize((ANCHO_GRANDE, alto), Image.LANCZOS)
+    mascara = Image.new("L", foto.size, 0)
+    ImageDraw.Draw(mascara).rounded_rectangle([0, 0, foto.width - 1, alto - 1], radius=30, fill=255)
+    img = Image.new("RGBA", (ANCHO_GRANDE + 2 * MARGEN, alto + 2 * MARGEN), (0, 0, 0, 0))
+    img.paste(foto, (MARGEN, MARGEN), mascara)
+    return img
+
+
 def imagen_foto(datos):
     """Foto de la noticia con esquinas redondeadas dentro del panel."""
     fuente_img = Image.open(datos["ruta"]).convert("RGB")
+    if datos.get("grande"):
+        return foto_grande(fuente_img)
     ancho = PANEL_ANCHO - 60
     # Entre apaisada 8:3 (las de categoría) y cuadrada; si es más alta, se recorta al centro,
     # salvo que el json permita más ("proporcion_max", por ejemplo 1.8 para carteles verticales).

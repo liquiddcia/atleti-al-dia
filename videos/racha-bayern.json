@@ -32,7 +32,7 @@
   ],
   "imagen": {
     "tipo": "foto",
-    "titulo": "LA SEMANA DECISIVA",
+    "grande": true,
     "ruta": "videos/imagenes/semana-bayern-barca.jpg"
   }
 }
