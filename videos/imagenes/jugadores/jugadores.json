@@ -3,6 +3,7 @@
   "jugadores": [
     {"archivo": "llorente.jpg", "nombres": ["Marcos Llorente", "Llorente"]},
     {"archivo": "simeone.jpg", "nombres": ["Diego Simeone", "Simeone", "Cholo"]},
-    {"archivo": "julian-alvarez.jpg", "nombres": ["Julián Álvarez", "Julián", "Álvarez"]}
+    {"archivo": "julian-alvarez.jpg", "nombres": ["Julián Álvarez", "Julián", "Álvarez"]},
+    {"archivo": "baena.jpg", "nombres": ["Álex Baena", "Baena"]}
   ]
 }

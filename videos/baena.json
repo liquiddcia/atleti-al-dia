@@ -28,14 +28,9 @@
     }
   ],
   "imagen": {
-    "tipo": "lista",
+    "tipo": "foto",
     "titulo": "ÁLEX BAENA · MERCADO",
-    "filas": [
-      {"nombre": "Arsenal (Arteta)", "estado": "Interesado: quiere abrir conversaciones", "color": "ambar"},
-      {"nombre": "Lo que le ofrecería", "estado": "Protagonismo, más sueldo y la Premier", "color": "gris"},
-      {"nombre": "Atlético", "estado": "No facilitará su salida en enero", "color": "rojo"},
-      {"nombre": "Precio", "estado": "Solo con una oferta irrechazable", "color": "ambar"}
-    ],
-    "pie": "Ya pasó con Julián este verano"
+    "ruta": "videos/imagenes/baena-arsenal.jpg",
+    "pie": "El Atleti no le dejará salir en enero"
   }
 }
