@@ -39,8 +39,9 @@ jobs:
                || ! git cat-file -e "$ANTES" 2>/dev/null; then
               ANTES="$DESPUES~1"
             fi
+            # Solo los json que están directamente en videos/ (no los de subcarpetas como imagenes/)
             nombres=$(git diff --name-only --diff-filter=AM "$ANTES" "$DESPUES" -- 'videos/*.json' \
-                      | xargs -r -n1 basename | sed 's/\.json$//')
+                      | grep -E '^videos/[^/]+\.json$' | xargs -r -n1 basename | sed 's/\.json$//')
           fi
           videos="[]"
           for n in $nombres; do
