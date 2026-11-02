@@ -18,7 +18,7 @@ jobs:
           FB, FR = find('LiberationSans-Bold.ttf'), find('LiberationSans-Regular.ttf')
           B=lambda s:ImageFont.truetype(FB,s); R=lambda s:ImageFont.truetype(FR,s)
           W,H=1920,1080
-          RED=(203,53,43); WHITE=(255,255,255); GREY=(190,190,205); CARD=(36,28,48); GREEN=(46,160,90); AMB=(235,170,40)
+          RED=(203,53,43); WHITE=(255,255,255); GREY=(200,204,220); CARD=(255,255,255,20); GREEN=(46,190,110); AMB=(240,175,45)
           import urllib.request, urllib.parse, json, io
           UA={'User-Agent':'DiarioColchonero/1.0 (diariocolchonero.com)'}
           def _get(u):
@@ -51,23 +51,44 @@ jobs:
               ESC[k]=_local(k) or _commons(q) or _respaldo(ini,c1,c2)
           def pegar(im,k,cx,cy,size):
               e=ESC[k].copy(); e.thumbnail((size,size)); im.paste(e,(int(cx-e.width/2),int(cy-e.height/2)),e)
+          from PIL import ImageFilter as _F
+          def _fondo_premium():
+              import math
+              # Degradado diagonal azul noche -> granate, con brillos, franjas rojiblancas muy sutiles y viñeta
+              g=Image.new('RGB',(W,H)); px=g.load()
+              for y in range(0,H,2):
+                  for x in range(0,W,2):
+                      k=(x/W*0.55+y/H*0.45)
+                      c=(int(8+40*k),int(12+4*k),int(30+8*(1-k)))
+                      px[x,y]=c
+              g=g.resize((W//2,H//2)).resize((W,H),Image.BILINEAR)
+              capa=Image.new('RGBA',(W,H),(0,0,0,0)); dc=ImageDraw.Draw(capa)
+              for i in range(-H, W, 120):  # franjas diagonales
+                  dc.polygon([(i,H),(i+40,H),(i+40+H*0.6,0),(i+H*0.6,0)],fill=(255,255,255,7) if (i//120)%2 else (203,53,43,10))
+              g=Image.alpha_composite(g.convert('RGBA'),capa)
+              luz=Image.new('RGBA',(W,H),(0,0,0,0)); dl=ImageDraw.Draw(luz)
+              dl.ellipse([-300,-350,900,450],fill=(203,53,43,90)); dl.ellipse([1200,500,2300,1400],fill=(40,80,200,80)); dl.ellipse([700,-200,1300,250],fill=(255,255,255,25))
+              g=Image.alpha_composite(g,luz.filter(_F.GaussianBlur(160)))
+              vin=Image.new('L',(W,H),0); ImageDraw.Draw(vin).ellipse([-W*0.25,-H*0.35,W*1.25,H*1.35],fill=255)
+              vin=vin.filter(_F.GaussianBlur(220)); negro=Image.new('RGBA',(W,H),(0,0,0,255))
+              return Image.composite(g,negro,vin)
+          FONDO=_fondo_premium().convert("RGB")
           def base(titulo, sub=None, n=None, esc=('atm','bay')):
-              im=Image.new('RGB',(W,H)); d=ImageDraw.Draw(im)
-              for y in range(H): d.line([(0,y),(W,y)],fill=(int(16+26*y/H),12,int(28+10*y/H)))
-              d.rectangle([0,0,26,H],fill=RED)
-              d.text((90,70),titulo,font=B(76),fill=WHITE)
-              if sub: d.text((92,168),sub,font=R(38),fill=GREY)
-              d.rectangle([0,H-64,W,H],fill=RED)
-              d.text((90,H-34),"DIARIO COLCHONERO · diariocolchonero.com",font=B(28),fill=WHITE,anchor="lm")
-              d.text((W-90,H-34),"Atlético – Bayern · Champions · 3 nov · 21:00",font=R(28),fill=WHITE,anchor="rm")
+              im=FONDO.copy(); d=ImageDraw.Draw(im,'RGBA')
+              d.rounded_rectangle([60,64,72,150 if sub else 130],6,fill=RED)
+              d.text((96,70),titulo,font=B(74),fill=WHITE)
+              if sub: d.text((98,166),sub,font=R(36),fill=GREY)
+              d.rectangle([0,H-58,W,H],fill=(0,0,0,150)); d.rectangle([0,H-58,W,H-55],fill=RED)
+              d.text((90,H-29),"DIARIO COLCHONERO · diariocolchonero.com",font=B(26),fill=WHITE,anchor="lm")
+              d.text((W-90,H-29),"Atlético – Bayern · Champions · 3 nov · 21:00",font=R(26),fill=GREY,anchor="rm")
               for i,k in enumerate(reversed(esc)): pegar(im,k,W-130-i*150,110,120)
               return im,d
           def card(d,x,y,w,h,big,small,color=WHITE):
-              d.rounded_rectangle([x,y,x+w,y+h],24,fill=CARD)
+              d.rounded_rectangle([x,y,x+w,y+h],24,fill=CARD,outline=(255,255,255,45),width=2)
               d.text((x+w//2,y+h*0.42),big,font=B(int(h*0.36)),fill=color,anchor="mm")
               d.text((x+w//2,y+h*0.80),small,font=R(30),fill=GREY,anchor="mm")
           def pitch(d,x0,y0,w,h):
-              d.rounded_rectangle([x0,y0,x0+w,y0+h],18,fill=(24,92,56),outline=(220,230,225),width=4)
+              d.rounded_rectangle([x0,y0,x0+w,y0+h],18,fill=(20,96,62,235),outline=(220,230,225),width=4)
               d.line([(x0,y0+h//2),(x0+w,y0+h//2)],fill=(220,230,225),width=3)
               r=90; d.ellipse([x0+w//2-r,y0+h//2-r,x0+w//2+r,y0+h//2+r],outline=(220,230,225),width=3)
               for yy,s in ((y0,1),(y0+h,-1)):
@@ -86,7 +107,7 @@ jobs:
                       x=x0+w*(j+1)/(len(f)+1)
                       jug(d,x,y,nom,color,nota)
           out=[]
-          def save(im,name): im.save(name); out.append(name)
+          def save(im,name): im.convert("RGB").save(name); out.append(name)
 
           BAYC=(220,30,60)
           def fila(d,y,t1,t2,etq=None,col=RED,h=135,big=None):
@@ -200,7 +221,8 @@ jobs:
           fondo=canal.resize((int(canal.width*H/canal.height),H)).crop((0,0,W,H)).filter(ImageFilter.GaussianBlur(30))
           fondo=ImageEnhance.Brightness(fondo).enhance(0.5)
           c2=canal.copy(); c2.thumbnail((W,H)); fondo.paste(c2,((W-c2.width)//2,(H-c2.height)//2))
-          fondo.save("00_canal.png"); fondo.save("14_suscribete.png")
+          fondo.save("14_suscribete.png")
+          Image.open('../videos/imagenes/portada-previa-bayern.jpg').convert('RGB').resize((W,H),Image.LANCZOS).save("00_portada.png")
           PYEOF
           cat > montar.py <<'PYEOF'
           import os, re, subprocess, asyncio
@@ -208,7 +230,7 @@ jobs:
           FAKE = os.environ.get("FAKE") == "1"
           OUT = "salida"; os.makedirs(OUT, exist_ok=True)
           SEG = [
-          ("00_canal.png", """Esto es Diario Colchonero."""),
+          ("00_portada.png", ""),
           ("01_portada.png", """Buenas, colchoneros. Llega una de esas noches grandes de Champions: el Atlético de Madrid recibe al Bayern de Múnich este martes, a las nueve de la noche, en un Metropolitano lleno hasta la bandera. Es la cuarta jornada de la fase de liga, y el Bayern llega solo un punto por delante. Repasamos cómo llegan los dos equipos, las bajas, los onces y las claves. Quédate hasta el final."""),
           ("02_momento.png", """El Atlético llega lanzado. Suma nueve partidos sin perder, con ocho victorias y un empate, y siete triunfos seguidos en Liga, el último por cero a dos en Valencia ante el Levante. Es segundo, a dos puntos del Barcelona. Pero en Europa el arranque ha sido irregular: una victoria, un empate y una derrota. Cuatro puntos, decimosexto, y la necesidad de sumar para no complicarse el camino."""),
           ("03_defensa_europa.png", """Y aquí está la gran preocupación. En sus primeros sesenta y nueve partidos de Champions con Simeone, el Atlético dejaba la portería a cero en el cincuenta y cinco por ciento de los encuentros. En los últimos sesenta y cinco, solo lo ha conseguido doce veces, un dieciocho por ciento. La solidez de antes, en Europa, ya no es la misma. La buena noticia es arriba: el equipo lleva veinte partidos seguidos de Champions marcando en casa."""),
@@ -236,12 +258,16 @@ jobs:
               # Tono algo más grave con el propio edge-tts (sin estirar el audio, que la hacía robótica).
               # Cada bloque se lee seguido: los saltos de línea del guion metían parones largos.
               t = " ".join(t.split())
-              asyncio.run(edge_tts.Communicate(t, "es-ES-AlvaroNeural", rate="+10%", pitch="-6Hz").save(p))
+              asyncio.run(edge_tts.Communicate(t, "es-ES-AlvaroNeural", rate="+16%", pitch="-6Hz").save(p))
           partes = []
           for i, (img, txt) in enumerate(SEG):
               raw, fx, seg = f"{OUT}/r{i}.mp3", f"{OUT}/f{i}.wav", f"{OUT}/s{i:02d}.mp4"
-              tts(txt, raw)
-              run([FF,"-y","-i",raw,"-af","aresample=44100,bass=g=3:f=120,acompressor=threshold=0.1:ratio=2.5:attack=20:release=250,apad=pad_dur=0.3",fx])
+              if not txt.strip():  # imagen sin locución: 2,5 s solo con música
+                  run([FF,"-y","-f","lavfi","-i","anullsrc=r=44100:cl=mono","-t","2.5",fx])
+              else:
+                  tts(txt, raw)
+                  # Recorta las pausas largas entre frases a 0,15 s y deja solo 0,12 s entre imágenes
+                  run([FF,"-y","-i",raw,"-af","aresample=44100,silenceremove=start_periods=1:start_threshold=-45dB:stop_periods=-1:stop_duration=0.18:stop_threshold=-45dB:stop_silence=0.15,bass=g=3:f=120,acompressor=threshold=0.1:ratio=2.5:attack=20:release=250,apad=pad_dur=0.12",fx])
               d = dur(fx); n = int(d*25)+1
               # Movimiento variado: alterna acercarse y alejarse, con un ligero desplazamiento lateral
               z = f"1+0.12*on/{n}" if i % 2 == 0 else f"1.12-0.12*on/{n}"
@@ -263,33 +289,24 @@ jobs:
               crudo = subprocess.run([FF, "-loglevel", "error", "-stream_loop", "-1", "-i", cancion[0], "-t", f"{total:.2f}", "-ac", "1", "-ar", str(SR), "-f", "s16le", "-"], capture_output=True, check=True).stdout
               musica = np.frombuffer(crudo, "<i2").astype(float) / 32768; musica = np.pad(musica, (0, max(N - len(musica), 0)))[:N]
           else:
-              # Base animada sintetizada: 112 bpm, La m - Fa - Do - Sol
-              bpm = 112; beat = 60 / bpm; compas = 4 * beat
+              # Ambiente: colchón de acordes lentos, bajo largo, brillo suave y murmullo de estadio
               acordes = [(220.0, 261.63, 329.63), (174.61, 220.0, 261.63), (261.63, 329.63, 392.0), (196.0, 246.94, 293.66)]
+              dur_ac = 6.0
               musica = np.zeros(N)
-              def suma(pos, señal):
-                  a = int(pos * SR); b = min(a + len(señal), N)
-                  if a < N: musica[a:b] += señal[:b - a]
-              L = lambda s: np.arange(int(s * SR)) / SR
-              kick = np.sin(2 * np.pi * (45 * L(0.35) + 90 * (1 - np.exp(-L(0.35) * 35)) / 35)) * env(L(0.35), 0.002, 9)
-              ruido = rng.standard_normal(int(0.25 * SR))
-              palma = (ruido - np.convolve(ruido, np.ones(8) / 8, "same")) * env(L(0.25), 0.002, 22) * 0.6
-              hat = np.diff(rng.standard_normal(int(0.06 * SR) + 1)) * env(L(0.06), 0.001, 70) * 0.18
-              for c in range(int(total / compas) + 1):
-                  t0 = c * compas; ac = acordes[c % 4]; fuerte = (c // 8) % 2 == 1  # cada 8 compases sube la intensidad
-                  tt = L(compas)
-                  pad = sum(np.sin(2 * np.pi * f * tt) + 0.35 * np.sin(4 * np.pi * f * tt) + 0.15 * np.sin(6 * np.pi * f * tt) for f in ac)
-                  suma(t0, 0.035 * pad * np.minimum(tt / 0.4, 1) * np.minimum((compas - tt) / 0.3, 1))
-                  for b in range(4):
-                      suma(t0 + b * beat, 0.55 * kick)
-                      if b in (1, 3): suma(t0 + b * beat, 0.5 * palma)
-                      for h in ((0.5,) if not fuerte else (0, 0.25, 0.5, 0.75)):  # platillos a contratiempo; más en la parte fuerte
-                          suma(t0 + (b + h) * beat, hat)
-                      for o in (0, 0.5):  # bajo en corcheas
-                          lb = L(beat * 0.45); suma(t0 + (b + o) * beat, 0.22 * np.sin(2 * np.pi * ac[0] / 2 * lb) * env(lb, 0.005, 6))
-                  if fuerte:  # arpegio por encima
-                      for k in range(8):
-                          la = L(beat * 0.4); f = ac[k % 3] * 2; suma(t0 + k * beat / 2, 0.05 * np.sin(2 * np.pi * f * la) * env(la, 0.005, 9))
+              for c in range(int(total / dur_ac) + 2):
+                  a0 = int(c * dur_ac * SR); a1 = min(int((c + 1.6) * dur_ac * SR), N)  # solapan para fundirse
+                  if a0 >= N: break
+                  tt = np.arange(a1 - a0) / SR; L_ = (a1 - a0) / SR
+                  envol = np.sin(np.pi * np.clip(tt / L_, 0, 1)) ** 2
+                  ac = acordes[c % 4]
+                  pad = sum(np.sin(2 * np.pi * f * tt + 0.3 * np.sin(2 * np.pi * 0.2 * tt)) + 0.5 * np.sin(2 * np.pi * f * 1.003 * tt) + 0.25 * np.sin(4 * np.pi * f * tt) for f in ac)
+                  bajo = np.sin(2 * np.pi * ac[0] / 2 * tt)
+                  brillo = sum(np.sin(2 * np.pi * f * 2 * tt) for f in ac) * (0.5 + 0.5 * np.sin(2 * np.pi * 0.5 * tt))
+                  musica[a0:a1] += envol * (0.05 * pad + 0.06 * bajo + 0.012 * brillo)
+              ruido = rng.standard_normal(N)
+              espectro = np.fft.rfft(ruido); fr = np.fft.rfftfreq(N, 1 / SR); espectro[(fr < 250) | (fr > 1600)] = 0
+              grada = np.fft.irfft(espectro, N); grada /= (np.max(np.abs(grada)) or 1)
+              musica += 0.06 * grada * (0.8 + 0.2 * np.sin(2 * np.pi * 0.07 * t))
           musica *= np.minimum(t / 2, 1) * np.minimum((total - t) / 3, 1)
           musica = 0.22 * musica / (np.max(np.abs(musica)) or 1)
           # Whoosh: ruido que sube y baja de tono al cambiar de imagen
