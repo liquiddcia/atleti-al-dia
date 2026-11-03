@@ -42,7 +42,7 @@ def ambiente(n):
     m *= np.minimum(t / 1.5, 1) * np.minimum((t[-1] - t) / 1.5, 1)
     return 0.22 * m / (np.max(np.abs(m)) or 1)
 
-def main(salida):
+def main(salida, render=None):
     tmp = os.path.join(os.path.dirname(os.path.abspath(salida)), "plato_tmp"); os.makedirs(tmp, exist_ok=True)
     partes, tramos, t = [], [], 0.6
     pista = [np.zeros(int(0.6 * SR))]
@@ -61,8 +61,9 @@ def main(salida):
                     "[0]asplit[v][k];[1][k]sidechaincompress=threshold=0.04:ratio=3:attack=30:release=400[m];[v][m]amix=inputs=2:normalize=0,alimiter=limit=0.95",
                     os.path.join(tmp, "final.wav")], check=True)
     for tr in tramos: print("tramo", tr[2], round(tr[0], 2), "→", round(tr[1], 2), flush=True)
-    pr.render(P("fondos", "escudo_centro.png"), P("fondos", "escudo_pantalla.png"), P("presentador.png"),
-              tramos, os.path.join(tmp, "voz.wav"), salida, os.path.join(tmp, "final.wav"))
+    (render or (lambda tr, voz_, sal, fin: pr.render(P("fondos", "escudo_centro.png"), P("fondos", "escudo_pantalla.png"),
+                                                    P("presentador.png"), tr, voz_, sal, fin)))(
+        tramos, os.path.join(tmp, "voz.wav"), salida, os.path.join(tmp, "final.wav"))
     print("Vídeo listo:", salida)
 
 if __name__ == "__main__":

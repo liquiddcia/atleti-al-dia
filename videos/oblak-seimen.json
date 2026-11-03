@@ -1,5 +1,8 @@
 {
-  "titular": ["EL HEREDERO", "DE OBLAK"],
+  "titular": [
+    "EL HEREDERO",
+    "DE OBLAK"
+  ],
   "frases": [
     {
       "hablado": "El Atlético ya piensa en el futuro de su portería y tiene un nombre en la agenda: Dennis Seimen.",
@@ -30,5 +33,37 @@
     "tipo": "foto",
     "grande": true,
     "ruta": "videos/imagenes/oblak-seimen.jpg"
+  },
+  "plato": {
+    "paneles": [
+      {
+        "ruta": "videos/imagenes/recortes/oblak.png",
+        "sub": "El presente",
+        "titulo": "JAN OBLAK",
+        "etiqueta": "Indiscutible",
+        "frases": 3,
+        "brillo": [
+          203,
+          53,
+          36
+        ]
+      },
+      {
+        "ruta": "videos/imagenes/recortes/seimen.png",
+        "sub": "¿El futuro?",
+        "titulo": "DENNIS SEIMEN",
+        "etiqueta": "En la agenda",
+        "color": [
+          255,
+          214,
+          0
+        ],
+        "brillo": [
+          245,
+          140,
+          40
+        ]
+      }
+    ]
   }
 }

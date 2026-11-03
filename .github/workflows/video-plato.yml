@@ -28,6 +28,10 @@ jobs:
         run: |
           [[ "$VIDEO" =~ ^[A-Za-z0-9_-]+$ ]] || { echo "::error::Nombre no válido"; exit 1; }
           python3 scripts/plato/noticia.py "videos/$VIDEO.json" "salida/$VIDEO-plato.mp4"
+          # Versión vertical para Shorts si el json define los paneles del plató
+          if python3 -c "import json,sys; sys.exit(0 if 'plato' in json.load(open('videos/$VIDEO.json')) else 1)"; then
+            python3 scripts/plato/vertical.py "videos/$VIDEO.json" "salida/$VIDEO-vertical-plato.mp4"
+          fi
       - uses: actions/upload-artifact@v4
         with:
           name: plato-${{ env.VIDEO }}
