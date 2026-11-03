@@ -30,7 +30,7 @@ def animar(base, lm, boca, parpadeo):
     im = base.copy()
     e = (lm["boca"][1] - lm["boca"][0]) / 120.0   # escala respecto a la cara de referencia
     ed = distancia_ojos(lm)
-    L = lm["labio"]; cx = (lm["boca"][0] + lm["boca"][1]) / 2
+    L = int(round(lm["labio"])); cx = (lm["boca"][0] + lm["boca"][1]) / 2
     if boca > 0.02:
         d = boca * 16.0 * e
         arr = np.asarray(im).astype(np.float32); h, w = arr.shape[:2]
