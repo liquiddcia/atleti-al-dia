@@ -9,8 +9,8 @@
       "subtitulo": "El Atlético ya piensa en el futuro de su portería y tiene un nombre en la agenda: Dennis Seimen."
     },
     {
-      "hablado": "El joven portero del Stuttgart es uno de los candidatos para suceder a Jan Oblak cuando el esloveno deje de ser titular.",
-      "subtitulo": "El joven portero del Stuttgart es uno de los candidatos para suceder a Jan Oblak cuando el esloveno deje de ser titular."
+      "hablado": "El joven portero del Stuttgart es uno de los candidatos para suceder a Oblak cuando el esloveno deje de ser titular.",
+      "subtitulo": "El joven portero del Stuttgart es uno de los candidatos para suceder a Oblak cuando el esloveno deje de ser titular."
     },
     {
       "hablado": "Oblak ha sido durante años la gran referencia bajo palos en el Metropolitano, y encontrar un relevo de garantías es una prioridad.",
@@ -39,7 +39,7 @@
       {
         "ruta": "videos/imagenes/recortes/oblak.png",
         "sub": "El presente",
-        "titulo": "JAN OBLAK",
+        "titulo": "OBLAK",
         "etiqueta": "Indiscutible",
         "frases": 3,
         "brillo": [

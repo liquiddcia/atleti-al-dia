@@ -212,7 +212,8 @@ def pedir_guion(prompt, minimo=5, maximo=6, puntos=False):
             titular, frases = validar_guion(g, minimo, maximo)
             if puntos and not g.get("puntos"):
                 raise ValueError("faltan los puntos")
-            return titular, frases, g.get("puntos") or []
+            from nombres import aplicar
+            return aplicar(titular), aplicar(frases), aplicar(g.get("puntos") or [])
         except (ValueError, KeyError, json.JSONDecodeError) as e:
             ultimo = e
             print(f"  Guion no válido (intento {intento + 1}): {e}", flush=True)

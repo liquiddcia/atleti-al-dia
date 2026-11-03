@@ -115,7 +115,8 @@ def render(noticia, paneles, tramos, voz_wav, salida, audio_final):
     proc.stdin.close(); proc.wait()
 
 def main(ruta_json, salida):
-    n = json.load(open(ruta_json, encoding="utf-8"))
+    from nombres import aplicar
+    n = aplicar(json.load(open(ruta_json, encoding="utf-8")))
     paneles = n["plato"]["paneles"]
     for p in paneles:
         if not os.path.isabs(p["ruta"]): p["ruta"] = os.path.join(RAIZ, p["ruta"])

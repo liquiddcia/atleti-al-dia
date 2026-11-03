@@ -13,6 +13,7 @@ import sys
 import wave
 
 import imageio_ffmpeg
+from nombres import aplicar as aplicar_nombres
 import numpy as np
 from PIL import Image, ImageDraw, ImageFilter, ImageFont, ImageOps
 
@@ -454,7 +455,7 @@ def subtitulos(textos, tramos):
 
 def cargar_noticia(ruta):
     with open(ruta, encoding="utf-8") as f:
-        noticia = json.load(f)
+        noticia = aplicar_nombres(json.load(f))
     frases = []
     for frase in noticia["frases"]:
         if isinstance(frase, str):  # una frase suelta vale para voz y subtítulo

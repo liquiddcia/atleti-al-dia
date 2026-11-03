@@ -9,7 +9,8 @@ sys.path.insert(0, AQUI)
 import demo, plato_render as pr
 
 def main(ruta_json, salida):
-    n = json.load(open(ruta_json, encoding="utf-8"))
+    sys.path.insert(0, os.path.join(RAIZ, "scripts")); from nombres import aplicar
+    n = aplicar(json.load(open(ruta_json, encoding="utf-8")))
     img = n["imagen"]["ruta"]
     img = img if os.path.isabs(img) else os.path.join(RAIZ, img)
     # La pantalla del plató es 16:9: se centra la imagen de la noticia sobre fondo oscuro

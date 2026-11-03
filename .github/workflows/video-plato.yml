@@ -1,5 +1,5 @@
 name: Vídeo plató
-# Presentador con una sola postura, sin cortes
+# Presentador con una sola postura, sin cortes · nombres según scripts/nombres.py
 
 on:
   workflow_dispatch:

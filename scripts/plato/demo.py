@@ -5,6 +5,8 @@ import numpy as np
 AQUI = os.path.dirname(os.path.abspath(__file__)); RAIZ = os.path.join(AQUI, "..", "..")
 sys.path.insert(0, AQUI)
 import plato_render as pr
+sys.path.insert(0, os.path.join(RAIZ, "scripts"))
+from nombres import nombres
 FF = os.environ.get("FF", "ffmpeg"); pr.FFMPEG = FF
 SR = 44100
 P = lambda *r: os.path.join(RAIZ, "videos", "plato", *r)
@@ -16,6 +18,7 @@ GUION = [
 ]
 
 def voz(texto, wav):
+    texto = nombres(texto)
     import edge_tts
     mp3 = wav.replace(".wav", ".mp3")
     asyncio.run(edge_tts.Communicate(texto, "es-ES-AlvaroNeural", rate="+12%", pitch="-6Hz").save(mp3))
