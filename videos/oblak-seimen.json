@@ -1,0 +1,34 @@
+{
+  "titular": ["EL HEREDERO", "DE OBLAK"],
+  "frases": [
+    {
+      "hablado": "El Atlético ya piensa en el futuro de su portería y tiene un nombre en la agenda: Dennis Seimen.",
+      "subtitulo": "El Atlético ya piensa en el futuro de su portería y tiene un nombre en la agenda: Dennis Seimen."
+    },
+    {
+      "hablado": "El joven portero del Stuttgart es uno de los candidatos para suceder a Jan Oblak cuando el esloveno deje de ser titular.",
+      "subtitulo": "El joven portero del Stuttgart es uno de los candidatos para suceder a Jan Oblak cuando el esloveno deje de ser titular."
+    },
+    {
+      "hablado": "Oblak ha sido durante años la gran referencia bajo palos en el Metropolitano, y encontrar un relevo de garantías es una prioridad.",
+      "subtitulo": "Oblak ha sido durante años la gran referencia bajo palos en el Metropolitano, y encontrar un relevo de garantías es una prioridad."
+    },
+    {
+      "hablado": "Seimen ha llamado la atención de los ojeadores rojiblancos, que siguen de cerca su evolución.",
+      "subtitulo": "Seimen ha llamado la atención de los ojeadores rojiblancos, que siguen de cerca su evolución."
+    },
+    {
+      "hablado": "El club planifica a largo plazo y evalúa perfiles preparados para asumir el reto cuando llegue el relevo generacional.",
+      "subtitulo": "El club planifica a largo plazo y evalúa perfiles preparados para asumir el reto cuando llegue el relevo generacional."
+    },
+    {
+      "hablado": "¿Será Seimen el nuevo guardián del Atleti? Esto es Diario Colchonero.",
+      "subtitulo": "¿Será Seimen el nuevo guardián del Atleti? Esto es Diario Colchonero."
+    }
+  ],
+  "imagen": {
+    "tipo": "foto",
+    "grande": true,
+    "ruta": "videos/imagenes/oblak-seimen.jpg"
+  }
+}
