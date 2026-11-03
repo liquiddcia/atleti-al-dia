@@ -57,3 +57,20 @@ def en(claves, t):
             u = (t - t0) / max(t1 - t0, 1e-6)
             return a, b, u * u * (3 - 2 * u)
     return claves[-1][1], claves[-1][1], 0.0
+
+# --- Modo limpio: posturas quietas que cambian con un corte de cámara (sin fundidos de manos) ---
+POSTURAS_LIMPIAS = ["f01", "f04", "f12", "f08", "f01", "f03", "f12"]
+
+def plan_limpio(tramos, semilla=5):
+    """Lista de (inicio, fotograma, encuadre); el encuadre alterna plano medio y primer plano."""
+    rnd = random.Random(semilla); out = []; i = 0; encuadre = 0
+    dur = tramos[-1][1]; t = 0.0
+    while t < dur:
+        d = rnd.uniform(2.6, 4.2)
+        out.append((t, POSTURAS_LIMPIAS[i % len(POSTURAS_LIMPIAS)], encuadre))
+        i += 1; encuadre = 1 - encuadre; t += d
+    return out
+
+def en_limpio(plan, t):
+    j = max(k for k, x in enumerate(plan) if x[0] <= t)
+    return plan[j][1], plan[j][2], t - plan[j][0]

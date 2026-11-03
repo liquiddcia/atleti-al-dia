@@ -1,4 +1,5 @@
 name: Vídeo plató
+# Posturas limpias con cortes de cámara (sin fundidos de manos)
 
 on:
   workflow_dispatch:
