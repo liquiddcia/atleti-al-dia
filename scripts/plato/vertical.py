@@ -22,6 +22,14 @@ VENTANA = (552, 255, 1092, 755)
 
 def panel(info):
     x0, y0, x1, y1 = B; w, h = x1 - x0, y1 - y0
+    if info.get("completa"):  # imagen 16:9 entera dentro del panel, con borde rojo
+        im = Image.new("RGBA", (w, h), (0, 0, 0, 0)); d = ImageDraw.Draw(im)
+        foto = Image.open(info["ruta"]).convert("RGB"); foto.thumbnail((w - 12, h - 12), Image.LANCZOS)
+        fx, fy = (w - foto.width) // 2, (h - foto.height) // 2
+        d.rounded_rectangle([fx - 6, fy - 6, fx + foto.width + 5, fy + foto.height + 5], 22, fill=ROJO)
+        m = Image.new("L", foto.size, 0); ImageDraw.Draw(m).rounded_rectangle([0, 0, foto.width - 1, foto.height - 1], 18, fill=255)
+        im.paste(foto, (fx, fy), m)
+        return im
     im = Image.new("RGBA", (w, h), (0, 0, 0, 0)); d = ImageDraw.Draw(im)
     d.rounded_rectangle([0, 0, w - 1, h - 1], 28, fill=(16, 20, 38, 235), outline=(203, 53, 36, 255), width=4)
     glow = Image.new("RGBA", (w, h), (0, 0, 0, 0))
