@@ -91,7 +91,7 @@ def render(fondo_centro, fondo_pantalla, pres_png, tramos, voz_wav, salida_mp4, 
     """tramos: lista de (inicio_s, fin_s, plano, slide_png o None)."""
     pres = Presentador()
     lienzos = {"centro": extender(fondo_centro), "pantalla": extender(fondo_pantalla)}
-    plan = SQ.plan(tramos)
+    plan = [(0.0, "f01"), (tramos[-1][1] + 1, "f01")]  # una sola postura: sin gestos ni fundidos de manos
     con_slide = {}
     dur = tramos[-1][1]; n = int(round(dur * FPS))
     boca = envolvente(voz_wav, n)

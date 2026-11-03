@@ -6,7 +6,7 @@ En el json, "plato": {"paneles": [{"ruta": ..., "titulo": ..., "sub": ..., "fras
 reparte las frases entre los paneles por orden."""
 import json, math, os, subprocess, sys
 import numpy as np
-from PIL import Image, ImageDraw, ImageFilter
+from PIL import Image, ImageDraw, ImageFilter, ImageOps
 AQUI = os.path.dirname(os.path.abspath(__file__)); RAIZ = os.path.join(AQUI, "..", "..")
 sys.path.insert(0, AQUI); sys.path.insert(0, os.path.join(RAIZ, "scripts"))
 import demo, plato_render as pr, secuencia as SQ
@@ -22,13 +22,11 @@ VENTANA = (552, 255, 1092, 755)
 
 def panel(info):
     x0, y0, x1, y1 = B; w, h = x1 - x0, y1 - y0
-    if info.get("completa"):  # imagen 16:9 entera dentro del panel, con borde rojo
-        im = Image.new("RGBA", (w, h), (0, 0, 0, 0)); d = ImageDraw.Draw(im)
-        foto = Image.open(info["ruta"]).convert("RGB"); foto.thumbnail((w - 12, h - 12), Image.LANCZOS)
-        fx, fy = (w - foto.width) // 2, (h - foto.height) // 2
-        d.rounded_rectangle([fx - 6, fy - 6, fx + foto.width + 5, fy + foto.height + 5], 22, fill=ROJO)
-        m = Image.new("L", foto.size, 0); ImageDraw.Draw(m).rounded_rectangle([0, 0, foto.width - 1, foto.height - 1], 18, fill=255)
-        im.paste(foto, (fx, fy), m)
+    if info.get("completa"):  # la imagen ocupa el panel entero, con borde rojo
+        foto = ImageOps.fit(Image.open(info["ruta"]).convert("RGB"), (w, h), Image.LANCZOS).convert("RGBA")
+        m = Image.new("L", (w, h), 0); ImageDraw.Draw(m).rounded_rectangle([0, 0, w - 1, h - 1], 26, fill=255)
+        im = Image.new("RGBA", (w, h), (0, 0, 0, 0)); im.paste(foto, (0, 0), m)
+        ImageDraw.Draw(im).rounded_rectangle([0, 0, w - 1, h - 1], 26, outline=ROJO + (255,), width=6)
         return im
     im = Image.new("RGBA", (w, h), (0, 0, 0, 0)); d = ImageDraw.Draw(im)
     d.rounded_rectangle([0, 0, w - 1, h - 1], 28, fill=(16, 20, 38, 235), outline=(203, 53, 36, 255), width=4)
@@ -126,6 +124,9 @@ def main(ruta_json, salida):
     from nombres import aplicar
     n = aplicar(json.load(open(ruta_json, encoding="utf-8")))
     paneles = n["plato"]["paneles"]
+    global A_ALTO, B, VENTANA
+    if all(p.get("completa") for p in paneles):
+        A_ALTO, B, VENTANA = 800, (40, 818, 1040, 1480), (552, 305, 1092, 705)
     for p in paneles:
         if not os.path.isabs(p["ruta"]): p["ruta"] = os.path.join(RAIZ, p["ruta"])
         if "brillo" in p: p["brillo"] = tuple(p["brillo"])

@@ -16,9 +16,7 @@ def main(ruta_json, salida):
     # La pantalla del plató es 16:9: se centra la imagen de la noticia sobre fondo oscuro
     from PIL import Image
     tmp = os.path.join(os.path.dirname(os.path.abspath(salida)), "plato_tmp"); os.makedirs(tmp, exist_ok=True)
-    src = Image.open(img).convert("RGB"); lienzo = Image.new("RGB", (1920, 1080), (14, 18, 34))
-    src.thumbnail((1920, 1080), Image.LANCZOS); lienzo.paste(src, ((1920 - src.width) // 2, (1080 - src.height) // 2))
-    slide = os.path.join(tmp, "pantalla.png"); lienzo.save(slide)
+    slide = img
     frases = [f["hablado"] if isinstance(f, dict) else f for f in n["frases"]]
     paneles = n.get("plato", {}).get("paneles")
     if paneles:  # varias imágenes: cada una ocupa la pantalla durante sus frases
@@ -28,9 +26,7 @@ def main(ruta_json, salida):
         rutas = []
         for k, p in enumerate(paneles):
             r = p["ruta"] if os.path.isabs(p["ruta"]) else os.path.join(RAIZ, p["ruta"])
-            src = Image.open(r).convert("RGB"); lz = Image.new("RGB", (1920, 1080), (14, 18, 34))
-            src.thumbnail((1920, 1080), Image.LANCZOS); lz.paste(src, ((1920 - src.width) // 2, (1080 - src.height) // 2))
-            rutas.append(os.path.join(tmp, f"pantalla{k}.png")); lz.save(rutas[-1])
+            rutas.append(r)
         demo.GUION = [("centro", None, frases[0])] + [("pantalla", rutas[de_frase[i]], frases[i]) for i in range(1, len(frases))]
     else:
         demo.GUION = [("centro", None, frases[0])] + [("pantalla", slide, f) for f in frases[1:]]

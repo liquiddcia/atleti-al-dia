@@ -1,5 +1,5 @@
 import sys, numpy as np
-from PIL import Image, ImageDraw, ImageFilter
+from PIL import Image, ImageDraw, ImageFilter, ImageOps
 K = 3            # escala del lienzo respecto a la imagen del plató
 T, B = 200, 330  # extensión de techo y suelo (px de la imagen original)
 
@@ -31,8 +31,7 @@ def poner_en_pantalla(lienzo, slide_path, quad):
     alto = ((q[3][1] - q[0][1]) + (q[2][1] - q[1][1])) / 2
     sl = Image.open(slide_path).convert("RGB")
     sw = 1920; sh = int(sw * alto / ancho)
-    lb = Image.new("RGB", (sw, sh), (4, 4, 8)); s2 = sl.resize((sw, int(sw * 9 / 16)), Image.LANCZOS)
-    lb.paste(s2, (0, (sh - s2.height) // 2))
+    lb = ImageOps.fit(sl, (sw, sh), Image.LANCZOS)  # la imagen ocupa toda la pantalla
     dst = [(x - bx0, y - by0) for x, y in q]; src = [(0, 0), (sw, 0), (sw, sh), (0, sh)]
     warp = lb.transform((bx1 - bx0, by1 - by0), Image.PERSPECTIVE, _coef(dst, src), Image.BICUBIC)
     m = Image.new("L", warp.size, 0); ImageDraw.Draw(m).polygon(dst, fill=255)
