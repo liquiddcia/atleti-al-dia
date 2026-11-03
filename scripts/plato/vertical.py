@@ -65,7 +65,9 @@ def render(noticia, paneles, tramos, voz_wav, salida, audio_final):
         for k, v in enumerate((0.6, 1.0, 1.0, 0.6)):
             if f + k < n: parpados[f + k] = v
         t_sig += rng.uniform(2.8, 5.5)
-    plan = SQ.plan_limpio(tramos)
+    # Una sola postura todo el vídeo: sin cortes ni cambios de imagen del presentador
+    pose = noticia.get("plato", {}).get("pose", "f01")
+    plan = [(0.0, pose, 0)]
     proc = subprocess.Popen([pr.FFMPEG, "-y", "-loglevel", "error", "-f", "rawvideo", "-pix_fmt", "rgb24", "-s", f"{W}x{H}", "-r", str(FPS), "-i", "-",
                              "-i", audio_final, "-map", "0:v", "-map", "1:a", "-c:v", "libx264", "-preset", "medium", "-crf", "20",
                              "-pix_fmt", "yuv420p", "-c:a", "aac", "-b:a", "160k", "-shortest", "-movflags", "+faststart", salida], stdin=subprocess.PIPE)
@@ -74,7 +76,7 @@ def render(noticia, paneles, tramos, voz_wav, salida, audio_final):
         t = f / FPS
         k_pose, encuadre, t_pose = SQ.en_limpio(plan, t)
         # Corte de cámara en cada cambio de postura: plano medio o primer plano, con deriva lenta
-        z = (1.0 if encuadre == 0 else 1.22) + 0.012 * t_pose
+        z = 1.0 + 0.10 * t / dur          # acercamiento continuo y muy lento
         cx, cy = (vx0 + vx1) / 2, (vy0 + vy1) / 2 - (25 if encuadre else 0); hw, hh = (vx1 - vx0) / 2 / z, (vy1 - vy0) / 2 / z
         box = tuple(int(round(c * K)) for c in (cx - hw, cy - hh, cx + hw, cy + hh))
         base = lienzo.crop(box).convert("RGBA")
