@@ -49,7 +49,10 @@ def main(salida):
     for i, (plano, slide, texto) in enumerate(GUION):
         x = voz(texto, os.path.join(tmp, f"v{i}.wav"))
         ini = t; t += len(x) / SR + 0.3
-        tramos.append((0 if i == 0 else ini, t, plano, slide))
+        if tramos and tramos[-1][2] == plano and tramos[-1][3] == slide:
+            tramos[-1] = (tramos[-1][0], t, plano, slide)   # misma imagen: se alarga el tramo
+        else:
+            tramos.append((0 if i == 0 else ini, t, plano, slide))
         pista += [x, np.zeros(int(0.3 * SR))]
     pista.append(np.zeros(int(1.0 * SR)))
     v = np.concatenate(pista); tramos[-1] = (tramos[-1][0], len(v) / SR, tramos[-1][2], tramos[-1][3])

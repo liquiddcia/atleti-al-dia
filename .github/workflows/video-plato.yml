@@ -1,0 +1,34 @@
+name: Vídeo plató
+
+on:
+  workflow_dispatch:
+    inputs:
+      video:
+        description: "Nombre del json de videos/ (sin .json)"
+        required: true
+  push:
+    branches: [claude/upbeat-meitner-6q6qho]
+    paths:
+      - .github/workflows/video-plato.yml
+
+jobs:
+  plato:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      VIDEO: ${{ inputs.video || 'oblak-seimen' }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Instalar edge-tts, Pillow, NumPy y ffmpeg
+        run: |
+          pip install edge-tts imageio-ffmpeg pillow numpy
+          echo "FF=$(python3 -c 'import imageio_ffmpeg; print(imageio_ffmpeg.get_ffmpeg_exe())')" >> "$GITHUB_ENV"
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+      - name: Generar el vídeo en el plató
+        run: |
+          [[ "$VIDEO" =~ ^[A-Za-z0-9_-]+$ ]] || { echo "::error::Nombre no válido"; exit 1; }
+          python3 scripts/plato/noticia.py "videos/$VIDEO.json" "salida/$VIDEO-plato.mp4"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: plato-${{ env.VIDEO }}
+          path: salida/*-plato.mp4
