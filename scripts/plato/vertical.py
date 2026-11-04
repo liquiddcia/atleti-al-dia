@@ -18,7 +18,7 @@ ROJO, BLANCO, AMARILLO = (203, 53, 36), (255, 255, 255), (255, 214, 0)
 A_ALTO = 1000                          # zona del presentador (arriba)
 B = (40, 1020, 1040, 1470)             # panel de imágenes (dentro de la zona segura de los Shorts)
 # Recorte del plató alrededor del presentador, en px de la imagen original (con la extensión T)
-VENTANA = (552, 255, 1092, 755)
+VENTANA = (450, 142, 1235, 869)    # incluye el logo y el nombre enteros
 
 def panel(info):
     x0, y0, x1, y1 = B; w, h = x1 - x0, y1 - y0
@@ -62,7 +62,9 @@ def render(noticia, paneles, tramos, voz_wav, salida, audio_final):
     # rótulo del titular (bajo el presentador)
     rotulo = Image.new("RGBA", (W, 130), (0, 0, 0, 0)); dr = ImageDraw.Draw(rotulo)
     dr.rectangle([0, 0, W, 130], fill=(0, 0, 0, 170)); dr.rectangle([0, 0, 18, 130], fill=ROJO)
-    dr.text((48, 65), " ".join(noticia["titular"]), font=vn.fuente(56), fill=BLANCO, anchor="lm")
+    tit, tam = " ".join(noticia["titular"]), 56
+    while tam > 30 and dr.textlength(tit, font=vn.fuente(tam)) > W - 48 - 30: tam -= 2   # que el titular quepa entero
+    dr.text((48, 65), tit, font=vn.fuente(tam), fill=BLANCO, anchor="lm")
     dur = tramos[-1][1]; n = int(round(dur * FPS))
     boca = pr.envolvente(voz_wav, n)
     rng = np.random.default_rng(7); parpados = np.zeros(n); t_sig = 2.0
@@ -82,7 +84,7 @@ def render(noticia, paneles, tramos, voz_wav, salida, audio_final):
         t = f / FPS
         k_pose, encuadre, t_pose = SQ.en_limpio(plan, t)
         # Corte de cámara en cada cambio de postura: plano medio o primer plano, con deriva lenta
-        z = 1.0 + 0.10 * t / dur          # acercamiento continuo y muy lento
+        z = 1.0 + 0.04 * t / dur          # acercamiento muy lento, sin cortar el logo ni el nombre
         cx, cy = (vx0 + vx1) / 2, (vy0 + vy1) / 2 - (25 if encuadre else 0); hw, hh = (vx1 - vx0) / 2 / z, (vy1 - vy0) / 2 / z
         box = tuple(int(round(c * K)) for c in (cx - hw, cy - hh, cx + hw, cy + hh))
         base = lienzo.crop(box).convert("RGBA")
@@ -126,7 +128,7 @@ def main(ruta_json, salida):
     paneles = n["plato"]["paneles"]
     global A_ALTO, B, VENTANA
     if all(p.get("completa") for p in paneles):
-        A_ALTO, B, VENTANA = 800, (40, 818, 1040, 1480), (552, 305, 1092, 705)
+        A_ALTO, B, VENTANA = 800, (40, 818, 1040, 1480), (450, 215, 1235, 796)
     for p in paneles:
         if not os.path.isabs(p["ruta"]): p["ruta"] = os.path.join(RAIZ, p["ruta"])
         if "brillo" in p: p["brillo"] = tuple(p["brillo"])
