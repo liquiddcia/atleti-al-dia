@@ -134,6 +134,12 @@ def main(ruta_json, salida):
         if "brillo" in p: p["brillo"] = tuple(p["brillo"])
         if "color" in p: p["color"] = tuple(p["color"])
     frases = [f["hablado"] if isinstance(f, dict) else f for f in n["frases"]]
+    if n.get("suscribete", True):  # cierre con la portada del canal
+        import suscribete
+        paneles = paneles[:-1] + [dict(paneles[-1], frases=len(frases) - sum(p["frases"] for p in paneles[:-1])),
+                                  {"ruta": suscribete.imagen(os.path.join(os.path.dirname(os.path.abspath(salida)), "plato_tmp"), B[2] - B[0], B[3] - B[1]),
+                                   "completa": True, "frases": 1}]
+        frases.append(suscribete.FRASE)
     guion, i = [], 0
     for k, p in enumerate(paneles):
         for _ in range(p["frases"] if k < len(paneles) - 1 else len(frases) - i):

@@ -30,6 +30,9 @@ def main(ruta_json, salida):
         demo.GUION = [("centro", None, frases[0])] + [("pantalla", rutas[de_frase[i]], frases[i]) for i in range(1, len(frases))]
     else:
         demo.GUION = [("centro", None, frases[0])] + [("pantalla", slide, f) for f in frases[1:]]
+    if n.get("suscribete", True):  # cierre con la portada del canal
+        import suscribete
+        demo.GUION.append(("pantalla", suscribete.imagen(tmp), suscribete.FRASE))
     # Las frases seguidas con la misma imagen forman un solo tramo de pantalla
     demo.main(salida)
 
