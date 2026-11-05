@@ -201,6 +201,7 @@ module.exports = async function handler(req, res) {
     fetch("/api/like", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: id, accion: "vista" }) }).catch(function(){});
   } catch (e) {} })();
   </script>
+  <script src="/banner-libro.js" defer></script>
   <script defer src="/_vercel/insights/script.js"></script>
 </body>
 </html>`;
