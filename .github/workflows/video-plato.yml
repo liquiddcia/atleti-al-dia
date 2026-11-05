@@ -20,7 +20,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 40
     env:
-      VIDEO: ${{ inputs.video || 'oblak-seimen' }}
+      VIDEO: ${{ inputs.video || 'cuti-barca' }}
       FORMATO: ${{ inputs.formato || 'vertical' }}
     steps:
       - uses: actions/checkout@v4
