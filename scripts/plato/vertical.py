@@ -47,7 +47,7 @@ def panel(info):
     etq = info.get("etiqueta")
     if etq:
         f = vn.fuente(44); tw = d.textlength(etq, font=f)
-        y = 200 + 78 * len(lineas) + 30
+        y = min(200 + 78 * len(lineas) + 30, h - 74 - 24)   # que la etiqueta no se salga del panel
         d.rounded_rectangle([tx, y, tx + tw + 50, y + 74], 18, fill=info.get("color", ROJO))
         d.text((tx + 25, y + 37), etq, font=f, fill=BLANCO if info.get("color", ROJO) != AMARILLO else (30, 20, 10), anchor="lm")
     return im
