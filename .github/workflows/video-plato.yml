@@ -1,5 +1,5 @@
 name: Vídeo plató
-# Presentador con una sola postura · imagen a pantalla completa · nombres según scripts/nombres.py · logo y nombre enteros · cierre con suscríbete · etiqueta dentro del panel · Barrios · Flick · historial 7-2-3
+# Presentador con una sola postura · imagen a pantalla completa · nombres según scripts/nombres.py · logo y nombre enteros · cierre con suscríbete · etiqueta dentro del panel · Barrios · Flick · historial 7-2-3 · rótulo
 
 on:
   workflow_dispatch:
