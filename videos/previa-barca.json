@@ -37,8 +37,12 @@
       "subtitulo": "Cuti Romero es baja en el Atlético. En el Barça no estarán Rodri, Dani Olmo, Koundé, Xavi Espart ni Bardghji."
     },
     {
-      "hablado": "En los últimos cinco duelos, dos victorias del Atlético y tres del Barça. Arbitrará Javier Alberola Rojas.",
-      "subtitulo": "En los últimos cinco duelos, dos victorias del Atlético y tres del Barça. Arbitrará Javier Alberola Rojas."
+      "hablado": "En los últimos cinco duelos, dos victorias del Atlético y tres del Barça.",
+      "subtitulo": "En los últimos cinco duelos, dos victorias del Atlético y tres del Barça."
+    },
+    {
+      "hablado": "Y el árbitro será Javier Alberola Rojas.",
+      "subtitulo": "Y el árbitro será Javier Alberola Rojas."
     },
     {
       "hablado": "¿Quién se lleva el duelo por el liderato? Os leo en comentarios. Esto es Diario Colchonero.",
@@ -94,6 +98,11 @@
       },
       {
         "ruta": "videos/imagenes/previa-barca/09_cara_a_cara.png",
+        "completa": true,
+        "frases": 1
+      },
+      {
+        "ruta": "videos/imagenes/previa-barca/09b_arbitro.png",
         "completa": true,
         "frases": 1
       },
