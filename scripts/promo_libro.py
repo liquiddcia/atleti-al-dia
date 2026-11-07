@@ -232,7 +232,6 @@ def render(subs, audio_wav, salida):
     luz = 1 + 0.025 * np.sin(2 * np.pi * 0.8 * tt) + 0.015 * np.sin(2 * np.pi * 2.3 * tt + 1)
     for c in rng.uniform(1.5, 28.5, 7):
         k = int(c * FPS); luz[k:k + 2] *= 0.86; luz[k + 2:k + 3] *= 0.95
-    capas_s = [(a, b, *a_np(capa_subtitulo(s))) for a, b, s in subs]
     capas_t = [(a, b, *a_np(capa_texto(s))) for a, b, s in TEXTOS]
     Y_SUB, Y_TXT = 900, 1460                  # subtítulo sobre el libro; texto en el hueco antes de «YA DISPONIBLE»
     p = subprocess.Popen([FF, "-y", "-loglevel", "error", "-f", "rawvideo", "-pix_fmt", "rgb24", "-s", f"{W}x{H}", "-r", str(FPS),
@@ -250,7 +249,7 @@ def render(subs, audio_wav, salida):
         a = np.asarray(fr, dtype=np.float32) / 255.0
         a = a * vineta * luz[i] + granos[i % 8]
         t = i / FPS
-        for capas, y in ((capas_s, Y_SUB), (capas_t, Y_TXT)):
+        for capas, y in ((capas_t, Y_TXT),):     # sin subtítulos: solo los textos en pantalla
             for (t0, t1, rgb, al) in capas:
                 if t0 <= t < t1:   # entra con un fundido muy corto y sale en seco: nunca se ven dos a la vez
                     f = min(1.0, (t - t0) / 0.12 + 0.2)
