@@ -13,7 +13,7 @@ import sys
 import wave
 
 import imageio_ffmpeg
-from nombres import aplicar as aplicar_nombres
+from nombres import aplicar as aplicar_nombres, pronunciar
 import numpy as np
 from PIL import Image, ImageDraw, ImageFilter, ImageFont, ImageOps
 
@@ -87,7 +87,7 @@ def generar_audio(carpeta, frases):
     for i, frase in enumerate(frases):
         mp3 = os.path.join(carpeta, f"frase{i}.mp3")
         wav = os.path.join(carpeta, f"frase{i}.wav")
-        subprocess.run(["edge-tts", "--voice", VOZ, "--text", frase, "--write-media", mp3],
+        subprocess.run(["edge-tts", "--voice", VOZ, "--text", pronunciar(frase), "--write-media", mp3],
                        check=True, timeout=90)
         subprocess.run([FF, "-y", "-loglevel", "error", "-i", mp3, "-af", f"{FILTRO_VOZ},{RECORTE}",
                         "-ac", "1", "-ar", "44100", "-sample_fmt", "s16", wav], check=True)

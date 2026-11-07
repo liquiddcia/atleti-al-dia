@@ -8,6 +8,20 @@ NOMBRES = {
     "Jan Oblak": "Oblak",
 }
 
+# Cómo debe PRONUNCIAR la voz algunos nombres (solo afecta a lo que se dice, no a lo que se escribe)
+PRONUNCIACION = {
+    "Raphinha": "Rafiña",
+    "Aston Villa": "Aston Vila",
+    "Hancko": "Janco",
+}
+
+def pronunciar(texto):
+    if not isinstance(texto, str):
+        return texto
+    for escrito, dicho in PRONUNCIACION.items():
+        texto = re.sub(rf"\b{re.escape(escrito)}\b", dicho, texto, flags=re.IGNORECASE)
+    return texto
+
 def nombres(texto):
     if not isinstance(texto, str):
         return texto
