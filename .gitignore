@@ -2,3 +2,5 @@ node_modules/
 .vercel
 .env
 .env.local
+salida/
+__pycache__/

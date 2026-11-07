@@ -1,0 +1,35 @@
+{
+  "titular": ["EL ARSENAL VA", "A POR BAENA"],
+  "frases": [
+    {
+      "hablado": "El Arsenal vuelve a mirar al Atlético: Mikel Arteta quiere a Álex Baena.",
+      "subtitulo": "El Arsenal vuelve a mirar al Atlético: Mikel Arteta quiere a Álex Baena."
+    },
+    {
+      "hablado": "El extremo vive un momento de forma excepcional y ya ha cumplido las expectativas con las que llegó, hace poco más de un año.",
+      "subtitulo": "El extremo vive un momento de forma excepcional y ya ha cumplido las expectativas con las que llegó, hace poco más de un año."
+    },
+    {
+      "hablado": "Tras un gran Mundial, en el que fue titular casi siempre, en el Metropolitano genera prácticamente un gol por partido.",
+      "subtitulo": "Tras un gran Mundial, en el que fue titular casi siempre, en el Metropolitano genera prácticamente un gol por partido."
+    },
+    {
+      "hablado": "Arteta valora su polivalencia e inteligencia, y le ofrecería un papel protagonista, más sueldo y la Premier League.",
+      "subtitulo": "Arteta valora su polivalencia e inteligencia, y le ofrecería un papel protagonista, más sueldo y la Premier League."
+    },
+    {
+      "hablado": "Pero el Atlético no facilitará su salida en enero. Ya lo demostró con Julián Álvarez este verano: solo con una oferta irrechazable.",
+      "subtitulo": "Pero el Atlético no facilitará su salida en enero. Ya lo demostró con Julián Álvarez este verano: solo con una oferta irrechazable."
+    },
+    {
+      "hablado": "Simeone no quiere perder a una de sus piezas clave. Esto es Diario Colchonero.",
+      "subtitulo": "Simeone no quiere perder a una de sus piezas clave. Esto es Diario Colchonero."
+    }
+  ],
+  "imagen": {
+    "tipo": "foto",
+    "titulo": "ÁLEX BAENA · MERCADO DE ENERO",
+    "ruta": "videos/imagenes/baena-arsenal.jpg",
+    "pie": "El Atleti no le dejará salir en enero"
+  }
+}
