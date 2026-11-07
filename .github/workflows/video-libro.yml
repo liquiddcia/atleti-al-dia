@@ -1,5 +1,5 @@
 name: Vídeo libro Sombras de Aranjuez
-# Short promocional del libro: portada a pantalla completa, voz en off y música de ambiente
+# Short promocional del libro: portada a pantalla completa, voz paranormal, ambiente tenebroso y efectos
 
 on:
   workflow_dispatch:
