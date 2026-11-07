@@ -143,6 +143,7 @@ def main(ruta_json, salida):
         if modo == "medio":
             k = len(paneles) // 2
             paneles.insert(k, sus); frases.insert(sum(p["frases"] for p in paneles[:k]), suscribete.FRASE_MEDIO)
+            paneles.append(dict(sus)); frases.append(demo.PAUSA)      # y al final, la imagen del canal sin voz
         else:
             paneles.append(sus); frases.append(suscribete.FRASE)
     guion, i = [], 0

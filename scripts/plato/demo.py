@@ -17,7 +17,11 @@ GUION = [
     ("pantalla", P("demo", "02_momento.png"), "El Atlético llega lanzado: nueve partidos sin perder y siete victorias seguidas en Liga. Pero en Europa necesita sumar."),
 ]
 
+PAUSA = "__PAUSA__"   # tramo sin voz (por ejemplo, la imagen del canal al final)
+
 def voz(texto, wav):
+    if texto == PAUSA:
+        return np.zeros(int(2.2 * SR), dtype=np.float32)
     texto = pronunciar(nombres(texto))
     import edge_tts
     mp3 = wav.replace(".wav", ".mp3")
