@@ -3,6 +3,7 @@ import os
 from PIL import Image, ImageEnhance, ImageFilter
 RAIZ = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..")
 FRASE = "Suscríbete a nuestro canal de YouTube."
+FRASE_MEDIO = "Y si te está gustando, suscríbete a nuestro canal de YouTube."
 CANAL = os.path.join(RAIZ, "videos", "imagenes", "canal-diario-colchonero.jpg")
 
 def imagen(carpeta, w=1920, h=1272):

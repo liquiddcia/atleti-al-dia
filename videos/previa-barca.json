@@ -1,30 +1,108 @@
 {
-  "titular": ["ATLÉTICO - BARÇA:", "DUELO POR EL LIDERATO"],
-  "frases": [
-    {"hablado": "Duelo por el liderato en el Metropolitano: este domingo, a las nueve de la noche, el Atlético recibe al Barcelona en la jornada doce de LaLiga.", "subtitulo": "Duelo por el liderato en el Metropolitano: este domingo, a las 21:00, el Atlético recibe al Barcelona en la jornada 12 de LaLiga."},
-    {"hablado": "El Barça es líder con treinta puntos y el Atlético suma veintiocho, a solo dos. Si gana, le adelanta en la tabla.", "subtitulo": "El Barça es líder con 30 puntos y el Atlético suma 28, a solo dos. Si gana, le adelanta en la tabla."},
-    {"hablado": "El equipo de Simeone llega con siete victorias seguidas en Liga, la última, dos a cero al Levante. Pero viene de caer ante el Bayern en la Champions.", "subtitulo": "El equipo de Simeone llega con 7 victorias seguidas en Liga, la última, 2-0 al Levante. Pero viene de caer ante el Bayern en la Champions."},
-    {"hablado": "El Barça de Flick llega lanzado: diez victorias en once jornadas, un seis a uno al Alavés y un tres a cero al Aston Villa.", "subtitulo": "El Barça de Flick llega lanzado: 10 victorias en 11 jornadas, un 6-1 al Alavés y un 3-0 al Aston Villa."},
-    {"hablado": "En los últimos cinco partidos, el Barça promedia tres coma cuatro goles por encuentro; el Atlético, uno.", "subtitulo": "En los últimos cinco partidos, el Barça promedia 3,4 goles por encuentro; el Atlético, uno."},
-    {"hablado": "El gran peligro es Raphinha: quince goles y tres asistencias en diez partidos.", "subtitulo": "El gran peligro es Raphinha: 15 goles y 3 asistencias en 10 partidos."},
-    {"hablado": "El posible once del Cholo: Oblak; Llorente, Pubill, Hancko y Grimaldo; Barrios y Koke; Giuliano, Kang In Li y Baena; y Julián Álvarez arriba.", "subtitulo": "El posible once del Cholo: Oblak; Llorente, Pubill, Hancko y Grimaldo; Barrios y Koke; Giuliano, Kang-in Lee y Baena; y Julián Álvarez arriba."},
-    {"hablado": "Cuti Romero es baja en el Atlético. En el Barça no estarán Rodri, Dani Olmo, Koundé, Xavi Espart ni Bardghji.", "subtitulo": "Cuti Romero es baja en el Atlético. En el Barça no estarán Rodri, Dani Olmo, Koundé, Xavi Espart ni Bardghji."},
-    {"hablado": "En los últimos cinco duelos, dos victorias del Atlético y tres del Barça. Arbitrará Javier Alberola Rojas.", "subtitulo": "En los últimos cinco duelos, dos victorias del Atlético y tres del Barça. Arbitrará Javier Alberola Rojas."},
-    {"hablado": "¿Quién se lleva el duelo por el liderato? Os leo en comentarios. Esto es Diario Colchonero.", "subtitulo": "¿Quién se lleva el duelo por el liderato? Os leo en comentarios. Esto es Diario Colchonero."}
+  "titular": [
+    "ATLÉTICO - BARÇA:",
+    "DUELO POR EL LIDERATO"
   ],
-  "imagen": {"tipo": "foto", "grande": true, "ruta": "videos/imagenes/previa-barca/01_partido.png"},
+  "frases": [
+    {
+      "hablado": "Duelo por el liderato en el Metropolitano: este domingo, a las nueve de la noche, el Atlético recibe al Barcelona en la jornada doce de LaLiga.",
+      "subtitulo": "Duelo por el liderato en el Metropolitano: este domingo, a las 21:00, el Atlético recibe al Barcelona en la jornada 12 de LaLiga."
+    },
+    {
+      "hablado": "El Barça es líder con treinta puntos y el Atlético suma veintiocho, a solo dos. Si gana, le adelanta en la tabla.",
+      "subtitulo": "El Barça es líder con 30 puntos y el Atlético suma 28, a solo dos. Si gana, le adelanta en la tabla."
+    },
+    {
+      "hablado": "El equipo de Simeone llega con siete victorias seguidas en Liga, la última, dos a cero al Levante. Pero viene de caer ante el Bayern en la Champions.",
+      "subtitulo": "El equipo de Simeone llega con 7 victorias seguidas en Liga, la última, 2-0 al Levante. Pero viene de caer ante el Bayern en la Champions."
+    },
+    {
+      "hablado": "El Barça de Flick llega lanzado: diez victorias en once jornadas, un seis a uno al Alavés y un tres a cero al Aston Villa.",
+      "subtitulo": "El Barça de Flick llega lanzado: 10 victorias en 11 jornadas, un 6-1 al Alavés y un 3-0 al Aston Villa."
+    },
+    {
+      "hablado": "En los últimos cinco partidos, el Barça promedia tres coma cuatro goles por encuentro; el Atlético, uno.",
+      "subtitulo": "En los últimos cinco partidos, el Barça promedia 3,4 goles por encuentro; el Atlético, uno."
+    },
+    {
+      "hablado": "El gran peligro es Raphinha: quince goles y tres asistencias en diez partidos.",
+      "subtitulo": "El gran peligro es Raphinha: 15 goles y 3 asistencias en 10 partidos."
+    },
+    {
+      "hablado": "El posible once del Cholo: Oblak; Llorente, Pubill, Hancko y Grimaldo; Barrios y Koke; Giuliano, Kang In Li y Baena; y Julián Álvarez arriba.",
+      "subtitulo": "El posible once del Cholo: Oblak; Llorente, Pubill, Hancko y Grimaldo; Barrios y Koke; Giuliano, Kang-in Lee y Baena; y Julián Álvarez arriba."
+    },
+    {
+      "hablado": "Cuti Romero es baja en el Atlético. En el Barça no estarán Rodri, Dani Olmo, Koundé, Xavi Espart ni Bardghji.",
+      "subtitulo": "Cuti Romero es baja en el Atlético. En el Barça no estarán Rodri, Dani Olmo, Koundé, Xavi Espart ni Bardghji."
+    },
+    {
+      "hablado": "En los últimos cinco duelos, dos victorias del Atlético y tres del Barça. Arbitrará Javier Alberola Rojas.",
+      "subtitulo": "En los últimos cinco duelos, dos victorias del Atlético y tres del Barça. Arbitrará Javier Alberola Rojas."
+    },
+    {
+      "hablado": "¿Quién se lleva el duelo por el liderato? Os leo en comentarios. Esto es Diario Colchonero.",
+      "subtitulo": "¿Quién se lleva el duelo por el liderato? Os leo en comentarios. Esto es Diario Colchonero."
+    }
+  ],
+  "imagen": {
+    "tipo": "foto",
+    "grande": true,
+    "ruta": "videos/imagenes/previa-barca/01_partido.png"
+  },
   "plato": {
     "paneles": [
-      {"ruta": "videos/imagenes/previa-barca/01_partido.png", "completa": true, "frases": 1},
-      {"ruta": "videos/imagenes/previa-barca/02_tabla.png", "completa": true, "frases": 1},
-      {"ruta": "videos/imagenes/previa-barca/03_atleti.png", "completa": true, "frases": 1},
-      {"ruta": "videos/imagenes/previa-barca/04_barca.png", "completa": true, "frases": 1},
-      {"ruta": "videos/imagenes/previa-barca/05_numeros.png", "completa": true, "frases": 1},
-      {"ruta": "videos/imagenes/previa-barca/06_raphinha.png", "completa": true, "frases": 1},
-      {"ruta": "videos/imagenes/previa-barca/07_once.png", "completa": true, "frases": 1},
-      {"ruta": "videos/imagenes/previa-barca/08_bajas.png", "completa": true, "frases": 1},
-      {"ruta": "videos/imagenes/previa-barca/09_cara_a_cara.png", "completa": true, "frases": 1},
-      {"ruta": "videos/imagenes/previa-barca/10_quien.png", "completa": true, "frases": 1}
+      {
+        "ruta": "videos/imagenes/previa-barca/01_partido.png",
+        "completa": true,
+        "frases": 1
+      },
+      {
+        "ruta": "videos/imagenes/previa-barca/02_tabla.png",
+        "completa": true,
+        "frases": 1
+      },
+      {
+        "ruta": "videos/imagenes/previa-barca/03_atleti.png",
+        "completa": true,
+        "frases": 1
+      },
+      {
+        "ruta": "videos/imagenes/previa-barca/04_barca.png",
+        "completa": true,
+        "frases": 1
+      },
+      {
+        "ruta": "videos/imagenes/previa-barca/05_numeros.png",
+        "completa": true,
+        "frases": 1
+      },
+      {
+        "ruta": "videos/imagenes/previa-barca/06_raphinha.png",
+        "completa": true,
+        "frases": 1
+      },
+      {
+        "ruta": "videos/imagenes/previa-barca/07_once.png",
+        "completa": true,
+        "frases": 1
+      },
+      {
+        "ruta": "videos/imagenes/previa-barca/08_bajas.png",
+        "completa": true,
+        "frases": 1
+      },
+      {
+        "ruta": "videos/imagenes/previa-barca/09_cara_a_cara.png",
+        "completa": true,
+        "frases": 1
+      },
+      {
+        "ruta": "videos/imagenes/previa-barca/10_quien.png",
+        "completa": true,
+        "frases": 1
+      }
     ]
-  }
+  },
+  "suscribete": "medio"
 }
