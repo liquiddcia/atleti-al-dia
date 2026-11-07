@@ -22,7 +22,7 @@ try:
 except Exception:
     FF = "ffmpeg"
 
-VOZ, RATE, PITCH = "es-ES-AlvaroNeural", "-10%", "-9Hz"
+VOZ, RATE, PITCH = "es-ES-AlvaroNeural", "-18%", "-9Hz"   # lenta y grave (el último tramo, algo más ágil para que quepa)
 
 # Guion exacto, troceado para colocar las pausas. (inicio, fin, [(texto hablado, subtítulo, pausa después)])
 GUION = [
@@ -57,11 +57,11 @@ def escribir_wav(ruta, x):
     p.stdin.write(x.tobytes()); p.stdin.close(); p.wait()
 
 # ---------- voz ----------
-async def _tts(texto, ruta):
+async def _tts(texto, ruta, rate):
     import edge_tts
-    await edge_tts.Communicate(texto, VOZ, rate=RATE, pitch=PITCH).save(ruta)
+    await edge_tts.Communicate(texto, VOZ, rate=rate, pitch=PITCH).save(ruta)
 
-def trozo_voz(texto, tmp, i):
+def trozo_voz(texto, tmp, i, rate=RATE):
     mp3, wav = os.path.join(tmp, f"v{i}.mp3"), os.path.join(tmp, f"v{i}.wav")
     if os.environ.get("FALSA_VOZ"):
         n = int(SR * (0.35 + 0.068 * len(texto)))
@@ -70,7 +70,7 @@ def trozo_voz(texto, tmp, i):
     else:
         for intento in range(4):
             try:
-                asyncio.run(_tts(texto, mp3)); break
+                asyncio.run(_tts(texto, mp3, rate)); break
             except Exception:
                 if intento == 3: raise
         # sin silencios al principio ni al final
@@ -86,7 +86,7 @@ def voz(tmp):
     pista = np.zeros(int(SR * DUR), dtype=np.float32)
     subs, k, fin_ant = [], 0, 0.0
     for (ini, fin, trozos) in GUION:
-        audios = [trozo_voz(t, tmp, k + j) for j, (t, _, _) in enumerate(trozos)]
+        audios = [trozo_voz(t, tmp, k + j, "-4%" if fin >= DUR else RATE) for j, (t, _, _) in enumerate(trozos)]
         pausas = [p for (_, _, p) in trozos]
         hablado = sum(len(a) for a in audios) / SR
         fin_max = DUR - 0.2 if fin >= DUR else fin - 0.15
@@ -235,7 +235,7 @@ def render(subs, audio_wav, salida):
     Y_SUB, Y_TXT = 900, 1460                  # subtítulo sobre el libro; texto en el hueco antes de «YA DISPONIBLE»
     p = subprocess.Popen([FF, "-y", "-loglevel", "error", "-f", "rawvideo", "-pix_fmt", "rgb24", "-s", f"{W}x{H}", "-r", str(FPS),
                           "-i", "-", "-i", audio_wav, "-map", "0:v", "-map", "1:a", "-c:v", "libx264", "-preset", "medium",
-                          "-crf", "18", "-pix_fmt", "yuv420p", "-c:a", "aac", "-b:a", "192k", "-t", f"{DUR}",
+                          "-crf", "22", "-maxrate", "12M", "-bufsize", "24M", "-pix_fmt", "yuv420p", "-c:a", "aac", "-b:a", "192k", "-ac", "2", "-t", f"{DUR}",
                           "-movflags", "+faststart", salida], stdin=subprocess.PIPE)
     for i in range(n):
         u = i / (n - 1)
