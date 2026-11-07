@@ -1,5 +1,5 @@
 name: Vídeo plató
-# Presentador con una sola postura · imagen a pantalla completa · nombres según scripts/nombres.py · logo y nombre enteros · cierre con suscríbete · etiqueta dentro del panel · Barrios · Flick · historial 7-2-3 · rótulo · Beltrán sin fondo · River · suscríbete en medio · pronunciación · imagen del canal al final · árbitro
+# Presentador con una sola postura · imagen a pantalla completa · nombres según scripts/nombres.py · logo y nombre enteros · cierre con suscríbete · etiqueta dentro del panel · Barrios · Flick · historial 7-2-3 · rótulo · Beltrán sin fondo · River · suscríbete en medio · pronunciación · imagen del canal al final · árbitro · portada al principio
 
 on:
   workflow_dispatch:
