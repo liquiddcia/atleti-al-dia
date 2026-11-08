@@ -1,0 +1,27 @@
+{
+  "titular": ["FERMÍN APAGA", "EL METROPOLITANO"],
+  "frases": [
+    {"hablado": "Fermín apaga el Metropolitano: el Barça gana uno a dos al Atlético y se escapa en el liderato.", "subtitulo": "Fermín apaga el Metropolitano: el Barça gana 1-2 al Atlético y se escapa en el liderato."},
+    {"hablado": "Empezó mandando el Atleti: en el minuto diez, Giuliano remató un gran centro de Julián Álvarez para el uno a cero.", "subtitulo": "Empezó mandando el Atleti: en el minuto 10, Giuliano remató un gran centro de Julián Álvarez para el 1-0."},
+    {"hablado": "Pero justo antes del descanso, Fermín empató de zurda, y en el sesenta y seis firmó su doblete tras un pase de Lamine Yamal.", "subtitulo": "Pero justo antes del descanso, Fermín empató de zurda, y en el 66 firmó su doblete tras un pase de Lamine Yamal."},
+    {"hablado": "El Barça tuvo el balón, con un sesenta y tres por ciento de posesión y diecinueve remates por nueve. Pero en goles esperados, casi empate: uno coma cinco tres contra uno coma seis.", "subtitulo": "El Barça tuvo el balón, con un 63 % de posesión y 19 remates por 9. Pero en goles esperados, casi empate: 1,53 contra 1,60."},
+    {"hablado": "El Atleti tuvo incluso más grandes ocasiones, cuatro por tres, pero el uno a uno antes del descanso lo cambió todo.", "subtitulo": "El Atleti tuvo incluso más grandes ocasiones, cuatro por tres, pero el 1-1 antes del descanso lo cambió todo."},
+    {"hablado": "Lo mejor del Atlético, Giuliano: gol y la nota más alta del equipo.", "subtitulo": "Lo mejor del Atlético, Giuliano: gol y la nota más alta del equipo."},
+    {"hablado": "Se acaba la racha de siete victorias seguidas en Liga. El Barça suma treinta y tres puntos, el Madrid treinta y el Atlético, tercero, se queda con veintiocho, a cinco del líder.", "subtitulo": "Se acaba la racha de 7 victorias seguidas en Liga. El Barça suma 33 puntos, el Madrid 30 y el Atlético, tercero, se queda con 28, a cinco del líder."},
+    {"hablado": "Ahora llega el parón. ¿Se puede pelear todavía la Liga? Os leo en comentarios. Esto es Diario Colchonero.", "subtitulo": "Ahora llega el parón. ¿Se puede pelear todavía la Liga? Os leo en comentarios. Esto es Diario Colchonero."}
+  ],
+  "imagen": {"tipo": "foto", "grande": true, "ruta": "videos/imagenes/post-barca/01_marcador.png"},
+  "portada": "videos/imagenes/post-barca/00_portada.jpg",
+  "suscribete": "medio",
+  "plato": {
+    "paneles": [
+      {"ruta": "videos/imagenes/post-barca/01_marcador.png", "completa": true, "frases": 1},
+      {"ruta": "videos/imagenes/post-barca/02_goles.png", "completa": true, "frases": 2},
+      {"ruta": "videos/imagenes/post-barca/03_numeros.png", "completa": true, "frases": 1},
+      {"ruta": "videos/imagenes/post-barca/04_claves.png", "completa": true, "frases": 1},
+      {"ruta": "videos/imagenes/post-barca/05_giuliano.png", "completa": true, "frases": 1},
+      {"ruta": "videos/imagenes/post-barca/06_tabla.png", "completa": true, "frases": 1},
+      {"ruta": "videos/imagenes/post-barca/07_ahora.png", "completa": true, "frases": 1}
+    ]
+  }
+}
