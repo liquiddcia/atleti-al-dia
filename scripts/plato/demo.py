@@ -17,7 +17,9 @@ GUION = [
     ("pantalla", P("demo", "02_momento.png"), "El Atlético llega lanzado: nueve partidos sin perder y siete victorias seguidas en Liga. Pero en Europa necesita sumar."),
 ]
 
-PAUSA = "__PAUSA__"   # tramo sin voz (por ejemplo, la imagen del canal al final)
+PAUSA = "__PAUSA__"
+HUECO = 0.3        # silencio entre frases (s); el json puede cambiarlo con "hueco"
+VELOCIDAD = "+12%"  # velocidad de la voz; el json puede cambiarla con "velocidad"   # tramo sin voz (por ejemplo, la imagen del canal al final)
 
 def voz(texto, wav):
     if texto == PAUSA:
@@ -25,7 +27,7 @@ def voz(texto, wav):
     texto = pronunciar(nombres(texto))
     import edge_tts
     mp3 = wav.replace(".wav", ".mp3")
-    asyncio.run(edge_tts.Communicate(texto, "es-ES-AlvaroNeural", rate="+12%", pitch="-6Hz").save(mp3))
+    asyncio.run(edge_tts.Communicate(texto, "es-ES-AlvaroNeural", rate=VELOCIDAD, pitch="-6Hz").save(mp3))
     subprocess.run([FF, "-y", "-loglevel", "error", "-i", mp3, "-af",
                     "aresample=44100,silenceremove=start_periods=1:start_threshold=-45dB:stop_periods=-1:stop_duration=0.18:stop_threshold=-45dB:stop_silence=0.15,bass=g=3:f=120,acompressor=threshold=0.1:ratio=2.5:attack=20:release=250",
                     "-ac", "1", "-ar", str(SR), "-sample_fmt", "s16", wav], check=True)
@@ -55,12 +57,12 @@ def main(salida, render=None):
     pista = [np.zeros(int(0.6 * SR))]
     for i, (plano, slide, texto) in enumerate(GUION):
         x = voz(texto, os.path.join(tmp, f"v{i}.wav"))
-        ini = t; t += len(x) / SR + 0.3
+        ini = t; t += len(x) / SR + HUECO
         if tramos and tramos[-1][2] == plano and tramos[-1][3] == slide:
             tramos[-1] = (tramos[-1][0], t, plano, slide)   # misma imagen: se alarga el tramo
         else:
             tramos.append((0 if i == 0 else ini, t, plano, slide))
-        pista += [x, np.zeros(int(0.3 * SR))]
+        pista += [x, np.zeros(int(HUECO * SR))]
     pista.append(np.zeros(int(1.0 * SR)))
     v = np.concatenate(pista); tramos[-1] = (tramos[-1][0], len(v) / SR, tramos[-1][2], tramos[-1][3])
     guardar(v, os.path.join(tmp, "voz.wav")); guardar(ambiente(len(v)), os.path.join(tmp, "musica.wav"))

@@ -151,6 +151,7 @@ def main(ruta_json, salida):
         for _ in range(p["frases"] if k < len(paneles) - 1 else len(frases) - i):
             guion.append(("centro", k, frases[i])); i += 1
     demo.GUION = guion
+    demo.HUECO = float(n.get("hueco", demo.HUECO)); demo.VELOCIDAD = n.get("velocidad", demo.VELOCIDAD)
     portada = n.get("portada")
     destino = salida
     if portada:   # primero se hace el plató y luego se le pone delante la portada
