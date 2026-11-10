@@ -8,7 +8,7 @@ on:
         description: "Nombre del json de videos/ (sin .json)"
         required: true
       formato:
-        description: "todos (horizontal y vertical) o vertical"
+        description: "todos, vertical u horizontal"
         default: todos
   push:
     branches: [claude/upbeat-meitner-6q6qho]
@@ -18,10 +18,10 @@ on:
 jobs:
   plato:
     runs-on: ubuntu-latest
-    timeout-minutes: 40
+    timeout-minutes: 60
     env:
-      VIDEO: ${{ inputs.video || 'baena-duda' }}
-      FORMATO: ${{ inputs.formato || 'vertical' }}
+      VIDEO: ${{ inputs.video || 'post-barca-largo' }}
+      FORMATO: ${{ inputs.formato || 'horizontal' }}
     steps:
       - uses: actions/checkout@v4
       - name: Instalar edge-tts, Pillow, NumPy y ffmpeg
@@ -36,7 +36,7 @@ jobs:
             python3 scripts/plato/noticia.py "videos/$VIDEO.json" "salida/$VIDEO-plato.mp4"
           fi
           # Versión vertical para Shorts si el json define los paneles del plató
-          if python3 -c "import json,sys; sys.exit(0 if 'plato' in json.load(open('videos/$VIDEO.json')) else 1)"; then
+          if [ "$FORMATO" != "horizontal" ] && python3 -c "import json,sys; sys.exit(0 if 'plato' in json.load(open('videos/$VIDEO.json')) else 1)"; then
             python3 scripts/plato/vertical.py "videos/$VIDEO.json" "salida/$VIDEO-vertical-plato.mp4"
           fi
       - uses: actions/upload-artifact@v4

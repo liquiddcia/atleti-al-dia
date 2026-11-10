@@ -30,11 +30,27 @@ def main(ruta_json, salida):
         demo.GUION = [("centro", None, frases[0])] + [("pantalla", rutas[de_frase[i]], frases[i]) for i in range(1, len(frases))]
     else:
         demo.GUION = [("centro", None, frases[0])] + [("pantalla", slide, f) for f in frases[1:]]
-    if n.get("suscribete", True):  # cierre con la portada del canal
+    modo = n.get("suscribete", True)
+    if modo:  # portada del canal con «Suscríbete…»: al final o, con "suscribete": "medio", también a mitad
         import suscribete
-        demo.GUION.append(("pantalla", suscribete.imagen(tmp), suscribete.FRASE))
+        sus = suscribete.imagen(tmp)
+        if modo == "medio":
+            k = len(demo.GUION) // 2   # se pone en el primer cambio de imagen a partir de la mitad
+            while k < len(demo.GUION) - 1 and demo.GUION[k][1] == demo.GUION[k - 1][1]: k += 1
+            demo.GUION.insert(k, ("pantalla", sus, suscribete.FRASE_MEDIO))
+            demo.GUION.append(("pantalla", sus, demo.PAUSA))
+        else:
+            demo.GUION.append(("pantalla", sus, suscribete.FRASE))
+    demo.HUECO = float(n.get("hueco", demo.HUECO)); demo.VELOCIDAD = n.get("velocidad", demo.VELOCIDAD)
+    portada = n.get("portada_horizontal")
+    destino = salida
+    if portada: salida = salida.replace(".mp4", "_sin_portada.mp4")
     # Las frases seguidas con la misma imagen forman un solo tramo de pantalla
     demo.main(salida)
+    if portada:
+        import portada as port
+        port.poner(portada if os.path.isabs(portada) else os.path.join(RAIZ, portada), salida, destino, pr.W, pr.H,
+                   float(n.get("portada_segundos", 1.6)), pr.FPS)
 
 if __name__ == "__main__":
     main(sys.argv[1], sys.argv[2])
