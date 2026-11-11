@@ -1,0 +1,38 @@
+name: Prueba de voz clonada
+# Prueba la voz del plató con el timbre de videos/voz/referencia.mp3
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [claude/upbeat-meitner-6q6qho]
+    paths:
+      - .github/workflows/voz-clon.yml
+      - scripts/voz_clon.py
+      - videos/voz/referencia.mp3
+
+jobs:
+  voz:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Instalar OpenVoice (solo el conversor de timbre) y edge-tts
+        run: |
+          pip install --index-url https://download.pytorch.org/whl/cpu torch torchaudio
+          pip install edge-tts imageio-ffmpeg numpy soundfile "librosa>=0.10" unidecode eng_to_ipa inflect pypinyin jieba cn2an langid
+          git clone --depth 1 https://github.com/myshell-ai/OpenVoice /tmp/OpenVoice
+          echo "PYTHONPATH=/tmp/OpenVoice" >> "$GITHUB_ENV"
+          mkdir -p /tmp/ov && cd /tmp/ov
+          curl -sSLf -o config.json https://huggingface.co/myshell-ai/OpenVoiceV2/resolve/main/converter/config.json
+          curl -sSLf -o checkpoint.pth https://huggingface.co/myshell-ai/OpenVoiceV2/resolve/main/converter/checkpoint.pth
+          ls -la /tmp/ov
+          echo "OPENVOICE_CKPT=/tmp/ov" >> "$GITHUB_ENV"
+      - name: Generar la prueba
+        run: python3 scripts/voz_clon.py videos/voz/referencia.mp3 salida/voz
+      - uses: actions/upload-artifact@v4
+        with:
+          name: prueba-voz
+          path: salida/voz/*.mp3
