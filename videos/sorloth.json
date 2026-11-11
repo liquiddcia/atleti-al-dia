@@ -1,0 +1,20 @@
+{
+  "titular": ["LA JUVE VA", "A POR SØRLOTH"],
+  "frases": [
+    {"hablado": "La Juventus va a por Sorloth. Spalletti ha pedido a su directiva que fiche al delantero del Atlético en enero.", "subtitulo": ""},
+    {"hablado": "Según la prensa, la Juve prepara una primera oferta de unos treinta millones, mientras que el Atlético pedía alrededor de cuarenta.", "subtitulo": ""},
+    {"hablado": "Sorloth tiene contrato hasta dos mil veintiocho, y las reuniones entre los dos clubes seguirían durante noviembre y diciembre. De momento, nada cerrado.", "subtitulo": ""},
+    {"hablado": "¿Lo venderías o te lo quedas? Os leo en comentarios. Esto es Diario Colchonero.", "subtitulo": ""}
+  ],
+  "imagen": {"tipo": "foto", "grande": true, "ruta": "videos/imagenes/sorloth/01_juve.png"},
+  "portada": "videos/imagenes/sorloth/00_portada.jpg",
+  "hueco": 0.1,
+  "plato": {
+    "paneles": [
+      {"ruta": "videos/imagenes/sorloth/01_juve.png", "completa": true, "frases": 1},
+      {"ruta": "videos/imagenes/sorloth/02_pulso.png", "completa": true, "frases": 1},
+      {"ruta": "videos/imagenes/sorloth/03_que.png", "completa": true, "frases": 1},
+      {"ruta": "videos/imagenes/sorloth/04_vender.png", "completa": true, "frases": 1}
+    ]
+  }
+}
