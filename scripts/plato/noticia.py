@@ -18,6 +18,9 @@ def main(ruta_json, salida):
     tmp = os.path.join(os.path.dirname(os.path.abspath(salida)), "plato_tmp"); os.makedirs(tmp, exist_ok=True)
     slide = img
     frases = [f["hablado"] if isinstance(f, dict) else f for f in n["frases"]]
+    # Frases grabadas por el autor: {"audio": "videos/voz/xxx.m4a", "subtitulo": "..."} en lugar de "hablado"
+    frases = [demo.AUDIO + (f["audio"] if os.path.isabs(f["audio"]) else os.path.join(RAIZ, f["audio"]))
+              if isinstance(f, dict) and f.get("audio") else x for f, x in zip(n["frases"], frases)]
     paneles = n.get("plato", {}).get("paneles")
     if paneles:  # varias imágenes: cada una ocupa la pantalla durante sus frases
         de_frase = []

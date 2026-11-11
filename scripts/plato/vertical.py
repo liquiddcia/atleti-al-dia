@@ -134,6 +134,9 @@ def main(ruta_json, salida):
         if "brillo" in p: p["brillo"] = tuple(p["brillo"])
         if "color" in p: p["color"] = tuple(p["color"])
     frases = [f["hablado"] if isinstance(f, dict) else f for f in n["frases"]]
+    # Frases grabadas por el autor: {"audio": "videos/voz/xxx.m4a", "subtitulo": "..."} en lugar de "hablado"
+    frases = [demo.AUDIO + (f["audio"] if os.path.isabs(f["audio"]) else os.path.join(RAIZ, f["audio"]))
+              if isinstance(f, dict) and f.get("audio") else x for f, x in zip(n["frases"], frases)]
     modo = n.get("suscribete", True)
     if modo:  # portada del canal con «Suscríbete…»: al final o, con "suscribete": "medio", a mitad de vídeo
         import suscribete

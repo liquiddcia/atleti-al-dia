@@ -18,12 +18,21 @@ GUION = [
 ]
 
 PAUSA = "__PAUSA__"
+AUDIO = "__AUDIO__:"   # prefijo de una frase grabada por el autor (ruta a su audio)
 HUECO = 0.3        # silencio entre frases (s); el json puede cambiarlo con "hueco"
 VELOCIDAD = "+12%"  # velocidad de la voz; el json puede cambiarla con "velocidad"   # tramo sin voz (por ejemplo, la imagen del canal al final)
 
 def voz(texto, wav):
     if texto == PAUSA:
         return np.zeros(int(2.2 * SR), dtype=np.float32)
+    if texto.startswith(AUDIO):   # frase grabada por el autor: se usa su audio tal cual (limpio y nivelado)
+        ruta = texto[len(AUDIO):]
+        subprocess.run([FF, "-y", "-loglevel", "error", "-i", ruta, "-af",
+                        "highpass=f=70,afftdn=nf=-25,silenceremove=start_periods=1:start_threshold=-45dB,areverse,"
+                        "silenceremove=start_periods=1:start_threshold=-45dB,areverse,loudnorm=I=-16:TP=-1.5",
+                        "-ac", "1", "-ar", str(SR), "-sample_fmt", "s16", wav], check=True)
+        with wave.open(wav) as w:
+            return np.frombuffer(w.readframes(w.getnframes()), "<i2").astype(np.float32) / 32768
     texto = pronunciar(nombres(texto))
     import edge_tts
     mp3 = wav.replace(".wav", ".mp3")
