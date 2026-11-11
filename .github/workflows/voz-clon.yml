@@ -22,7 +22,7 @@ jobs:
       - name: Instalar OpenVoice (solo el conversor de timbre) y edge-tts
         run: |
           pip install --index-url https://download.pytorch.org/whl/cpu torch torchaudio
-          pip install edge-tts imageio-ffmpeg numpy soundfile "librosa>=0.10" unidecode eng_to_ipa inflect pypinyin jieba cn2an langid
+          pip install edge-tts imageio-ffmpeg numpy soundfile "librosa>=0.10" unidecode eng_to_ipa inflect pypinyin jieba cn2an langid wavmark
           git clone --depth 1 https://github.com/myshell-ai/OpenVoice /tmp/OpenVoice
           echo "PYTHONPATH=/tmp/OpenVoice" >> "$GITHUB_ENV"
           mkdir -p /tmp/ov && cd /tmp/ov

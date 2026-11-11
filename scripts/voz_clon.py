@@ -47,7 +47,8 @@ def main(ref, salida):
     os.makedirs(salida, exist_ok=True)
     tmp = os.path.join(salida, "tmp"); os.makedirs(tmp, exist_ok=True)
     ck = os.environ["OPENVOICE_CKPT"]
-    tcc = ToneColorConverter(os.path.join(ck, "config.json"), device="cpu", enable_watermark=False)
+    tcc = ToneColorConverter(os.path.join(ck, "config.json"), device="cpu")
+    tcc.watermark_model = None   # sin marca de agua de audio
     tcc.load_ckpt(os.path.join(ck, "checkpoint.pth"))
     trozos, limpio = trozos_referencia(ref, tmp)
     print("Trozos de la grabación:", len(trozos))
