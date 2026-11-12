@@ -8,6 +8,8 @@
 //   POST { accion: "publicarTodas" }           -> publica todos los borradores
 //   POST { accion: "subirImagen", id, imagen } -> sube una foto (data URL) y la pone como imagen de la noticia
 //   POST { accion: "quitarImagen", id }        -> quita la imagen propia (vuelve a la general de su categoría)
+//   POST { accion: "ponerVideo", id, video }   -> pone un vídeo de YouTube (enlace) en una noticia
+//   POST { accion: "quitarVideo", id }         -> quita el vídeo de una noticia
 //   GET ?resumen=1                        -> devuelve el texto del resumen del día, listo para pegar en WhatsApp
 //   GET ?ranking=1                        -> devuelve las noticias más leídas (vistas) y más votadas
 
@@ -137,6 +139,25 @@ module.exports = async function handler(req, res) {
     if (accion === "quitarImagen") {
       if (!id) return res.status(400).json({ error: "Falta el número de noticia" });
       const { error } = await supabase.from("noticias").update({ imagen_url: null }).eq("id", id);
+      if (error) throw error;
+      return res.status(200).json({ ok: true });
+    }
+
+    if (accion === "ponerVideo") {
+      if (!id) return res.status(400).json({ error: "Falta el número de noticia" });
+      const video = String(cuerpo.video || "").trim();
+      if (!/^https?:\/\/(www\.|m\.)?(youtube\.com|youtu\.be)\//i.test(video)) {
+        return res.status(400).json({ error: "El enlace tiene que ser de YouTube" });
+      }
+      const { data, error } = await supabase.from("noticias").update({ video_url: video }).eq("id", id).select("id");
+      if (error) throw error;
+      if (!data || !data.length) return res.status(404).json({ error: "No existe la noticia " + id });
+      return res.status(200).json({ ok: true });
+    }
+
+    if (accion === "quitarVideo") {
+      if (!id) return res.status(400).json({ error: "Falta el número de noticia" });
+      const { error } = await supabase.from("noticias").update({ video_url: null }).eq("id", id);
       if (error) throw error;
       return res.status(200).json({ ok: true });
     }
