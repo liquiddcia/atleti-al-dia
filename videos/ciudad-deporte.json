@@ -1,0 +1,23 @@
+{
+  "titular": ["ASÍ SERÁ", "SU NUEVA CASA"],
+  "frases": [
+    {"hablado": "El primer equipo del Atlético ha visitado las obras de la Ciudad del Deporte, que avanzan a buen ritmo para cumplir los plazos.", "subtitulo": ""},
+    {"hablado": "Jugadores y cuerpo técnico se fijaron sobre todo en el Centro de Alto Rendimiento, donde entrenarán a partir de la temporada dos mil veintisiete veintiocho.", "subtitulo": ""},
+    {"hablado": "Y en esa misma parcela se levantará un mini estadio para seis mil espectadores.", "subtitulo": ""},
+    {"hablado": "Encabezaron la visita el presidente, Enrique Cerezo, y el consejero delegado, Miguel Ángel Gil, junto a Carlos Bucero, Óscar Mayo y Mateu Alemany.", "subtitulo": ""},
+    {"hablado": "Es un proyecto del Ayuntamiento de Madrid y el Atlético, abierto a los vecinos, que quiere ser una referencia internacional del deporte, el ocio y la cultura.", "subtitulo": ""},
+    {"hablado": "¿Qué te parece la nueva casa del Atleti? Os leo en comentarios. Esto es Diario Colchonero.", "subtitulo": ""}
+  ],
+  "imagen": {"tipo": "foto", "grande": true, "ruta": "videos/imagenes/ciudad-deporte/01_visita.png"},
+  "portada": "videos/imagenes/ciudad-deporte/00_portada.jpg",
+  "hueco": 0.1,
+  "plato": {
+    "paneles": [
+      {"ruta": "videos/imagenes/ciudad-deporte/01_visita.png", "completa": true, "frases": 1},
+      {"ruta": "videos/imagenes/ciudad-deporte/02_car.png", "completa": true, "frases": 2},
+      {"ruta": "videos/imagenes/ciudad-deporte/03_comitiva.png", "completa": true, "frases": 1},
+      {"ruta": "videos/imagenes/ciudad-deporte/04_proyecto.png", "completa": true, "frases": 1},
+      {"ruta": "videos/imagenes/ciudad-deporte/05_pregunta.png", "completa": true, "frases": 1}
+    ]
+  }
+}
