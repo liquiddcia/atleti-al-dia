@@ -70,6 +70,18 @@
         <button class="b-des" id="img-quitar">Quitar imagen</button>
       </div>
     </div>
+    <div class="caja" id="caja-video">
+      <strong>🎬 Poner vídeo a una noticia</strong>
+      <label for="vid-id">Número de la noticia</label>
+      <input type="text" id="vid-id" inputmode="numeric" placeholder="Por ejemplo 607">
+      <label for="vid-url">Enlace del vídeo de YouTube</label>
+      <input type="text" id="vid-url" placeholder="https://youtube.com/shorts/…">
+      <div class="ayuda">Vale un Short, un vídeo normal o un enlace youtu.be. Puede tardar unos minutos en verse en la web.</div>
+      <div class="fila">
+        <button class="b-pub" id="vid-poner">Poner vídeo</button>
+        <button class="b-des" id="vid-quitar">Quitar vídeo</button>
+      </div>
+    </div>
     <p class="meta" id="resumen-panel"></p>
     <button class="b-todas" id="publicar-todas" style="display:none">Publicar todas</button>
     <div id="lista"></div>
@@ -291,6 +303,28 @@
     var b = $("img-quitar"); b.disabled = true;
     llamar("POST", { accion: "quitarImagen", id: id }).then(function(){
       aviso("Imagen quitada de la noticia " + id + ".", "ok");
+    }).catch(function(err){ aviso(err.message, "err"); }).then(function(){ b.disabled = false; });
+  };
+
+  // ---------- Poner vídeo a una noticia ----------
+  $("vid-poner").onclick = function(){
+    var id = parseInt($("vid-id").value, 10);
+    var url = $("vid-url").value.trim();
+    if(!id){ aviso("Escribe el número de la noticia.", "err"); return; }
+    if(!url){ aviso("Pega el enlace del vídeo de YouTube.", "err"); return; }
+    var b = $("vid-poner"); b.disabled = true;
+    llamar("POST", { accion: "ponerVideo", id: id, video: url }).then(function(){
+      aviso("Vídeo puesto en la noticia " + id + ". Puede tardar unos minutos en verse en la web.", "ok");
+      $("vid-url").value = "";
+    }).catch(function(err){ aviso(err.message, "err"); }).then(function(){ b.disabled = false; });
+  };
+  $("vid-quitar").onclick = function(){
+    var id = parseInt($("vid-id").value, 10);
+    if(!id){ aviso("Escribe el número de la noticia.", "err"); return; }
+    if(!confirm("¿Quitar el vídeo de la noticia " + id + "?")) return;
+    var b = $("vid-quitar"); b.disabled = true;
+    llamar("POST", { accion: "quitarVideo", id: id }).then(function(){
+      aviso("Vídeo quitado de la noticia " + id + ".", "ok");
     }).catch(function(err){ aviso(err.message, "err"); }).then(function(){ b.disabled = false; });
   };
 
