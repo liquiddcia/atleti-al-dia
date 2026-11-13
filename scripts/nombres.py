@@ -13,6 +13,7 @@ PRONUNCIACION = {
     "Raphinha": "Rafiña",
     "Aston Villa": "Aston Vila",
     "Hancko": "Janco",
+    "Lookman": "Lukman",
 }
 
 def pronunciar(texto):

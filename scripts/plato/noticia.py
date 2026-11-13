@@ -53,7 +53,7 @@ def main(ruta_json, salida):
     if portada:
         import portada as port
         port.poner(portada if os.path.isabs(portada) else os.path.join(RAIZ, portada), salida, destino, pr.W, pr.H,
-                   float(n.get("portada_segundos", 1.6)), pr.FPS)
+                   float(n.get("portada_segundos", 1.0)), pr.FPS)
 
 if __name__ == "__main__":
     main(sys.argv[1], sys.argv[2])

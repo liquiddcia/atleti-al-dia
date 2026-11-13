@@ -162,7 +162,7 @@ def main(ruta_json, salida):
     demo.main(salida, render=lambda tr, voz, sal, fin: render(n, paneles, tr, voz, sal, fin))
     if portada:
         import portada as port
-        port.poner(portada if os.path.isabs(portada) else os.path.join(RAIZ, portada), salida, destino, W, H, float(n.get("portada_segundos", 1.6)), FPS)
+        port.poner(portada if os.path.isabs(portada) else os.path.join(RAIZ, portada), salida, destino, W, H, float(n.get("portada_segundos", 1.0)), FPS)
 
 if __name__ == "__main__":
     main(sys.argv[1], sys.argv[2])

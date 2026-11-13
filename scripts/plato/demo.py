@@ -19,6 +19,7 @@ GUION = [
 
 PAUSA = "__PAUSA__"
 AUDIO = "__AUDIO__:"   # prefijo de una frase grabada por el autor (ruta a su audio)
+INICIO = 0.15      # silencio antes de la primera frase (s)
 HUECO = 0.3        # silencio entre frases (s); el json puede cambiarlo con "hueco"
 VELOCIDAD = "+12%"  # velocidad de la voz; el json puede cambiarla con "velocidad"   # tramo sin voz (por ejemplo, la imagen del canal al final)
 
@@ -62,8 +63,8 @@ def ambiente(n):
 
 def main(salida, render=None):
     tmp = os.path.join(os.path.dirname(os.path.abspath(salida)), "plato_tmp"); os.makedirs(tmp, exist_ok=True)
-    partes, tramos, t = [], [], 0.6
-    pista = [np.zeros(int(0.6 * SR))]
+    partes, tramos, t = [], [], INICIO
+    pista = [np.zeros(int(INICIO * SR))]
     for i, (plano, slide, texto) in enumerate(GUION):
         x = voz(texto, os.path.join(tmp, f"v{i}.wav"))
         ini = t; t += len(x) / SR + HUECO
