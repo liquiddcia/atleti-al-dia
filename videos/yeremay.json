@@ -1,0 +1,22 @@
+{
+  "titular": ["¿YEREMAY", "AL ATLETI?"],
+  "frases": [
+    {"hablado": "Simeone apunta a Yeremay Hernández. El delantero del Deportivo de La Coruña es una de las opciones que gustan al Cholo para reforzar el ataque.", "subtitulo": ""},
+    {"hablado": "El canario está brillando en Segunda con el conjunto gallego, y su perfil ofensivo encaja con lo que busca el Atlético.", "subtitulo": ""},
+    {"hablado": "El análisis del club es claro: al equipo le falta gol esta temporada, y Simeone lo ve como un buen relevo para Lookman.", "subtitulo": ""},
+    {"hablado": "Todo, dentro de un mercado de enero en el que el Atlético quiere hacer varias operaciones, tanto de entradas como de salidas.", "subtitulo": ""},
+    {"hablado": "¿Ficharías a Yeremay para el Atleti? Os leo en comentarios. Esto es Diario Colchonero.", "subtitulo": ""}
+  ],
+  "imagen": {"tipo": "foto", "grande": true, "ruta": "videos/imagenes/yeremay/01_yeremay.png"},
+  "portada": "videos/imagenes/yeremay/00_portada.jpg",
+  "hueco": 0.1,
+  "plato": {
+    "paneles": [
+      {"ruta": "videos/imagenes/yeremay/01_yeremay.png", "completa": true, "frases": 1},
+      {"ruta": "videos/imagenes/yeremay/02_perfil.png", "completa": true, "frases": 1},
+      {"ruta": "videos/imagenes/yeremay/03_porque.png", "completa": true, "frases": 1},
+      {"ruta": "videos/imagenes/yeremay/04_enero.png", "completa": true, "frases": 1},
+      {"ruta": "videos/imagenes/yeremay/05_ficharias.png", "completa": true, "frases": 1}
+    ]
+  }
+}
