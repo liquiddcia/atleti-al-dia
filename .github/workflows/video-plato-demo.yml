@@ -1,0 +1,29 @@
+name: Vídeo plató (demo)
+
+on:
+  workflow_dispatch:
+  # Mientras se prueba en la rama
+  push:
+    branches: [claude/upbeat-meitner-6q6qho]
+    paths:
+      - .github/workflows/video-plato-demo.yml
+      - scripts/plato/**
+      - videos/plato/**
+
+jobs:
+  demo:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Instalar edge-tts, Pillow, NumPy y ffmpeg
+        run: |
+          pip install edge-tts imageio-ffmpeg pillow numpy
+          echo "FF=$(python3 -c 'import imageio_ffmpeg; print(imageio_ffmpeg.get_ffmpeg_exe())')" >> "$GITHUB_ENV"
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+      - name: Generar la demo del plató
+        run: python3 scripts/plato/demo.py salida/plato_demo.mp4
+      - uses: actions/upload-artifact@v4
+        with:
+          name: plato-demo
+          path: salida/plato_demo.mp4

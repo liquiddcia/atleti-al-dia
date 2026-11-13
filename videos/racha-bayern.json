@@ -1,0 +1,38 @@
+{
+  "titular": ["9 PARTIDOS SIN PERDER", "¡LLEGA EL BAYERN!"],
+  "frases": [
+    {
+      "hablado": "El Atlético llega imponente a su semana más exigente: nueve partidos sin perder, con ocho victorias y un empate.",
+      "subtitulo": "El Atlético llega imponente a su semana más exigente: 9 partidos sin perder, con 8 victorias y 1 empate."
+    },
+    {
+      "hablado": "El único tropiezo fue el uno a uno en Stuttgart, en la fase de liga de la Champions, donde Julián Álvarez rescató el empate.",
+      "subtitulo": "El único tropiezo fue el 1-1 en Stuttgart, en la fase de liga de la Champions, donde Julián Álvarez rescató el empate."
+    },
+    {
+      "hablado": "En Liga suma siete victorias seguidas y es segundo, a dos puntos del Barcelona.",
+      "subtitulo": "En Liga suma 7 victorias seguidas y es segundo, a 2 puntos del Barcelona."
+    },
+    {
+      "hablado": "En esos nueve partidos ha marcado dieciocho goles, dos por encuentro, y ha dejado la portería a cero en seis.",
+      "subtitulo": "En esos 9 partidos ha marcado 18 goles, 2 por encuentro, y ha dejado la portería a cero en 6."
+    },
+    {
+      "hablado": "El martes llega el Bayern al Metropolitano: el Atleti es decimosexto en Champions, con cuatro puntos, a uno de los alemanes.",
+      "subtitulo": "El martes llega el Bayern al Metropolitano: el Atleti es 16.º en Champions, con 4 puntos, a 1 de los alemanes."
+    },
+    {
+      "hablado": "Y el domingo, el Barça: una victoria le daría el liderato antes del parón.",
+      "subtitulo": "Y el domingo, el Barça: una victoria le daría el liderato antes del parón."
+    },
+    {
+      "hablado": "Giuliano pide a la afición que sea el jugador número doce, y Baena, ir paso a paso: primero, Europa. Esto es Diario Colchonero.",
+      "subtitulo": "Giuliano pide a la afición que sea el jugador número 12, y Baena, ir paso a paso: primero, Europa. Esto es Diario Colchonero."
+    }
+  ],
+  "imagen": {
+    "tipo": "foto",
+    "grande": true,
+    "ruta": "videos/imagenes/semana-bayern-barca.jpg"
+  }
+}

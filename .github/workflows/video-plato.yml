@@ -1,0 +1,45 @@
+name: Vídeo plató
+# Presentador con una sola postura · imagen a pantalla completa · nombres según scripts/nombres.py · logo y nombre enteros · cierre con suscríbete · etiqueta dentro del panel · Barrios · Flick · historial 7-2-3 · rótulo · Beltrán sin fondo · River · suscríbete en medio · pronunciación · imagen del canal al final · árbitro · portada al principio · Baena limpio · ritmo · suscríbete con motivo · mapa · Lookman · inicio rápido
+
+on:
+  workflow_dispatch:
+    inputs:
+      video:
+        description: "Nombre del json de videos/ (sin .json)"
+        required: true
+      formato:
+        description: "todos, vertical u horizontal"
+        default: todos
+  push:
+    branches: [claude/upbeat-meitner-6q6qho]
+    paths:
+      - .github/workflows/video-plato.yml
+
+jobs:
+  plato:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      VIDEO: ${{ inputs.video || 'atletico-fc' }}
+      FORMATO: ${{ inputs.formato || 'vertical' }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Instalar edge-tts, Pillow, NumPy y ffmpeg
+        run: |
+          pip install edge-tts imageio-ffmpeg pillow numpy
+          echo "FF=$(python3 -c 'import imageio_ffmpeg; print(imageio_ffmpeg.get_ffmpeg_exe())')" >> "$GITHUB_ENV"
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+      - name: Generar el vídeo en el plató
+        run: |
+          [[ "$VIDEO" =~ ^[A-Za-z0-9_-]+$ ]] || { echo "::error::Nombre no válido"; exit 1; }
+          if [ "$FORMATO" != "vertical" ]; then
+            python3 scripts/plato/noticia.py "videos/$VIDEO.json" "salida/$VIDEO-plato.mp4"
+          fi
+          # Versión vertical para Shorts si el json define los paneles del plató
+          if [ "$FORMATO" != "horizontal" ] && python3 -c "import json,sys; sys.exit(0 if 'plato' in json.load(open('videos/$VIDEO.json')) else 1)"; then
+            python3 scripts/plato/vertical.py "videos/$VIDEO.json" "salida/$VIDEO-vertical-plato.mp4"
+          fi
+      - uses: actions/upload-artifact@v4
+        with:
+          name: plato-${{ env.VIDEO }}
+          path: salida/*-plato.mp4

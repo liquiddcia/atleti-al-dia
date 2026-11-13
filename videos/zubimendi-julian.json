@@ -1,0 +1,24 @@
+{
+  "titular": ["¿JULIÁN POR", "ZUBIMENDI?"],
+  "frases": [
+    {"hablado": "Bombazo para enero: el Atlético estudia traer a Martín Zubimendi en un intercambio con el Arsenal que incluiría a Julián Álvarez.", "subtitulo": "Bombazo para enero: el Atlético estudia traer a Martín Zubimendi en un intercambio con el Arsenal que incluiría a Julián Álvarez."},
+    {"hablado": "Zubimendi costó setenta millones, pero apenas juega en Londres: cien minutos en siete partidos de Premier, con competencia como Rice, Odegaard o Merino.", "subtitulo": "Zubimendi costó 70 millones, pero apenas juega en Londres: 100 minutos en 7 partidos de Premier, con competencia como Rice, Ødegaard o Merino."},
+    {"hablado": "El Atlético lo sigue desde hace años, incluso cuando estaba en la Real Sociedad.", "subtitulo": "El Atlético lo sigue desde hace años, incluso cuando estaba en la Real Sociedad."},
+    {"hablado": "Al otro lado, Julián Álvarez: solo dos goles esta temporada y un futuro incierto tras querer irse al Barça en verano.", "subtitulo": "Al otro lado, Julián Álvarez: solo dos goles esta temporada y un futuro incierto tras querer irse al Barça en verano."},
+    {"hablado": "El Arsenal ya lo tanteó en agosto, pero el Atlético pide unos ciento cincuenta millones, con una condición: que no vaya al Barcelona.", "subtitulo": "El Arsenal ya lo tanteó en agosto, pero el Atlético pide unos 150 millones, con una condición: que no vaya al Barcelona."},
+    {"hablado": "Ojo, porque el Real Madrid y el Bayern también siguen a Zubimendi. Los próximos dos meses serán decisivos.", "subtitulo": "Ojo, porque el Real Madrid y el Bayern también siguen a Zubimendi. Los próximos dos meses serán decisivos."},
+    {"hablado": "¿Harías el cambio, Julián por Zubimendi? Os leo en comentarios. Esto es Diario Colchonero.", "subtitulo": "¿Harías el cambio, Julián por Zubimendi? Os leo en comentarios. Esto es Diario Colchonero."}
+  ],
+  "imagen": {"tipo": "foto", "grande": true, "ruta": "videos/imagenes/zubimendi-julian/01_trueque.png"},
+  "portada": "videos/imagenes/zubimendi-julian/00_portada.jpg",
+  "suscribete": "medio",
+  "plato": {
+    "paneles": [
+      {"ruta": "videos/imagenes/zubimendi-julian/01_trueque.png", "completa": true, "frases": 1},
+      {"ruta": "videos/imagenes/zubimendi-julian/02_zubimendi.png", "completa": true, "frases": 2},
+      {"ruta": "videos/imagenes/zubimendi-julian/03_julian.png", "completa": true, "frases": 2},
+      {"ruta": "videos/imagenes/zubimendi-julian/04_competencia.png", "completa": true, "frases": 1},
+      {"ruta": "videos/imagenes/zubimendi-julian/05_harias.png", "completa": true, "frases": 1}
+    ]
+  }
+}
