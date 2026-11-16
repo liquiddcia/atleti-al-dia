@@ -1,0 +1,22 @@
+{
+  "titular": ["GOLES… Y", "LESIONES"],
+  "frases": [
+    {"hablado": "El parón deja al Atleti goles que ilusionan, pero también lesiones que preocupan.", "subtitulo": ""},
+    {"hablado": "Julián marcó con Argentina ante Uruguay, Jonathan David marcó y dio una asistencia con Canadá, y Baena y Pubill marcaron con España ante la República Checa.", "subtitulo": ""},
+    {"hablado": "Y ojo al dato: Julián, David y Sorloth suman cinco goles en toda la temporada… los mismos que Baena él solo.", "subtitulo": ""},
+    {"hablado": "Ahora, las malas noticias. Lookman se retiró con Nigeria con un problema en la rodilla que apunta a esguince, y Pubill se lesionó el tobillo izquierdo con España. Los dos, pendientes de pruebas.", "subtitulo": ""},
+    {"hablado": "Lookman tiene muy complicado llegar al Getafe. ¿Qué te preocupa más? Os leo en comentarios. Esto es Diario Colchonero.", "subtitulo": ""}
+  ],
+  "imagen": {"tipo": "foto", "grande": true, "ruta": "videos/imagenes/paron/01_balance.png"},
+  "portada": "videos/imagenes/paron/00_portada.jpg",
+  "hueco": 0.1,
+  "plato": {
+    "paneles": [
+      {"ruta": "videos/imagenes/paron/01_balance.png", "completa": true, "frases": 1},
+      {"ruta": "videos/imagenes/paron/02_goles.png", "completa": true, "frases": 1},
+      {"ruta": "videos/imagenes/paron/03_dato.png", "completa": true, "frases": 1},
+      {"ruta": "videos/imagenes/paron/04_lesiones.png", "completa": true, "frases": 1},
+      {"ruta": "videos/imagenes/paron/05_getafe.png", "completa": true, "frases": 1}
+    ]
+  }
+}
