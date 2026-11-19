@@ -1,0 +1,42 @@
+{
+  "titular": ["AL ATLÉTICO LE", "SALEN LAS CUENTAS"],
+  "frases": [
+    {
+      "hablado": "Al Atlético le salen las cuentas.",
+      "subtitulo": "Al Atlético le salen las cuentas."
+    },
+    {
+      "hablado": "El equipo de Simeone suma veinticinco de treinta puntos en diez jornadas.",
+      "subtitulo": "El equipo de Simeone suma 25 de 30 puntos en 10 jornadas."
+    },
+    {
+      "hablado": "Iguala la 2012-13 y la 2020-21, el año del último título.",
+      "subtitulo": "Iguala la 2012-13 y la 2020-21, el año del último título."
+    },
+    {
+      "hablado": "Solo la 2013-14, con veintisiete, y la 1995-96, con veintiséis, arrancaron mejor.",
+      "subtitulo": "Solo la 2013-14, con 27, y la 1995-96, con 26, arrancaron mejor."
+    },
+    {
+      "hablado": "Y las dos terminaron con la Liga en las vitrinas rojiblancas.",
+      "subtitulo": "Y las dos terminaron con la Liga en las vitrinas rojiblancas."
+    },
+    {
+      "hablado": "Los números ilusionan. ¿Será este el año? Esto es Diario Colchonero.",
+      "subtitulo": "Los números ilusionan. ¿Será este el año? Esto es Diario Colchonero."
+    }
+  ],
+  "imagen": {
+    "tipo": "barras",
+    "titulo": "MEJORES ARRANQUES EN LIGA · 10 JORNADAS",
+    "maximo": 30,
+    "formato": "{valor}/30",
+    "barras": [
+      {"etiqueta": "2013-14", "valor": 27},
+      {"etiqueta": "1995-96", "valor": 26},
+      {"etiqueta": "2012-13", "valor": 25},
+      {"etiqueta": "2020-21", "valor": 25},
+      {"etiqueta": "2026-27", "valor": 25, "destacada": true}
+    ]
+  }
+}

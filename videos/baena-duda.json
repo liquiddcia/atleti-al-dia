@@ -1,0 +1,82 @@
+{
+  "titular": [
+    "BAENA: «SIEMPRE",
+    "TIENES ESA DUDA»"
+  ],
+  "frases": [
+    {
+      "hablado": "Polémica con Álex Baena. Con la selección, le preguntaron por la situación de Julián Álvarez, y esta fue su respuesta.",
+      "subtitulo": "Polémica con Álex Baena. Con la selección, le preguntaron por la situación de Julián Álvarez, y esta fue su respuesta."
+    },
+    {
+      "hablado": "«También entendemos su situación».",
+      "subtitulo": "«También entendemos su situación»."
+    },
+    {
+      "hablado": "«Yo creo que cualquier jugador del mundo,",
+      "subtitulo": "«Yo creo que cualquier jugador del mundo,"
+    },
+    {
+      "hablado": "si el Barça o el Madrid",
+      "subtitulo": "si el Barça o el Madrid"
+    },
+    {
+      "hablado": "viniesen a por ti, pues siempre tienes",
+      "subtitulo": "viniesen a por ti, pues siempre tienes"
+    },
+    {
+      "hablado": "esa duda de si te quieres ir o no».",
+      "subtitulo": "esa duda de si te quieres ir o no»."
+    },
+    {
+      "hablado": "¿Pueden estas palabras crear tensión entre Baena y la afición? Dijo que si te llaman el Barça o el Madrid, te entra la duda.",
+      "subtitulo": "¿Pueden estas palabras crear tensión entre Baena y la afición? Dijo que si te llaman el Barça o el Madrid, te entra la duda."
+    },
+    {
+      "hablado": "Mi opinión es que, si eres del Atlético de Madrid y de verdad sientes estos colores, no debería entrarte esa duda. ¿Qué opináis? Os leo en comentarios. Esto es Diario Colchonero.",
+      "subtitulo": "Mi opinión es que, si eres del Atlético de Madrid y de verdad sientes estos colores, no debería entrarte esa duda. ¿Qué opináis? Os leo en comentarios. Esto es Diario Colchonero."
+    }
+  ],
+  "imagen": {
+    "tipo": "foto",
+    "grande": true,
+    "ruta": "videos/imagenes/baena-duda/01_baena.png"
+  },
+  "portada": "videos/imagenes/baena-duda/00_portada.jpg",
+  "plato": {
+    "paneles": [
+      {
+        "ruta": "videos/imagenes/baena-duda/01_baena.png",
+        "completa": true,
+        "frases": 2
+      },
+      {
+        "ruta": "videos/imagenes/baena-duda/02_baena.png",
+        "completa": true,
+        "frases": 1
+      },
+      {
+        "ruta": "videos/imagenes/baena-duda/03_baena.png",
+        "completa": true,
+        "frases": 1
+      },
+      {
+        "ruta": "videos/imagenes/baena-duda/04_baena.png",
+        "completa": true,
+        "frases": 1
+      },
+      {
+        "ruta": "videos/imagenes/baena-duda/05_baena.png",
+        "completa": true,
+        "frases": 1
+      },
+      {
+        "ruta": "videos/imagenes/baena-duda/06_opinion.png",
+        "completa": true,
+        "frases": 2
+      }
+    ]
+  },
+  "hueco": 0.06,
+  "velocidad": "+18%"
+}

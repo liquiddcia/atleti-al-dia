@@ -1,0 +1,21 @@
+{
+  "titular": ["OBLAK HACE", "HISTORIA"],
+  "frases": [
+    {"hablado": "Oblak hace historia en el Atlético de Madrid. Contra el Barça jugó su partido quinientos cincuenta y cuatro con la camiseta rojiblanca.", "subtitulo": ""},
+    {"hablado": "Con esa cifra supera a Adelardo, que tenía quinientos cincuenta y tres, y se convierte en el segundo jugador con más partidos de la historia del club.", "subtitulo": ""},
+    {"hablado": "Por delante solo le queda Koke.", "subtitulo": ""},
+    {"hablado": "Llegó en dos mil catorce desde el Benfica y ya es el extranjero con más partidos de la historia del Atleti.", "subtitulo": ""},
+    {"hablado": "¿Llegará a alcanzar a Koke? Os leo en comentarios. Esto es Diario Colchonero.", "subtitulo": ""}
+  ],
+  "imagen": {"tipo": "foto", "grande": true, "ruta": "videos/imagenes/oblak-historia/01_record.png"},
+  "portada": "videos/imagenes/oblak-historia/00_portada.jpg",
+  "hueco": 0.1,
+  "plato": {
+    "paneles": [
+      {"ruta": "videos/imagenes/oblak-historia/01_record.png", "completa": true, "frases": 1},
+      {"ruta": "videos/imagenes/oblak-historia/02_podio.png", "completa": true, "frases": 2},
+      {"ruta": "videos/imagenes/oblak-historia/03_trayectoria.png", "completa": true, "frases": 1},
+      {"ruta": "videos/imagenes/oblak-historia/04_koke.png", "completa": true, "frases": 1}
+    ]
+  }
+}

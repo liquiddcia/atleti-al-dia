@@ -1,0 +1,22 @@
+{
+  "titular": ["EL ATLETI COMPRA", "UN CLUB EN ECUADOR"],
+  "frases": [
+    {"hablado": "Es oficial: el Atlético de Madrid compra el cincuenta por ciento del Atlético Fútbol Club de Guayaquil, en Ecuador.", "subtitulo": ""},
+    {"hablado": "El club tendrá un consejo de seis miembros: tres del Atlético y tres de la Junta de Beneficencia de Guayaquil. El presidente lo propondrá el Atlético.", "subtitulo": ""},
+    {"hablado": "El Atlético Fútbol Club acaba de ascender a la Serie A de Ecuador, con Carlos Santamarina, entrenador de la Academia rojiblanca, y debutará en Primera en dos mil veintisiete.", "subtitulo": ""},
+    {"hablado": "Es el fruto de un proyecto que empezó en dos mil veintitrés: hoy ya son treinta sedes en diez ciudades y más de quince mil jóvenes.", "subtitulo": ""},
+    {"hablado": "El Atleti sigue creciendo en Sudamérica. ¿Qué te parece? Os leo en comentarios. Esto es Diario Colchonero.", "subtitulo": ""}
+  ],
+  "imagen": {"tipo": "foto", "grande": true, "ruta": "videos/imagenes/atletico-fc/01_compra.png"},
+  "portada": "videos/imagenes/atletico-fc/00_portada.jpg",
+  "hueco": 0.1,
+  "plato": {
+    "paneles": [
+      {"ruta": "videos/imagenes/atletico-fc/01_compra.png", "completa": true, "frases": 1},
+      {"ruta": "videos/imagenes/atletico-fc/02_consejo.png", "completa": true, "frases": 1},
+      {"ruta": "videos/imagenes/atletico-fc/03_ascenso.png", "completa": true, "frases": 1},
+      {"ruta": "videos/imagenes/atletico-fc/04_proyecto.png", "completa": true, "frases": 1},
+      {"ruta": "videos/imagenes/atletico-fc/05_pregunta.png", "completa": true, "frases": 1}
+    ]
+  }
+}

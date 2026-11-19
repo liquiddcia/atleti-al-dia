@@ -1,0 +1,20 @@
+{
+  "titular": ["¿EL BARÇA VIENE", "A POR BARRIOS?"],
+  "frases": [
+    {"hablado": "¿El Barça viene a por Barrios? Según varios analistas, el centrocampista del Atlético tiene un perfil que podría interesar al Barcelona en futuros mercados.", "subtitulo": "¿El Barça viene a por Barrios? Según varios analistas, el centrocampista del Atlético tiene un perfil que podría interesar al Barcelona en futuros mercados."},
+    {"hablado": "Destaca por su participación en la construcción del juego, su energía defensiva y una conducción potente, capaz de recibir cerca de los centrales y superar marcajes.", "subtitulo": "Destaca por su participación en la construcción del juego, su energía defensiva y una conducción potente, capaz de recibir cerca de los centrales y superar marcajes."},
+    {"hablado": "Debutó en el primer equipo en octubre de dos mil veintidós y ya supera el centenar de partidos con el Atlético, con experiencia en la élite siendo todavía muy joven.", "subtitulo": "Debutó en el primer equipo en octubre de 2022 y ya supera el centenar de partidos con el Atlético, con experiencia en la élite siendo todavía muy joven."},
+    {"hablado": "Pero el gran obstáculo es su contrato: está atado al Atlético hasta junio de dos mil treinta, y cualquier operación exigiría una gran inversión y una negociación entre rivales directos.", "subtitulo": "Pero el gran obstáculo es su contrato: está atado al Atlético hasta junio de 2030, y cualquier operación exigiría una gran inversión y una negociación entre rivales directos."},
+    {"hablado": "Barrios no se moverá del Atlético de Madrid, pero, ¿qué opináis? Os leo en comentarios.", "subtitulo": "Barrios no se moverá del Atlético de Madrid, pero, ¿qué opináis? Os leo en comentarios."}
+  ],
+  "imagen": {"tipo": "foto", "grande": true, "ruta": "videos/imagenes/barrios-barca/05_opinion.png"},
+  "plato": {
+    "paneles": [
+      {"ruta": "videos/imagenes/recortes/barrios.png", "sub": "Centrocampista", "titulo": "PABLO BARRIOS", "etiqueta": "Radar del Barça", "color": [255, 214, 0], "brillo": [245, 140, 40], "frases": 1},
+      {"ruta": "videos/imagenes/barrios-barca/02_perfil.png", "completa": true, "frases": 1},
+      {"ruta": "videos/imagenes/barrios-barca/03_trayectoria.png", "completa": true, "frases": 1},
+      {"ruta": "videos/imagenes/barrios-barca/04_contrato.png", "completa": true, "frases": 1},
+      {"ruta": "videos/imagenes/barrios-barca/05_opinion.png", "completa": true, "frases": 1}
+    ]
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "titular": ["EL BAYERN SOMETE", "AL ATLÉTICO"],
+  "frases": [
+    {"hablado": "Noche dura en el Metropolitano: el Bayern de Múnich gana cero a dos al Atlético en la Champions.", "subtitulo": "Noche dura en el Metropolitano: el Bayern de Múnich gana 0-2 al Atlético en la Champions."},
+    {"hablado": "Antes del partido, un minuto de silencio por las víctimas del accidente ferroviario. Descansen en paz.", "subtitulo": "Antes del partido, un minuto de silencio por las víctimas del accidente ferroviario. Descansen en paz."},
+    {"hablado": "En el minuto cincuenta y cuatro, Le Normand perdió el balón en la salida y Karl la picó ante Oblak.", "subtitulo": "En el minuto 54, Le Normand perdió el balón en la salida y Karl la picó ante Oblak."},
+    {"hablado": "Y en el setenta y cuatro, tras una parada de Oblak, Laimer sentenció con asistencia de Harry Kane.", "subtitulo": "Y en el 74, tras una parada de Oblak, Laimer sentenció con asistencia de Harry Kane."},
+    {"hablado": "Los números lo dicen todo: el Bayern tuvo el cincuenta y ocho por ciento del balón, diecinueve remates por nueve y uno coma siete siete de goles esperados.", "subtitulo": "Los números lo dicen todo: el Bayern tuvo el 58 % del balón, 19 remates por 9 y 1,77 de goles esperados."},
+    {"hablado": "El Bayern impuso un ritmo imposible de seguir. Sorloth, titular por primera vez, ganó balones largos, pero sin acompañamiento.", "subtitulo": "El Bayern impuso un ritmo imposible de seguir. Sorloth, titular por primera vez, ganó balones largos, pero sin acompañamiento."},
+    {"hablado": "Simeone movió el banquillo con Koke, Lookman y Kang In Li, pero el equipo atacó con más corazón que cabeza.", "subtitulo": "Simeone movió el banquillo con Koke, Lookman y Kang-in Lee, pero el equipo atacó con más corazón que cabeza."},
+    {"hablado": "En la tabla, el Atlético cae al puesto veintidós, con cuatro puntos, fuera de los puestos de play-off. El Bayern es octavo, con ocho.", "subtitulo": "En la tabla, el Atlético cae al puesto 22, con 4 puntos, fuera de los puestos de play-off. El Bayern es octavo, con 8."},
+    {"hablado": "Llorente lo resumió así: esto es la Champions y esos detalles deciden un partido. El primer gol fue un jarro de agua fría.", "subtitulo": "Llorente lo resumió así: «Esto es la Champions y esos detalles deciden un partido. El primer gol fue un jarro de agua fría»."},
+    {"hablado": "Y no hay tiempo para lamentarse: el domingo llega el Barcelona, con el liderato en juego. Esto es Diario Colchonero.", "subtitulo": "Y no hay tiempo para lamentarse: el domingo llega el Barcelona, con el liderato en juego. Esto es Diario Colchonero."}
+  ],
+  "imagen": {"tipo": "foto", "grande": true, "ruta": "videos/imagenes/bayern-resumen/01_marcador.png"},
+  "plato": {
+    "paneles": [
+      {"ruta": "videos/imagenes/bayern-resumen/01_marcador.png", "completa": true, "frases": 2},
+      {"ruta": "videos/imagenes/bayern-resumen/02_goles.png", "completa": true, "frases": 2},
+      {"ruta": "videos/imagenes/bayern-resumen/03_estadisticas.png", "completa": true, "frases": 1},
+      {"ruta": "videos/imagenes/bayern-resumen/04_claves.png", "completa": true, "frases": 2},
+      {"ruta": "videos/imagenes/bayern-resumen/05_clasificacion.png", "completa": true, "frases": 1},
+      {"ruta": "videos/imagenes/bayern-resumen/06_llorente.png", "completa": true, "frases": 1},
+      {"ruta": "videos/imagenes/bayern-resumen/07_barca.png", "completa": true, "frases": 1}
+    ]
+  }
+}
