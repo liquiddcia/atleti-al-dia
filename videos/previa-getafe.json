@@ -1,0 +1,33 @@
+{
+  "titular": ["VUELVE LA LIGA:", "GETAFE - ATLÉTICO"],
+  "frases": [
+    {"hablado": "Vuelve la Liga. El Atlético visita al Getafe este domingo a las nueve en el Coliseum. El Atleti es tercero con veintiocho puntos y el Getafe, decimoquinto con doce.", "subtitulo": ""},
+    {"hablado": "Los dos llegan tocados: el Getafe viene de perder ante el Villarreal y el Brighton, y el Atlético, ante el Barça y el Bayern.", "subtitulo": ""},
+    {"hablado": "Pero el cara a cara sonríe al Atleti: cuatro victorias en los últimos cinco duelos, y el último en el Coliseum fue cero a uno.", "subtitulo": ""},
+    {"hablado": "El posible once, en cuatro tres tres: Oblak; Llorente, Le Normand, Janco y Grimaldo; Johnny, Koke y Barrios; y arriba Giuliano, Julián y Baena.", "subtitulo": ""},
+    {"hablado": "¿La sorpresa? Arnau Ortiz, que marcó dos goles en el partidillo. Simeone dice que vive mucho del gol, pero que tiene que mejorar en todo lo demás.", "subtitulo": ""},
+    {"hablado": "Las bajas: Lucman, Pubill, con un esguince leve de tobillo, y Cuti Romero, que se pierde su sexto partido seguido.", "subtitulo": ""},
+    {"hablado": "Simeone, optimista: si estamos aquí sin los goles de los delanteros, me entusiasma más. Y sobre Cuti: necesitamos al mejor Cuti Romero. Además, confía en Le Normand tras su error ante el Bayern.", "subtitulo": ""},
+    {"hablado": "El duelo clave: Satriano, con tres goles y dos asistencias, frente a Baena, con cinco goles y tres asistencias.", "subtitulo": ""},
+    {"hablado": "Arbitrará Gil Manzano.", "subtitulo": ""},
+    {"hablado": "¿Quién gana en el Coliseum? Os leo en comentarios. Esto es Diario Colchonero.", "subtitulo": ""}
+  ],
+  "imagen": {"tipo": "foto", "grande": true, "ruta": "videos/imagenes/previa-getafe/01_partido.png"},
+  "portada": "videos/imagenes/previa-getafe/00_portada.jpg",
+  "suscribete": "medio",
+  "hueco": 0.1,
+  "plato": {
+    "paneles": [
+      {"ruta": "videos/imagenes/previa-getafe/01_partido.png", "completa": true, "frases": 1},
+      {"ruta": "videos/imagenes/previa-getafe/02_forma.png", "completa": true, "frases": 1},
+      {"ruta": "videos/imagenes/previa-getafe/03_cara_a_cara.png", "completa": true, "frases": 1},
+      {"ruta": "videos/imagenes/previa-getafe/04_once.png", "completa": true, "frases": 1},
+      {"ruta": "videos/imagenes/previa-getafe/05_arnau.png", "completa": true, "frases": 1},
+      {"ruta": "videos/imagenes/previa-getafe/06_bajas.png", "completa": true, "frases": 1},
+      {"ruta": "videos/imagenes/previa-getafe/07_simeone.png", "completa": true, "frases": 1},
+      {"ruta": "videos/imagenes/previa-getafe/08_duelo.png", "completa": true, "frases": 1},
+      {"ruta": "videos/imagenes/previa-getafe/09_arbitro.png", "completa": true, "frases": 1},
+      {"ruta": "videos/imagenes/previa-getafe/10_quien.png", "completa": true, "frases": 1}
+    ]
+  }
+}
