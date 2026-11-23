@@ -20,7 +20,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 60
     env:
-      VIDEO: ${{ inputs.video || 'post-getafe' }}
+      VIDEO: ${{ inputs.video || 'simeone-345' }}
       FORMATO: ${{ inputs.formato || 'vertical' }}
     steps:
       - uses: actions/checkout@v4
