@@ -14,6 +14,8 @@ PRONUNCIACION = {
     "Aston Villa": "Aston Vila",
     "Hancko": "Janco",
     "Lookman": "Lukman",
+    "Tripić": "Trípich",
+    "Viking": "Váiking",
 }
 
 def pronunciar(texto):

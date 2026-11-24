@@ -1,0 +1,101 @@
+{
+  "titular": [
+    "PERDER ES ESTAR",
+    "PIE Y MEDIO FUERA"
+  ],
+  "frases": [
+    {
+      "hablado": "Perder es estar con pie y medio fuera. El Atlético recibe al Viking este miércoles a las nueve en el Metropolitano, en la quinta jornada de Champions.",
+      "subtitulo": ""
+    },
+    {
+      "hablado": "Los dos llegan empatados a cuatro puntos: el Viking es vigésimo segundo y el Atleti, vigésimo tercero, al borde de la eliminación.",
+      "subtitulo": ""
+    },
+    {
+      "hablado": "El Atleti llega tras golear al Getafe, y el Viking, tras perder en Noruega el fin de semana.",
+      "subtitulo": ""
+    },
+    {
+      "hablado": "Pero en Champions el Atleti solo ha ganado uno de sus últimos seis partidos de la fase de liga.",
+      "subtitulo": ""
+    },
+    {
+      "hablado": "A favor: un ochenta y uno por ciento de probabilidad de victoria, y el Viking nunca ha marcado en España.",
+      "subtitulo": ""
+    },
+    {
+      "hablado": "Ojo, eso sí: el Viking lleva doce partidos europeos seguidos marcando.",
+      "subtitulo": ""
+    },
+    {
+      "hablado": "El posible once: Oblak; Llorente, Le Normand, Janco y Grimaldo; Giuliano, Barrios, Hjulmand y Baena; Kang In Li y Julián.",
+      "subtitulo": ""
+    },
+    {
+      "hablado": "Bajas: Lucman, Pubill y Cuti Romero.",
+      "subtitulo": ""
+    },
+    {
+      "hablado": "¿Gana el Atleti y respira en Champions? Os leo en comentarios. Esto es Diario Colchonero.",
+      "subtitulo": ""
+    }
+  ],
+  "imagen": {
+    "tipo": "foto",
+    "grande": true,
+    "ruta": "videos/imagenes/previa-viking/01_partido.png"
+  },
+  "portada": "videos/imagenes/previa-viking/00_portada.jpg",
+  "suscribete": "medio",
+  "hueco": 0.1,
+  "plato": {
+    "paneles": [
+      {
+        "ruta": "videos/imagenes/previa-viking/01_partido.png",
+        "completa": true,
+        "frases": 1
+      },
+      {
+        "ruta": "videos/imagenes/previa-viking/02_tabla.png",
+        "completa": true,
+        "frases": 1
+      },
+      {
+        "ruta": "videos/imagenes/previa-viking/03_forma.png",
+        "completa": true,
+        "frases": 1
+      },
+      {
+        "ruta": "videos/imagenes/previa-viking/04_champions.png",
+        "completa": true,
+        "frases": 1
+      },
+      {
+        "ruta": "videos/imagenes/previa-viking/05_favor.png",
+        "completa": true,
+        "frases": 1
+      },
+      {
+        "ruta": "videos/imagenes/previa-viking/06_viking.png",
+        "completa": true,
+        "frases": 1
+      },
+      {
+        "ruta": "videos/imagenes/previa-viking/08_once.png",
+        "completa": true,
+        "frases": 1
+      },
+      {
+        "ruta": "videos/imagenes/previa-viking/10_bajas.png",
+        "completa": true,
+        "frases": 1
+      },
+      {
+        "ruta": "videos/imagenes/previa-viking/12_quien.png",
+        "completa": true,
+        "frases": 1
+      }
+    ]
+  }
+}
