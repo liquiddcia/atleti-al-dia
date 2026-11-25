@@ -16,6 +16,7 @@ PRONUNCIACION = {
     "Lookman": "Lukman",
     "Tripić": "Trípich",
     "Viking": "Váiking",
+    "Giuliano": "Yuliano",
 }
 
 def pronunciar(texto):
