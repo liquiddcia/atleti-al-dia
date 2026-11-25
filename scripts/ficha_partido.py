@@ -81,13 +81,23 @@ def ficha(datos, salida, W=1920, H=1272):
     d.rounded_rectangle([tx1 - 10, ty - 30, tx1 + 90, ty + 30], 30, fill=TARJETA, outline=VERDE, width=4)
     d.text((tx1 + 40, ty), "FIN", font=F(28), fill=BLANCO, anchor="mm")
     _escudo(im, L["escudo"], 150, ty - 38, 60); _escudo(im, V["escudo"], 150, ty + 38, 60); d = ImageDraw.Draw(im)
+    etiquetas = {True: [], False: []}
     for g in datos.get("goles", []):
         x = tx0 + (tx1 - tx0) * min(g["min"], dur) / dur
         arriba = g["equipo"] == "local"
         yy = ty - 30 if arriba else ty + 30
         d.ellipse([x - 16, yy - 16, x + 16, yy + 16], fill=BLANCO, outline=(20, 20, 30), width=3)
         d.text((x, yy), "⚽", font=F(10), fill=BLANCO, anchor="mm")
-        d.text((x, yy + (-34 if arriba else 34)), f"{g['jugador']} {g['min']}'", font=F(28), fill=BLANCO, anchor="mm")
+        t = f"{g['jugador']} {g['min']}'"
+        etiquetas[arriba].append([x, d.textlength(t, font=F(28)), t, yy + (-34 if arriba else 34)])
+    for lista in etiquetas.values():   # separa las etiquetas de goles muy seguidos
+        lista.sort()
+        for _ in range(10):
+            for a, b in zip(lista, lista[1:]):
+                hueco = (a[0] + a[1] / 2 + 24) - (b[0] - b[1] / 2)
+                if hueco > 0: a[0] -= hueco / 2; b[0] += hueco / 2
+        for x, _, t, y in lista:
+            d.text((x, y), t, font=F(28), fill=BLANCO, anchor="mm")
     # campo con los onces
     cy0, cy1 = 800, H - 25
     d.rounded_rectangle([60, cy0, W - 60, cy1], 24, fill=(28, 96, 52))
