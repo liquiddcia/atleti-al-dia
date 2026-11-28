@@ -51,7 +51,7 @@ def tarjetas(d, x, filas, ancho=1000, y0=330, alto=170, paso=205):
 def borde(d, xy, t, f, col, b=12): d.text(xy, t, font=f, fill=col, anchor="mm", stroke_width=b, stroke_fill=(0, 0, 0))
 
 # --- portadas con fondo de estadio ---
-def jugador_luz(lienzo, ruta, cx, base_y, alto):
+def jugador_luz(lienzo, ruta, cx, base_y, alto, color=(255, 60, 50)):
     j = Image.open(ruta).convert("RGBA"); j = j.resize((round(j.width * alto / j.height), alto), Image.LANCZOS)
     aa = np.asarray(j.getchannel("A"), dtype=np.float32); n = int(alto * 0.22)
     aa[-n:] *= np.linspace(1, 0, n)[:, None] ** 1.2
@@ -61,7 +61,7 @@ def jugador_luz(lienzo, ruta, cx, base_y, alto):
     lienzo.alpha_composite(sh.filter(ImageFilter.GaussianBlur(25)))
     a = j.getchannel("A")
     glow = Image.new("RGBA", lienzo.size, (0, 0, 0, 0))
-    col = Image.new("RGBA", j.size, (255, 60, 50, 0)); col.putalpha(a.filter(ImageFilter.GaussianBlur(40)))
+    col = Image.new("RGBA", j.size, color + (0,)); col.putalpha(a.filter(ImageFilter.GaussianBlur(40)))
     glow.alpha_composite(col, (int(cx - j.width / 2), base_y - alto)); lienzo.alpha_composite(glow)
     lienzo.alpha_composite(ImageEnhance.Contrast(j).enhance(1.12), (int(cx - j.width / 2), base_y - alto))
 
