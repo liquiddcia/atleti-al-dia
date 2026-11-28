@@ -1,0 +1,31 @@
+{
+  "titular": ["EXHIBICIÓN", "EN EL COLISEUM"],
+  "frases": [
+    {"hablado": "Exhibición del Atleti en el Coliseum: cero a tres al Getafe y vuelta a la victoria tras las derrotas ante el Barça y el Bayern.", "subtitulo": ""},
+    {"hablado": "En el minuto diez, Baena abrió la lata con un zapatazo al palo tras un pase de Julián. En el treinta, Johnny aprovechó un error de Soria en un córner botado por Julián. Y en el descuento, tras la roja a Djené, Grimaldo cerró la goleada de penalti.", "subtitulo": ""},
+    {"hablado": "Dominio total: sesenta y nueve por ciento de posesión, diez remates a puerta por uno del Getafe, y más de cuatro goles esperados.", "subtitulo": ""},
+    {"hablado": "El mejor, Julián Álvarez: dos asistencias y un ocho coma cuatro. No lograba dos participaciones de gol en un partido desde marzo del año pasado.", "subtitulo": ""},
+    {"hablado": "Y Baena, otra vez decisivo: gol, un ocho coma tres de nota, y rozó el doblete en la segunda parte.", "subtitulo": ""},
+    {"hablado": "Las notas: Julián y Baena, los mejores; Llorente, Grimaldo y Kang In Li, por encima del siete. Le Normand, el más flojo, con un seis coma cuatro.", "subtitulo": ""},
+    {"hablado": "Y los datos: quinta victoria seguida fuera en Liga, tercer partido seguido sin encajar a domicilio, y siete remates a puerta en la primera parte, un récord fuera de casa con Simeone.", "subtitulo": ""},
+    {"hablado": "El Atleti sigue tercero con treinta y un puntos, a cinco del Barça y a dos del Madrid.", "subtitulo": ""},
+    {"hablado": "¿Quién fue tu mejor jugador, Julián o Baena? Os leo en comentarios. Esto es Diario Colchonero.", "subtitulo": ""}
+  ],
+  "imagen": {"tipo": "foto", "grande": true, "ruta": "videos/imagenes/post-getafe/01_marcador.png"},
+  "portada": "videos/imagenes/post-getafe/00_portada.jpg",
+  "suscribete": "medio",
+  "hueco": 0.1,
+  "plato": {
+    "paneles": [
+      {"ruta": "videos/imagenes/post-getafe/01_marcador.png", "completa": true, "frases": 1},
+      {"ruta": "videos/imagenes/post-getafe/02_goles.png", "completa": true, "frases": 1},
+      {"ruta": "videos/imagenes/post-getafe/03_numeros.png", "completa": true, "frases": 1},
+      {"ruta": "videos/imagenes/post-getafe/04_julian.png", "completa": true, "frases": 1},
+      {"ruta": "videos/imagenes/post-getafe/05_baena.png", "completa": true, "frases": 1},
+      {"ruta": "videos/imagenes/post-getafe/06_notas.png", "completa": true, "frases": 1},
+      {"ruta": "videos/imagenes/post-getafe/07_datos.png", "completa": true, "frases": 1},
+      {"ruta": "videos/imagenes/post-getafe/08_tabla.png", "completa": true, "frases": 1},
+      {"ruta": "videos/imagenes/post-getafe/09_mvp.png", "completa": true, "frases": 1}
+    ]
+  }
+}

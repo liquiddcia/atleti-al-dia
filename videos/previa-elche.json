@@ -1,0 +1,101 @@
+{
+  "titular": [
+    "SIN SØRLOTH",
+    "A ELCHE"
+  ],
+  "frases": [
+    {
+      "hablado": "Sin Sorloth, a Elche. El Atlético visita al Elche este sábado a las seis y media en el Martínez Valero, en la jornada catorce de LaLiga.",
+      "subtitulo": ""
+    },
+    {
+      "hablado": "El Atleti llega tercero con treinta y un puntos, a cinco del Barça, y con la moral alta tras ganar dos a cero al Viking en Champions.",
+      "subtitulo": ""
+    },
+    {
+      "hablado": "En los últimos cinco duelos hay igualdad total: dos victorias para cada uno y un empate.",
+      "subtitulo": ""
+    },
+    {
+      "hablado": "La gran baja es Sorloth, lesionado en la pantorrilla. Tampoco están Cuti Romero ni Lookman. En el Elche faltan Lemar, Sánchez, Boayar y Santiago, y Aguado es duda.",
+      "subtitulo": ""
+    },
+    {
+      "hablado": "El posible once: Oblak; Llorente, Le Normand, Janco y Grimaldo; Kang In Li, Koke, Cardoso y Baena; y arriba Julián, con Yuliano o Jonathan David.",
+      "subtitulo": ""
+    },
+    {
+      "hablado": "Ojo al duelo de delanteros: Fer Niño lleva seis goles en Liga, y Julián, un gol y cuatro asistencias.",
+      "subtitulo": ""
+    },
+    {
+      "hablado": "Arbitra Alejandro Quintero, que saca cinco tarjetas y media por partido y ya lleva cinco rojas esta temporada.",
+      "subtitulo": ""
+    },
+    {
+      "hablado": "El Elche de Anselmi juega con cuatro, cuatro, dos y viene de empatar uno a uno con el Levante.",
+      "subtitulo": ""
+    },
+    {
+      "hablado": "¿Qué resultado ves en Elche? Os leo en comentarios. Esto es Diario Colchonero.",
+      "subtitulo": ""
+    }
+  ],
+  "imagen": {
+    "tipo": "foto",
+    "grande": true,
+    "ruta": "videos/imagenes/previa-elche/01_partido.png"
+  },
+  "suscribete": "medio",
+  "hueco": 0.12,
+  "plato": {
+    "paneles": [
+      {
+        "ruta": "videos/imagenes/previa-elche/01_partido.png",
+        "completa": true,
+        "frases": 1
+      },
+      {
+        "ruta": "videos/imagenes/previa-elche/02_llega.png",
+        "completa": true,
+        "frases": 1
+      },
+      {
+        "ruta": "videos/imagenes/previa-elche/03_cara.png",
+        "completa": true,
+        "frases": 1
+      },
+      {
+        "ruta": "videos/imagenes/previa-elche/04_bajas.png",
+        "completa": true,
+        "frases": 1
+      },
+      {
+        "ruta": "videos/imagenes/previa-elche/05_once.png",
+        "completa": true,
+        "frases": 1
+      },
+      {
+        "ruta": "videos/imagenes/previa-elche/06_duelo.png",
+        "completa": true,
+        "frases": 1
+      },
+      {
+        "ruta": "videos/imagenes/previa-elche/07_arbitro.png",
+        "completa": true,
+        "frases": 1
+      },
+      {
+        "ruta": "videos/imagenes/previa-elche/08_elche.png",
+        "completa": true,
+        "frases": 1
+      },
+      {
+        "ruta": "videos/imagenes/previa-elche/09_pronostico.png",
+        "completa": true,
+        "frases": 1
+      }
+    ]
+  },
+  "portada": "videos/imagenes/previa-elche/00_portada.jpg"
+}

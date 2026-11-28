@@ -1,0 +1,40 @@
+{
+  "titular": ["EL CUTI ESTÁ", "DE VUELTA"],
+  "frases": [
+    {
+      "hablado": "Buena noticia en el Atlético: el Cuti Romero ya está de vuelta.",
+      "subtitulo": "Buena noticia en el Atlético: el Cuti Romero ya está de vuelta."
+    },
+    {
+      "hablado": "El central argentino volvió a entrenar con el grupo en la sesión de este martes.",
+      "subtitulo": "El central argentino volvió a entrenar con el grupo en la sesión de este martes."
+    },
+    {
+      "hablado": "Solo hizo la primera parte con sus compañeros y terminó el trabajo en solitario, bajo la mirada de Simeone.",
+      "subtitulo": "Solo hizo la primera parte con sus compañeros y terminó el trabajo en solitario, bajo la mirada de Simeone."
+    },
+    {
+      "hablado": "Su recuperación va según lo previsto y hay esperanza de que llegue al sábado contra el Levante.",
+      "subtitulo": "Su recuperación va según lo previsto y hay esperanza de que llegue al sábado contra el Levante."
+    },
+    {
+      "hablado": "Koke ya toca balón y haría sprints, y podría incorporarse al grupo la próxima semana. Cardoso, de momento, solo corre.",
+      "subtitulo": "Koke ya toca balón y haría sprints, y podría incorporarse al grupo la próxima semana. Cardoso, de momento, solo corre."
+    },
+    {
+      "hablado": "Semana clave para recuperar efectivos antes de visitar al Levante.",
+      "subtitulo": "Semana clave para recuperar efectivos antes de visitar al Levante."
+    }
+  ],
+  "imagen": {
+    "tipo": "lista",
+    "titulo": "ENTRENAMIENTO · MARTES",
+    "filas": [
+      {"nombre": "Cuti Romero", "estado": "Con el grupo (1ª parte)", "color": "verde"},
+      {"nombre": "Koke", "estado": "Toca balón y sprints", "color": "verde"},
+      {"nombre": "Cardoso", "estado": "Solo carrera", "color": "ambar"},
+      {"nombre": "Julián Álvarez, Kang-in, Pubill y Hancko", "estado": "Carrera continua", "color": "ambar"}
+    ],
+    "pie": "Sábado: Levante · Ciutat de Valencia"
+  }
+}

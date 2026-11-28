@@ -1,0 +1,48 @@
+{
+  "titular": ["FERMÍN APAGA", "EL METROPOLITANO"],
+  "frases": [
+    {"hablado": "Muy buenas, colchoneros. Fermín López apagó el Metropolitano: el Barça ganó uno a dos al Atlético y se escapa en el liderato. Vamos con el análisis completo.", "subtitulo": ""},
+    {"hablado": "Partido de la jornada doce, en el Metropolitano y con el liderato en juego: el Barça llegaba con treinta puntos y el Atlético con veintiocho.", "subtitulo": ""},
+    {"hablado": "El Cholo salió con un cuatro cuatro dos: Oblak; Llorente, Pubill, Hancko y Grimaldo; Giuliano, Koke, Barrios y Baena; y arriba, Julián Álvarez y Kang In Li.", "subtitulo": ""},
+    {"hablado": "Flick apostó por un cuatro uno cuatro uno, con Bernal por delante de la defensa y Gordon, Pedri, Fermín y Lamine Yamal por detrás de Raphinha.", "subtitulo": ""},
+    {"hablado": "Y el partido empezó como queríamos. El Atleti salió mandando y en el minuto diez llegó el premio: gran centro de Julián Álvarez al corazón del área y Giuliano, con solvencia, hizo el uno a cero.", "subtitulo": ""},
+    {"hablado": "El Metropolitano rugía, pero cuando la primera mitad agonizaba llegó el golpe: en el minuto cuarenta y cinco, Fermín cazó un balón suelto en el área y empató de zurda. Uno a uno al descanso.", "subtitulo": ""},
+    {"hablado": "En la segunda parte, el Barça consumó la remontada. Minuto sesenta y seis: Lamine Yamal filtró un pase preciso, Fermín cruzó ante la salida de Oblak y firmó su doblete. Uno a dos.", "subtitulo": ""},
+    {"hablado": "Vamos con los números, porque cuentan mucho. El Barça tuvo el balón: sesenta y tres por ciento de posesión y más del doble de pases completados, seiscientos quince por trescientos diecisiete.", "subtitulo": ""},
+    {"hablado": "También remató más, diecinueve tiros por nueve. Pero ojo: a puerta, cuatro cada uno. Y en goles esperados, casi empate: uno coma cinco tres del Atlético por uno coma seis del Barça.", "subtitulo": ""},
+    {"hablado": "Es más, el Atleti generó más grandes ocasiones, cuatro por tres. Es decir: con mucho menos balón, el equipo llegó y creó peligro.", "subtitulo": ""},
+    {"hablado": "En la lucha, el Atlético ganó más duelos, cincuenta y ocho por cuarenta y ocho, e hizo más intercepciones, diez por siete. Sacó más córners, cuatro por dos, y su juego generó casi el doble de asistencias esperadas.", "subtitulo": ""},
+    {"hablado": "Pero hubo un dato que pesa: cinco fueras de juego del Atlético. Más de una llegada murió en un pie adelantado.", "subtitulo": ""},
+    {"hablado": "Desde el banquillo, Flick metió a De Jong en el descanso, y luego a Christensen, Gavi, Eric García y Adeyemi.", "subtitulo": ""},
+    {"hablado": "Simeone buscó el empate con Sorloth en el sesenta, y después con Hjulmand, Johnny Cardoso y Jonathan David. Pero el gol no llegó.", "subtitulo": ""},
+    {"hablado": "Y el partido se calentó al final: cuatro amarillas para el Atleti, Baena, Llorente, Pubill y Hjulmand, por solo una del Barça, para Bernal. Catorce faltas por equipo y ninguna roja.", "subtitulo": ""},
+    {"hablado": "Las notas del Atleti. Lo mejor, Giuliano, con un siete coma cuatro: gol y trabajo incansable. Le siguen Koke y Pubill, con un siete.", "subtitulo": ""},
+    {"hablado": "Por abajo, Barrios, con un cinco coma nueve, y Grimaldo, con un cinco coma siete, los que menos. Oblak se queda en un seis coma uno.", "subtitulo": ""},
+    {"hablado": "Y el verdugo, Fermín López: dos goles y un ocho coma nueve, el mejor del partido. Se fue en el setenta y cuatro, ya con el trabajo hecho.", "subtitulo": ""},
+    {"hablado": "¿Las claves? Primera: el uno a uno justo antes del descanso cambió todo el partido. Segunda: el Barça controló el balón y el ritmo en la segunda parte.", "subtitulo": ""},
+    {"hablado": "Y tercera: al Atleti le faltó acierto arriba. Generó lo mismo que el Barça, pero solo marcó una vez.", "subtitulo": ""},
+    {"hablado": "Con esta derrota se acaba la racha de siete victorias seguidas en Liga. La tabla queda así: Barcelona, treinta y tres puntos; Real Madrid, treinta; y el Atlético, tercero, con veintiocho, a cinco del líder.", "subtitulo": ""},
+    {"hablado": "Ahora llega el parón de selecciones. Toca recuperar a Cuti, recargar y volver con todo.", "subtitulo": ""},
+    {"hablado": "Y ahora te pregunto a ti: ¿se puede pelear todavía la Liga con cinco puntos de diferencia? ¿Qué le faltó al Atleti? Déjamelo en los comentarios. Esto es Diario Colchonero.", "subtitulo": ""}
+  ],
+  "imagen": {"tipo": "foto", "grande": true, "ruta": "videos/imagenes/post-barca/01_marcador.png"},
+  "portada_horizontal": "videos/imagenes/post-barca/00_portada_horizontal.jpg",
+  "suscribete": "medio",
+  "hueco": 0.15,
+  "plato": {
+    "paneles": [
+      {"ruta": "videos/imagenes/post-barca/01_marcador.png", "frases": 2},
+      {"ruta": "videos/imagenes/post-barca/02b_alineaciones.png", "frases": 2},
+      {"ruta": "videos/imagenes/post-barca/02_goles.png", "frases": 3},
+      {"ruta": "videos/imagenes/post-barca/03_numeros.png", "frases": 3},
+      {"ruta": "videos/imagenes/post-barca/05b_lucha.png", "frases": 2},
+      {"ruta": "videos/imagenes/post-barca/06b_cambios.png", "frases": 2},
+      {"ruta": "videos/imagenes/post-barca/06c_tarjetas.png", "frases": 1},
+      {"ruta": "videos/imagenes/post-barca/08_notas.png", "frases": 2},
+      {"ruta": "videos/imagenes/post-barca/09_fermin.png", "frases": 1},
+      {"ruta": "videos/imagenes/post-barca/04_claves.png", "frases": 2},
+      {"ruta": "videos/imagenes/post-barca/06_tabla_larga.png", "frases": 1},
+      {"ruta": "videos/imagenes/post-barca/07_ahora.png", "frases": 2}
+    ]
+  }
+}

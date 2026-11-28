@@ -1,0 +1,24 @@
+{
+  "titular": ["ARNAU PIDE", "SU SITIO"],
+  "frases": [
+    {"hablado": "Vuelve la Liga: el Atlético visita al Getafe este domingo a las nueve en el Coliseum, y Simeone ya prueba el once.", "subtitulo": ""},
+    {"hablado": "La sorpresa es Arnau Ortiz. No juega un minuto oficial desde el dieciséis de septiembre, ante Osasuna, nueve partidos sin jugar. Pero esta semana ha marcado dos goles en el partidillo y ha brillado en los ejercicios de finalización.", "subtitulo": ""},
+    {"hablado": "Atrás, Simeone ha probado con Oblak, Llorente, Le Normand, Janco y Grimaldo. En el centro, Barrios tiene muchas opciones, Koke y Johnny pelean por un sitio, vuelve Hjulmand y Baena apunta al once.", "subtitulo": ""},
+    {"hablado": "Arriba, sin Lucman, Simeone tiene que ver cómo vuelven Julián, Sorloth y Kang In Li, y también Jonathan David. El once se decidirá el viernes.", "subtitulo": ""},
+    {"hablado": "Las bajas: Lucman, Pubill y Cuti Romero.", "subtitulo": ""},
+    {"hablado": "¿Le darías la oportunidad a Arnau? Os leo en comentarios. Esto es Diario Colchonero.", "subtitulo": ""}
+  ],
+  "imagen": {"tipo": "foto", "grande": true, "ruta": "videos/imagenes/arnau/02_arnau.png"},
+  "portada": "videos/imagenes/arnau/00_portada.jpg",
+  "hueco": 0.1,
+  "plato": {
+    "paneles": [
+      {"ruta": "videos/imagenes/arnau/01_partido.png", "completa": true, "frases": 1},
+      {"ruta": "videos/imagenes/arnau/02_arnau.png", "completa": true, "frases": 1},
+      {"ruta": "videos/imagenes/arnau/03_once.png", "completa": true, "frases": 1},
+      {"ruta": "videos/imagenes/arnau/04_ataque.png", "completa": true, "frases": 1},
+      {"ruta": "videos/imagenes/arnau/05_bajas.png", "completa": true, "frases": 1},
+      {"ruta": "videos/imagenes/arnau/06_pregunta.png", "completa": true, "frases": 1}
+    ]
+  }
+}

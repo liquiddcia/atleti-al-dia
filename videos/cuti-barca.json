@@ -1,0 +1,21 @@
+{
+  "titular": ["SIN CUTI", "ANTE EL BARÇA"],
+  "frases": [
+    {"hablado": "Mal golpe para el Atlético antes del duelo por el liderato: Cuti Romero se perderá el partido del domingo ante el Barcelona en el Metropolitano.", "subtitulo": "Mal golpe para el Atlético antes del duelo por el liderato: Cuti Romero se perderá el partido del domingo ante el Barcelona en el Metropolitano."},
+    {"hablado": "Arrastra una lesión muscular que no termina de superar. Quería arriesgar, pero se ha priorizado su recuperación: tampoco irá con Argentina y apunta al partido ante el Elche.", "subtitulo": "Arrastra una lesión muscular que no termina de superar. Quería arriesgar, pero se ha priorizado su recuperación: tampoco irá con Argentina y apunta al partido ante el Elche."},
+    {"hablado": "Su baja pesa mucho: con Cuti, cinco victorias en seis partidos y cero coma cincuenta y siete goles encajados por encuentro. Sin él, solo dos victorias y uno coma veinticinco.", "subtitulo": "Su baja pesa mucho: con Cuti, 5 victorias en 6 partidos y 0,57 goles encajados por encuentro. Sin él, solo 2 victorias y 1,25."},
+    {"hablado": "Y enfrente estará la máquina ofensiva de LaLiga: el Barça lleva cuarenta y seis goles en once jornadas, unos cuatro por partido.", "subtitulo": "Y enfrente estará la máquina ofensiva de LaLiga: el Barça lleva 46 goles en 11 jornadas, unos 4 por partido."},
+    {"hablado": "Simeone tendrá que reorganizar la defensa. La buena noticia: Hjulmand vuelve tras cumplir su sanción europea y Koke ya suma minutos.", "subtitulo": "Simeone tendrá que reorganizar la defensa. La buena noticia: Hjulmand vuelve tras cumplir su sanción europea y Koke ya suma minutos."},
+    {"hablado": "¿Le Normand en el centro con Hancko, o Llorente de vuelta al lateral? El domingo, a por el liderato. Esto es Diario Colchonero.", "subtitulo": "¿Le Normand en el centro con Hancko, o Llorente de vuelta al lateral? El domingo, a por el liderato. Esto es Diario Colchonero."}
+  ],
+  "imagen": {"tipo": "foto", "grande": true, "ruta": "videos/imagenes/cuti-barca/05_partido.png"},
+  "plato": {
+    "paneles": [
+      {"ruta": "videos/imagenes/recortes/cuti.png", "sub": "Baja ante el Barça", "titulo": "CUTI ROMERO", "etiqueta": "Lesionado", "frases": 2},
+      {"ruta": "videos/imagenes/cuti-barca/02_con_sin.png", "completa": true, "frases": 1},
+      {"ruta": "videos/imagenes/cuti-barca/03_barca.png", "completa": true, "frases": 1},
+      {"ruta": "videos/imagenes/recortes/koke.png", "sub": "El plan de Simeone", "titulo": "KOKE", "etiqueta": "+ Hjulmand", "color": [255, 214, 0], "brillo": [245, 140, 40], "frases": 1},
+      {"ruta": "videos/imagenes/cuti-barca/05_partido.png", "completa": true, "frases": 1}
+    ]
+  }
+}

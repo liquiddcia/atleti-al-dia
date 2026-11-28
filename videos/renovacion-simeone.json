@@ -1,0 +1,23 @@
+{
+  "titular": ["¿SE VA", "EL CHOLO?"],
+  "frases": [
+    {"hablado": "¿Seguirá el Cholo? Tras quince años en el banquillo, Simeone todavía no ha recibido ninguna oferta de renovación del Atlético.", "subtitulo": ""},
+    {"hablado": "Su contrato acaba el treinta de junio de dos mil veintisiete, y el Cholo espera que sea el club quien dé el primer paso.", "subtitulo": ""},
+    {"hablado": "Ojo a las fechas: desde el uno de enero podrá negociar con cualquier club, y las dos partes se han marcado febrero como fecha límite para una oferta.", "subtitulo": ""},
+    {"hablado": "La clave está en el consejo. Gil Marín fue quien le amplió el contrato las últimas veces, pero ahora el fondo Apollo quiere ver cómo evoluciona el equipo antes de decidir.", "subtitulo": ""},
+    {"hablado": "Y eso que la temporada pasada el Cholo eliminó al Barça en las semifinales de Copa y en los cuartos de Champions.", "subtitulo": ""},
+    {"hablado": "Todo se decidirá en los próximos tres meses. ¿Renovarías al Cholo? Os leo en comentarios. Esto es Diario Colchonero.", "subtitulo": ""}
+  ],
+  "imagen": {"tipo": "foto", "grande": true, "ruta": "videos/imagenes/renovacion-simeone/01_cholo.png"},
+  "portada": "videos/imagenes/renovacion-simeone/00_portada.jpg",
+  "hueco": 0.1,
+  "plato": {
+    "paneles": [
+      {"ruta": "videos/imagenes/renovacion-simeone/01_cholo.png", "completa": true, "frases": 2},
+      {"ruta": "videos/imagenes/renovacion-simeone/02_fechas.png", "completa": true, "frases": 1},
+      {"ruta": "videos/imagenes/renovacion-simeone/03_apollo.png", "completa": true, "frases": 1},
+      {"ruta": "videos/imagenes/renovacion-simeone/04_legado.png", "completa": true, "frases": 1},
+      {"ruta": "videos/imagenes/renovacion-simeone/05_pregunta.png", "completa": true, "frases": 1}
+    ]
+  }
+}

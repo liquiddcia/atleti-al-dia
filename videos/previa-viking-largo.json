@@ -1,0 +1,140 @@
+{
+  "titular": [
+    "PERDER ES ESTAR CON",
+    "PIE Y MEDIO FUERA"
+  ],
+  "frases": [
+    {
+      "hablado": "Muy buenas, colchoneros. Llega una final en el Metropolitano: perder ante el Viking es estar con pie y medio fuera de la Champions. Vamos con la previa completa.",
+      "subtitulo": ""
+    },
+    {
+      "hablado": "Atlético de Madrid contra Viking Stavanger, este miércoles veinticinco de noviembre a las nueve de la noche, en la quinta jornada de la fase de liga.",
+      "subtitulo": ""
+    },
+    {
+      "hablado": "Así está la tabla: el Viking es vigésimo segundo con cuatro puntos, y el Atlético, vigésimo tercero, también con cuatro.",
+      "subtitulo": ""
+    },
+    {
+      "hablado": "Recordad: del noveno al vigésimo cuarto se juega el playoff, y del vigésimo quinto hacia abajo, eliminado. El Atleti está justo en el filo.",
+      "subtitulo": ""
+    },
+    {
+      "hablado": "¿Cómo llegan? El Atlético viene de golear cero a tres al Getafe, con tres victorias en sus últimos cinco partidos.",
+      "subtitulo": ""
+    },
+    {
+      "hablado": "El Viking, en cambio, perdió tres a dos en Tromsø el fin de semana y se ha quedado a tres puntos del líder de la liga noruega.",
+      "subtitulo": ""
+    },
+    {
+      "hablado": "En Champions, el Atleti suma cuatro puntos: derrotas ante el Liverpool y el Bayern, un empate en Stuttgart y una victoria ante el Manchester United.",
+      "subtitulo": ""
+    },
+    {
+      "hablado": "Y el dato que preocupa: solo una victoria en sus últimos seis partidos de la fase de liga.",
+      "subtitulo": ""
+    },
+    {
+      "hablado": "Pero hay motivos para ilusionarse. Opta le da al Atleti un ochenta y uno por ciento de probabilidad de victoria.",
+      "subtitulo": ""
+    },
+    {
+      "hablado": "El Atleti ha ganado diez de sus últimos trece partidos como local en esta fase, y el Viking perdió sus dos visitas a España sin marcar un solo gol.",
+      "subtitulo": ""
+    },
+    {
+      "hablado": "Ojo, porque el Viking no es un rival cómodo: lleva doce partidos europeos seguidos marcando, un récord del club.",
+      "subtitulo": ""
+    },
+    {
+      "hablado": "Sus cuatro partidos en esta Champions han terminado con más de tres goles y medio, y solo tres equipos han sacado más córners.",
+      "subtitulo": ""
+    },
+    {
+      "hablado": "Los números de los dos en Champions: el Atleti marca uno por partido y encaja uno coma veinticinco. El Viking marca dos coma veinticinco, pero encaja dos y medio.",
+      "subtitulo": ""
+    },
+    {
+      "hablado": "El posible once del Cholo, en cuatro cuatro dos: Oblak; Llorente, Le Normand, Janco y Grimaldo; Giuliano, Barrios, Hjulmand y Baena; y arriba, Kang In Li y Julián Álvarez.",
+      "subtitulo": ""
+    },
+    {
+      "hablado": "El Viking, en cuatro tres tres: Østbø en la portería, y arriba, Trípich, Botheim y Christiansen.",
+      "subtitulo": ""
+    },
+    {
+      "hablado": "Las bajas del Atleti: Lucman, Pubill y Cuti Romero, más Javi Domínguez. El Viking tampoco llega completo: D'Agostino, Ove, Bjorshol y Baertelsen, lesionados.",
+      "subtitulo": ""
+    },
+    {
+      "hablado": "El duelo clave: Baena, que abrió el marcador en sus tres últimos goles, contra Trípich, con dos goles y tres asistencias, en cinco de los nueve goles del Viking.",
+      "subtitulo": ""
+    },
+    {
+      "hablado": "Ganar es respirar; perder es estar con pie y medio fuera. ¿Qué resultado esperas? Déjamelo en los comentarios. Esto es Diario Colchonero.",
+      "subtitulo": ""
+    }
+  ],
+  "imagen": {
+    "tipo": "foto",
+    "grande": true,
+    "ruta": "videos/imagenes/previa-viking/01_partido.png"
+  },
+  "portada_horizontal": "videos/imagenes/previa-viking/00_portada_horizontal.jpg",
+  "suscribete": "medio",
+  "hueco": 0.15,
+  "plato": {
+    "paneles": [
+      {
+        "ruta": "videos/imagenes/previa-viking/01_partido.png",
+        "frases": 2
+      },
+      {
+        "ruta": "videos/imagenes/previa-viking/02_tabla.png",
+        "frases": 2
+      },
+      {
+        "ruta": "videos/imagenes/previa-viking/03_forma.png",
+        "frases": 2
+      },
+      {
+        "ruta": "videos/imagenes/previa-viking/04_champions.png",
+        "frases": 2
+      },
+      {
+        "ruta": "videos/imagenes/previa-viking/05_favor.png",
+        "frases": 2
+      },
+      {
+        "ruta": "videos/imagenes/previa-viking/06_viking.png",
+        "frases": 2
+      },
+      {
+        "ruta": "videos/imagenes/previa-viking/07_numeros.png",
+        "frases": 1
+      },
+      {
+        "ruta": "videos/imagenes/previa-viking/08_once.png",
+        "frases": 1
+      },
+      {
+        "ruta": "videos/imagenes/previa-viking/09_once_viking.png",
+        "frases": 1
+      },
+      {
+        "ruta": "videos/imagenes/previa-viking/10_bajas.png",
+        "frases": 1
+      },
+      {
+        "ruta": "videos/imagenes/previa-viking/11_duelo.png",
+        "frases": 1
+      },
+      {
+        "ruta": "videos/imagenes/previa-viking/12_quien.png",
+        "frases": 1
+      }
+    ]
+  }
+}

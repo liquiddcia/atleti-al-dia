@@ -1,0 +1,71 @@
+{
+  "titular": [
+    "FLICK DOMINA,",
+    "SIMEONE ELIMINA"
+  ],
+  "frases": [
+    {
+      "hablado": "Flick domina, pero Simeone elimina. El domingo a las nueve, el Atlético recibe al Barcelona en el Metropolitano en un duelo por el liderato.",
+      "subtitulo": "Flick domina, pero Simeone elimina. El domingo a las 21:00, el Atlético recibe al Barcelona en el Metropolitano en un duelo por el liderato."
+    },
+    {
+      "hablado": "Líder contra segundo tras once jornadas: los dos solo han perdido un partido y llegan con puntuaciones de récord.",
+      "subtitulo": "Líder contra segundo tras 11 jornadas: los dos solo han perdido un partido y llegan con puntuaciones de récord."
+    },
+    {
+      "hablado": "Flick se ha medido a Simeone doce veces, más que a ningún otro entrenador. El alemán suma siete victorias, el Cholo tres, y han empatado dos veces. Y un dato curioso: nunca ha habido un cero a cero.",
+      "subtitulo": "Flick se ha medido a Simeone 12 veces, más que a ningún otro entrenador. El alemán suma 7 victorias, el Cholo 3, y han empatado 2 veces. Y un dato curioso: nunca ha habido un 0-0."
+    },
+    {
+      "hablado": "Pero cuando más dolía, ganó el Cholo: la temporada pasada eliminó al Barça de la Copa del Rey, con un cuatro a cero en la ida, y de la Champions, con un cero a dos en el Camp Nou.",
+      "subtitulo": "Pero cuando más dolía, ganó el Cholo: la temporada pasada eliminó al Barça de la Copa del Rey, con un 4-0 en la ida, y de la Champions, con un 0-2 en el Camp Nou."
+    },
+    {
+      "hablado": "La rivalidad empezó en octubre de dos mil veinte, cuando el Bayern de Flick goleó cuatro a cero al Atlético en la Champions.",
+      "subtitulo": "La rivalidad empezó en octubre de 2020, cuando el Bayern de Flick goleó 4-0 al Atlético en la Champions."
+    },
+    {
+      "hablado": "El domingo, el Barça puede escaparse en el liderato o dar alas al Atleti en una Liga de tres. ¿Quién se lleva el duelo? Esto es Diario Colchonero.",
+      "subtitulo": "El domingo, el Barça puede escaparse en el liderato o dar alas al Atleti en una Liga de tres. ¿Quién se lleva el duelo? Esto es Diario Colchonero."
+    }
+  ],
+  "imagen": {
+    "tipo": "foto",
+    "grande": true,
+    "ruta": "videos/imagenes/simeone-flick/01_duelo.png"
+  },
+  "plato": {
+    "paneles": [
+      {
+        "ruta": "videos/imagenes/simeone-flick/01_duelo.png",
+        "completa": true,
+        "frases": 1
+      },
+      {
+        "ruta": "videos/imagenes/simeone-flick/02_liderato.png",
+        "completa": true,
+        "frases": 1
+      },
+      {
+        "ruta": "videos/imagenes/simeone-flick/03_historial.png",
+        "completa": true,
+        "frases": 1
+      },
+      {
+        "ruta": "videos/imagenes/simeone-flick/04_golpes.png",
+        "completa": true,
+        "frases": 1
+      },
+      {
+        "ruta": "videos/imagenes/simeone-flick/05_origen.png",
+        "completa": true,
+        "frases": 1
+      },
+      {
+        "ruta": "videos/imagenes/simeone-flick/06_domingo.png",
+        "completa": true,
+        "frases": 1
+      }
+    ]
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "titular": ["BELTRÁN O SEIMEN:", "¿EL HEREDERO DE OBLAK?"],
+  "frases": [
+    {"hablado": "Mientras Simeone prepara el duelo ante el Barça, el Atlético ya piensa en el futuro de su portería: busca al heredero de Oblak.", "subtitulo": "Mientras Simeone prepara el duelo ante el Barça, el Atlético ya piensa en el futuro de su portería: busca al heredero de Oblak."},
+    {"hablado": "El primer candidato es Santiago Beltrán, portero argentino de River, de veintidós años y uno de los jóvenes más prometedores de Sudamérica.", "subtitulo": "El primer candidato es Santiago Beltrán, portero argentino de River, de 22 años y uno de los jóvenes más prometedores de Sudamérica."},
+    {"hablado": "El Atlético ya ha enviado ojeadores. Valora sus reflejos, su físico y su juego aéreo, y tiene pasaporte italiano, lo que facilitaría el fichaje.", "subtitulo": "El Atlético ya ha enviado ojeadores. Valora sus reflejos, su físico y su juego aéreo, y tiene pasaporte italiano, lo que facilitaría el fichaje."},
+    {"hablado": "La otra opción es Dennis Seimen, alemán de veinte años: mide uno noventa y dos, domina el juego aéreo y ya es internacional sub veintiuno.", "subtitulo": "La otra opción es Dennis Seimen, alemán de 20 años: mide 1,92, domina el juego aéreo y ya es internacional sub-21."},
+    {"hablado": "Con Oblak con contrato hasta dos mil veintiocho, no hay prisa: la idea es que el elegido aprenda a su lado antes de tomar el relevo.", "subtitulo": "Con Oblak con contrato hasta 2028, no hay prisa: la idea es que el elegido aprenda a su lado antes de tomar el relevo."},
+    {"hablado": "¿Beltrán o Seimen? ¿Quién debe ser el heredero de Oblak? Os leo en comentarios. Esto es Diario Colchonero.", "subtitulo": "¿Beltrán o Seimen? ¿Quién debe ser el heredero de Oblak? Os leo en comentarios. Esto es Diario Colchonero."}
+  ],
+  "imagen": {"tipo": "foto", "grande": true, "ruta": "videos/imagenes/heredero-oblak/05_quien.png"},
+  "plato": {
+    "paneles": [
+      {"ruta": "videos/imagenes/heredero-oblak/01_heredero.png", "completa": true, "frases": 1},
+      {"ruta": "videos/imagenes/heredero-oblak/02_beltran.png", "completa": true, "frases": 2},
+      {"ruta": "videos/imagenes/heredero-oblak/03_seimen.png", "completa": true, "frases": 1},
+      {"ruta": "videos/imagenes/heredero-oblak/04_plan.png", "completa": true, "frases": 1},
+      {"ruta": "videos/imagenes/heredero-oblak/05_quien.png", "completa": true, "frases": 1}
+    ]
+  }
+}

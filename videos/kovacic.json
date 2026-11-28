@@ -1,0 +1,24 @@
+{
+  "titular": ["¿KOVACIC", "AL ATLETI?"],
+  "frases": [
+    {"hablado": "Mateo Kovacic vuelve a sonar para el Atlético de cara al mercado de invierno.", "subtitulo": ""},
+    {"hablado": "No es un nombre nuevo: el Atleti ya lo intentó en dos mil diecinueve, cuando estaba en el Chelsea, pero su contrato era del Real Madrid, que se negó a negociar.", "subtitulo": ""},
+    {"hablado": "Ahora todo es distinto: tiene treinta y dos años, acaba contrato con el Manchester City el treinta de junio y apenas juega, trescientos setenta y tres minutos en ocho partidos, con un gol y una asistencia.", "subtitulo": ""},
+    {"hablado": "El gran problema son sus molestias en el tendón de Aquiles, algo que cualquier club tendrá que valorar. Pero su fichaje sería mucho más asequible que hace años.", "subtitulo": ""},
+    {"hablado": "Y no está solo: la Juventus, el Milan, el Nápoles y el Fenerbahçe también lo siguen. Eso sí, de momento no hay negociaciones concretas.", "subtitulo": ""},
+    {"hablado": "¿Ficharías a Kovacic para el Atleti? Os leo en comentarios. Esto es Diario Colchonero.", "subtitulo": ""}
+  ],
+  "imagen": {"tipo": "foto", "grande": true, "ruta": "videos/imagenes/kovacic/01_kovacic.png"},
+  "portada": "videos/imagenes/kovacic/00_portada.jpg",
+  "hueco": 0.1,
+  "plato": {
+    "paneles": [
+      {"ruta": "videos/imagenes/kovacic/01_kovacic.png", "completa": true, "frases": 1},
+      {"ruta": "videos/imagenes/kovacic/02_2019.png", "completa": true, "frases": 1},
+      {"ruta": "videos/imagenes/kovacic/03_situacion.png", "completa": true, "frases": 1},
+      {"ruta": "videos/imagenes/kovacic/04_problema.png", "completa": true, "frases": 1},
+      {"ruta": "videos/imagenes/kovacic/05_competencia.png", "completa": true, "frases": 1},
+      {"ruta": "videos/imagenes/kovacic/06_pregunta.png", "completa": true, "frases": 1}
+    ]
+  }
+}

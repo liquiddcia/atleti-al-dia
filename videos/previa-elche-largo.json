@@ -1,0 +1,137 @@
+{
+  "titular": [
+    "SIN SØRLOTH",
+    "A ELCHE"
+  ],
+  "frases": [
+    {
+      "hablado": "Sin Sorloth, a Elche. El Atlético visita al Elche este sábado a las seis y media de la tarde en el estadio Martínez Valero.",
+      "subtitulo": ""
+    },
+    {
+      "hablado": "Es la jornada catorce de LaLiga, y el Atleti no puede fallar si quiere seguir mirando hacia arriba.",
+      "subtitulo": ""
+    },
+    {
+      "hablado": "El Atleti llega tercero con treinta y un puntos, a cinco del Barça y a dos del Real Madrid.",
+      "subtitulo": ""
+    },
+    {
+      "hablado": "Y llega con la moral alta: ganó dos a cero al Viking en Champions, con goles de Sorloth y Julián.",
+      "subtitulo": ""
+    },
+    {
+      "hablado": "El cara a cara está igualadísimo: en los últimos cinco partidos, dos victorias para cada uno y un empate.",
+      "subtitulo": ""
+    },
+    {
+      "hablado": "Hay de todo: un cero a cuatro del Atleti, pero también un tres a dos y un uno a cero para el Elche.",
+      "subtitulo": ""
+    },
+    {
+      "hablado": "La gran baja es Sorloth: se fue cojeando ante el Viking y tiene una lesión en la pantorrilla. Tampoco estarán Cuti Romero ni Lookman.",
+      "subtitulo": ""
+    },
+    {
+      "hablado": "El Elche también llega tocado: no tiene a Lemar, Sánchez, Boayar ni Santiago, y Aguado es duda por un problema en el tobillo.",
+      "subtitulo": ""
+    },
+    {
+      "hablado": "El posible once del Atleti: Oblak; Llorente, Le Normand, Janco y Grimaldo; Kang In Li, Koke, Cardoso y Baena.",
+      "subtitulo": ""
+    },
+    {
+      "hablado": "Arriba, Julián, y la gran duda es quién ocupa el sitio de Sorloth: Yuliano o Jonathan David.",
+      "subtitulo": ""
+    },
+    {
+      "hablado": "El duelo de la tarde está en el área. Fer Niño lleva seis goles en trece partidos de Liga y es el gran peligro del Elche.",
+      "subtitulo": ""
+    },
+    {
+      "hablado": "Julián suma un gol y cuatro asistencias en nueve partidos. Le toca tirar del carro sin Sorloth.",
+      "subtitulo": ""
+    },
+    {
+      "hablado": "El árbitro será Alejandro Quintero. Esta temporada saca cinco tarjetas y media por partido: veintiocho amarillas y cinco rojas en seis encuentros.",
+      "subtitulo": ""
+    },
+    {
+      "hablado": "Con el Atleti ha pitado un partido: ganaron los rojiblancos, pero les señaló un penalti en contra.",
+      "subtitulo": ""
+    },
+    {
+      "hablado": "Ojo al Elche de Anselmi: juega con cuatro, cuatro, dos y viene de empatar uno a uno con el Levante.",
+      "subtitulo": ""
+    },
+    {
+      "hablado": "En casa aprieta, y con Fer Niño en racha cualquier descuido se paga.",
+      "subtitulo": ""
+    },
+    {
+      "hablado": "¿Qué resultado ves en Elche? ¿Quién debe sustituir a Sorloth? Os leo en comentarios.",
+      "subtitulo": ""
+    },
+    {
+      "hablado": "Esto es Diario Colchonero, nos vemos tras el partido.",
+      "subtitulo": ""
+    }
+  ],
+  "imagen": {
+    "tipo": "foto",
+    "grande": true,
+    "ruta": "videos/imagenes/previa-elche/01_partido.png"
+  },
+  "suscribete": "medio",
+  "hueco": 0.12,
+  "plato": {
+    "paneles": [
+      {
+        "ruta": "videos/imagenes/previa-elche/01_partido.png",
+        "completa": true,
+        "frases": 2
+      },
+      {
+        "ruta": "videos/imagenes/previa-elche/02_llega.png",
+        "completa": true,
+        "frases": 2
+      },
+      {
+        "ruta": "videos/imagenes/previa-elche/03_cara.png",
+        "completa": true,
+        "frases": 2
+      },
+      {
+        "ruta": "videos/imagenes/previa-elche/04_bajas.png",
+        "completa": true,
+        "frases": 2
+      },
+      {
+        "ruta": "videos/imagenes/previa-elche/05_once.png",
+        "completa": true,
+        "frases": 2
+      },
+      {
+        "ruta": "videos/imagenes/previa-elche/06_duelo.png",
+        "completa": true,
+        "frases": 2
+      },
+      {
+        "ruta": "videos/imagenes/previa-elche/07_arbitro.png",
+        "completa": true,
+        "frases": 2
+      },
+      {
+        "ruta": "videos/imagenes/previa-elche/08_elche.png",
+        "completa": true,
+        "frases": 2
+      },
+      {
+        "ruta": "videos/imagenes/previa-elche/09_pronostico.png",
+        "completa": true,
+        "frases": 2
+      }
+    ]
+  },
+  "portada_horizontal": "videos/imagenes/previa-elche/00_portada_horizontal.jpg"
+}

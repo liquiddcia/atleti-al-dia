@@ -1,0 +1,24 @@
+{
+  "titular": ["SIMEONE HACE", "HISTORIA: 345"],
+  "frases": [
+    {"hablado": "Simeone ya es leyenda de LaLiga: con el cero a tres en Getafe suma trescientas cuarenta y cinco victorias.", "subtitulo": ""},
+    {"hablado": "Supera a Luis Aragonés, que tenía trescientas cuarenta y cuatro, y se convierte en el entrenador con más victorias de la historia de la Liga.", "subtitulo": ""},
+    {"hablado": "Llegó en el Coliseum, en un partido que, según el Cholo, el equipo pudo cerrar ya en la primera parte.", "subtitulo": ""},
+    {"hablado": "Y Simeone, que no suele emocionarse con estos números, quiso compartirlo: con su mujer, Carla Pereira, con sus hijos, con su cuerpo técnico, Germán, el Profe Ortega, Vizcaíno o Nelson Vivas, y con todos los jugadores que han pasado por el club.", "subtitulo": ""},
+    {"hablado": "También habló de Baena: dice que ha asumido la responsabilidad que dejó Griezmann, que no es una carga fácil, y que hoy está mejor que cuando llegó.", "subtitulo": ""},
+    {"hablado": "De las trescientas cuarenta y cinco, ¿cuál es tu victoria favorita del Cholo? Os leo en comentarios. Esto es Diario Colchonero.", "subtitulo": ""}
+  ],
+  "imagen": {"tipo": "foto", "grande": true, "ruta": "videos/imagenes/simeone-345/01_record.png"},
+  "portada": "videos/imagenes/simeone-345/00_portada.jpg",
+  "hueco": 0.1,
+  "plato": {
+    "paneles": [
+      {"ruta": "videos/imagenes/simeone-345/01_record.png", "completa": true, "frases": 1},
+      {"ruta": "videos/imagenes/simeone-345/02_luis.png", "completa": true, "frases": 1},
+      {"ruta": "videos/imagenes/simeone-345/03_getafe.png", "completa": true, "frases": 1},
+      {"ruta": "videos/imagenes/simeone-345/04_gracias.png", "completa": true, "frases": 1},
+      {"ruta": "videos/imagenes/simeone-345/05_baena.png", "completa": true, "frases": 1},
+      {"ruta": "videos/imagenes/simeone-345/06_pregunta.png", "completa": true, "frases": 1}
+    ]
+  }
+}
